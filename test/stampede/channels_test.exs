@@ -135,6 +135,39 @@ defmodule Stampede.ChannelsTest do
 
     test "times out when nothing arrives", %{socket: socket} do
       assert {:error, :timeout} = Channels.await(socket, "room:lobby", "shout", 50)
+      assert {:error, :timeout} = Channels.await(socket, "room:lobby", "shout", timeout: 50)
+    end
+
+    test "waits for the message :match accepts", %{socket: socket} do
+      :ok = Channels.cast(socket, "room:lobby", "shout", %{from: 1})
+      :ok = Channels.cast(socket, "room:lobby", "shout", %{from: 2})
+      {:ok, _reply} = Channels.push(socket, "room:lobby", "ping")
+
+      assert {:ok, %{"from" => 2}} =
+               Channels.await(socket, "room:lobby", "shout", match: &(&1["from"] == 2))
+
+      assert {:ok, %{"from" => 1}} = Channels.await(socket, "room:lobby", "shout")
+
+      task =
+        Task.async(fn -> Channels.await(socket, "room:lobby", "shout", match: & &1["last"]) end)
+
+      :ok = Channels.cast(socket, "room:lobby", "shout", %{n: 3})
+      :ok = Channels.cast(socket, "room:lobby", "shout", %{last: true})
+
+      assert {:ok, %{"last" => true}} = Task.await(task)
+      assert {:ok, %{"n" => 3}} = Channels.await(socket, "room:lobby", "shout", 100)
+    end
+
+    test "treats a :match that raises as no match", %{socket: socket} do
+      :ok = Channels.cast(socket, "room:lobby", "shout", %{n: 1})
+
+      assert {:error, :timeout} =
+               Channels.await(socket, "room:lobby", "shout",
+                 match: fn _ -> raise "oops" end,
+                 timeout: 100
+               )
+
+      assert {:ok, %{"n" => 1}} = Channels.await(socket, "room:lobby", "shout")
     end
   end
 

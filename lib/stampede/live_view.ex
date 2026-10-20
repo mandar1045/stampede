@@ -214,10 +214,13 @@ defmodule Stampede.LiveView do
   @doc """
   Waits for the LiveView to send an update of its own, such as one caused by
   `handle_info/2`, and returns its diff.
+
+  Takes a timeout in milliseconds, or the same options as
+  `Stampede.Channels.await/4`, with `:match` getting each diff.
   """
-  @spec await(t(), timeout()) :: {:ok, map()} | {:error, term()}
-  def await(%__MODULE__{} = view, timeout \\ 5_000) do
-    Channels.await(view.socket, view.topic, "diff", timeout)
+  @spec await(t(), timeout() | keyword()) :: {:ok, map()} | {:error, term()}
+  def await(%__MODULE__{} = view, timeout_or_opts \\ []) do
+    Channels.await(view.socket, view.topic, "diff", timeout_or_opts)
   end
 
   @doc """
@@ -242,7 +245,14 @@ defmodule Stampede.LiveView do
   end
 
   defp load(url, cookies, redirects_left, opts) do
-    with {:ok, response} <- HTTP.get(url, with_cookies(opts[:headers], cookies), opts) do
+    request_opts = [
+      headers: with_cookies(opts[:headers], cookies),
+      timeout: opts[:timeout],
+      transport_opts: opts[:transport_opts],
+      metric: nil
+    ]
+
+    with {:ok, response} <- HTTP.request(:get, url, request_opts) do
       cookies = store_cookies(cookies, response.headers)
 
       case {response.status, List.keyfind(response.headers, "location", 0)} do

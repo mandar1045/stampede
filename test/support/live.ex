@@ -28,6 +28,15 @@ defmodule Stampede.TestRouter do
     end
   end
 
+  scope "/api" do
+    get "/hello", Stampede.TestApiController, :hello
+    post "/echo", Stampede.TestApiController, :echo
+    put "/echo", Stampede.TestApiController, :echo
+    get "/port", Stampede.TestApiController, :port
+    get "/fail", Stampede.TestApiController, :fail
+    get "/close", Stampede.TestApiController, :close
+  end
+
   defp put_visitor(conn, _opts) do
     if get_session(conn, "visitor"), do: conn, else: put_session(conn, "visitor", "jo")
   end
@@ -59,6 +68,23 @@ defmodule Stampede.TestPageController do
     conn
     |> Plug.Conn.put_session("visitor", name)
     |> redirect(to: "/counter")
+  end
+end
+
+defmodule Stampede.TestApiController do
+  use Phoenix.Controller, formats: [:json]
+
+  def hello(conn, _params), do: json(conn, %{hello: "world"})
+  def echo(conn, params), do: json(conn, %{method: conn.method, params: params})
+  def fail(conn, _params), do: conn |> put_status(500) |> json(%{error: "failed"})
+
+  # The client's port tells requests sent on the same connection apart.
+  def port(conn, _params), do: text(conn, Integer.to_string(Plug.Conn.get_peer_data(conn).port))
+
+  def close(conn, _params) do
+    conn
+    |> Plug.Conn.put_resp_header("connection", "close")
+    |> text("bye")
   end
 end
 

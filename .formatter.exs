@@ -8,6 +8,8 @@
     plug: 2,
     pipe_through: 1,
     live: 2,
-    get: 3
+    get: 3,
+    post: 3,
+    put: 3
   ]
 ]

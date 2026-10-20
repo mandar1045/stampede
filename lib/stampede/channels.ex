@@ -135,12 +135,28 @@ defmodule Stampede.Channels do
   its payload.
 
   Messages that arrived before the call are looked at first, oldest first.
-  Returns `{:error, :timeout}` if no such message arrives within `timeout`
-  milliseconds.
+  Returns `{:error, :timeout}` if no such message arrives in time.
+
+  The last argument is a timeout in milliseconds, or a list of options:
+
+    * `:timeout` - how long to wait, in milliseconds. Defaults to `5_000`.
+    * `:match` - a function that gets each payload and returns whether it is
+      the one to wait for. Useful when other VUs broadcast the same event:
+
+          Stampede.Channels.await(socket, "room:lobby", "shout", match: &(&1["from"] == vu.id))
   """
-  @spec await(socket(), String.t(), String.t(), timeout()) :: {:ok, term()} | {:error, term()}
-  def await(socket, topic, event, timeout \\ 5_000) when is_binary(topic) and is_binary(event) do
-    Socket.request(socket, {:await, topic, event, timeout})
+  @spec await(socket(), String.t(), String.t(), timeout() | keyword()) ::
+          {:ok, term()} | {:error, term()}
+  def await(socket, topic, event, timeout_or_opts \\ [])
+
+  def await(socket, topic, event, timeout) when is_integer(timeout) or timeout == :infinity do
+    await(socket, topic, event, timeout: timeout)
+  end
+
+  def await(socket, topic, event, opts)
+      when is_binary(topic) and is_binary(event) and is_list(opts) do
+    opts = Keyword.validate!(opts, timeout: 5_000, match: nil)
+    Socket.request(socket, {:await, topic, event, opts[:match], opts[:timeout]})
   end
 
   @doc """

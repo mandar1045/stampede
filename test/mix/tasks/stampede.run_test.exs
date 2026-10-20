@@ -64,5 +64,36 @@ defmodule Mix.Tasks.Stampede.RunTest do
     assert_raise Mix.Error, ~r/No module in .* implements Stampede.Scenario/, fn ->
       Mix.Tasks.Stampede.Run.run([path])
     end
+
+    assert_raise Mix.Error, ~r/Expected either --vus or --rate/, fn ->
+      Mix.Tasks.Stampede.Run.run([path, "--vus", "1", "--rate", "1"])
+    end
+
+    assert_raise Mix.Error, ~r/Could not connect to nobody@127.0.0.1|named node/, fn ->
+      Mix.Tasks.Stampede.Run.run([path, "--nodes", "nobody@127.0.0.1"])
+    end
+  end
+
+  test "runs at a rate and writes the results as JSON", %{tmp_dir: tmp_dir} do
+    path =
+      write_scenario!(tmp_dir, "Steady", """
+        @impl true
+        def options, do: [vus: 5, duration: 5_000]
+
+        @impl true
+        def run(_vu), do: Process.sleep(10)
+      """)
+
+    out = Path.join(tmp_dir, "results.json")
+
+    capture_io(fn ->
+      Mix.Tasks.Stampede.Run.run([path, "--rate", "20", "--duration", "500ms", "--out", out])
+    end)
+
+    assert [%{"scenario" => "Stampede.TaskTest.Steady", "duration" => duration} = result] =
+             out |> File.read!() |> JSON.decode!()
+
+    assert duration in 500..600
+    assert result["metrics"]["iteration"]["count"] in 8..10
   end
 end

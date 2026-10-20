@@ -9,6 +9,7 @@ defmodule Stampede.TestEndpoint do
     websocket: [connect_info: [session: @session_options]],
     longpoll: false
 
+  plug Plug.Parsers, parsers: [:json], pass: ["*/*"], json_decoder: JSON
   plug Plug.Session, @session_options
   plug Stampede.TestRouter
 

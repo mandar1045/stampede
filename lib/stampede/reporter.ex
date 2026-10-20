@@ -1,6 +1,6 @@
 defmodule Stampede.Reporter do
   @moduledoc """
-  Formats a `Stampede.Result` for the terminal.
+  Formats a `Stampede.Result` for the terminal, or as JSON.
   """
 
   alias Stampede.Result
@@ -9,21 +9,39 @@ defmodule Stampede.Reporter do
 
   @doc """
   Returns a summary of `result`, with a line per metric followed by the
-  thresholds and the most frequent errors, if there are any.
+  checks, the thresholds and the most frequent errors, if there are any.
   """
   @spec format(Result.t()) :: String.t()
   def format(%Result{} = result) do
+    {checks, metrics} = Enum.split_with(result.metrics, &match?({_name, %{type: :check}}, &1))
+
     IO.iodata_to_binary([
       "#{inspect(result.scenario)} ran for #{seconds(result.duration)}\n",
-      metrics(result.metrics),
+      metrics(metrics, checks),
+      checks(checks),
       thresholds(result.thresholds),
       errors(result.errors)
     ])
   end
 
-  defp metrics(metrics) when map_size(metrics) == 0, do: "\n  no metrics were recorded\n"
+  @doc """
+  Returns `result` as JSON, with every metric, the timeline, the thresholds
+  and the errors.
 
-  defp metrics(metrics) do
+  Timings are in milliseconds and rates per second, as in `Stampede.Result`.
+  """
+  @spec to_json(Result.t()) :: String.t()
+  def to_json(%Result{} = result) do
+    result
+    |> Map.from_struct()
+    |> Map.update!(:scenario, &inspect/1)
+    |> JSON.encode!()
+  end
+
+  defp metrics([], []), do: "\n  no metrics were recorded\n"
+  defp metrics([], _checks), do: []
+
+  defp metrics(metrics, _checks) do
     header = ["metric", "count", "rate/s" | Enum.map(@timing_stats, &Atom.to_string/1)]
 
     rows =
@@ -39,6 +57,18 @@ defmodule Stampede.Reporter do
   end
 
   defp timing_cells(_counter), do: []
+
+  defp checks([]), do: []
+
+  defp checks(checks) do
+    lines =
+      for {name, check} <- Enum.sort(checks) do
+        passed = :erlang.float_to_binary(check.passed / check.count * 100, decimals: 1) <> "%"
+        "    #{String.pad_leading(passed, 6)}  #{name} (#{check.passed} of #{check.count})\n"
+      end
+
+    ["\n  checks\n" | lines]
+  end
 
   defp thresholds([]), do: []
 
@@ -64,7 +94,8 @@ defmodule Stampede.Reporter do
   defp actual(%{value: nil}), do: "no samples"
   defp actual(%{stat: stat, value: value}), do: stat(stat, value)
 
-  defp stat(:count, value), do: to_string(value)
+  defp stat(stat, value) when stat in [:count, :failed], do: to_string(value)
+  defp stat(:failed_rate, value), do: decimal(value)
   defp stat(:rate, value), do: decimal(value) <> "/s"
   defp stat(_timing, value), do: milliseconds(value)
 

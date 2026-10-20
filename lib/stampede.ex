@@ -34,21 +34,46 @@ defmodule Stampede do
 
   ## Metrics
 
-  Every metric has a name and is either a timing or a counter. Stampede
+  Every metric has a name and is a timing, a counter or a check. Stampede
   records these on its own:
 
     * `"iteration"` - how long each successful `c:Stampede.Scenario.run/1` took
     * `"iteration.errors"` - iterations that raised, threw or exited
+    * `"iterations.dropped"` - iterations a `:rate` run could not start
+      because all of its `:max_vus` were busy
     * `"vu.crashes"` - VUs that crashed and had to be replaced
+    * the request metrics listed in `Stampede.HTTP`
     * the connection and channel metrics listed in `Stampede.Channels`
     * the page, join and event metrics listed in `Stampede.LiveView`
 
-  Record your own with `measure/2`, `record/3` and `increment/2`. Use
-  different names for timings and counters.
+  Record your own with `measure/2`, `record/3`, `increment/2` and `check/2`.
+  Timings, counters and checks share one set of names.
 
   Timings are counted in buckets that grow by 2% each, so every percentile
   in a `Stampede.Result` is within 1% of the exact value, however many samples
   the run collected.
+
+  ## Telemetry
+
+  Stampede emits these `:telemetry` events:
+
+    * `[:stampede, :run, :start]` - with the `:system_time` as measurement,
+      and the `:scenario` and its `:options` as metadata
+    * `[:stampede, :run, :interval]` - every second, with the number of busy
+      `:vus` as measurement, and the `:scenario` and the `:interval`, a point
+      of `Stampede.Result`'s timeline, as metadata
+    * `[:stampede, :run, :stop]` - with the `:duration` as measurement, and
+      the `:scenario` and its `:result` as metadata
+    * `[:stampede, :timing]` - for every timing recorded, with its
+      `:duration` as measurement and its `:name` as metadata
+    * `[:stampede, :counter]` - for every counter incremented, with the
+      `:count` added as measurement and its `:name` as metadata
+    * `[:stampede, :check]` - for every check, with a `:count` of 1 as
+      measurement, and its `:name` and whether it `:passed?` as metadata
+
+  Durations are in native time units, as usual for telemetry. The run events
+  are emitted where `run/2` was called, the others on the node that recorded
+  them.
   """
 
   alias Stampede.Metrics
@@ -70,12 +95,33 @@ defmodule Stampede do
       for `duration` instead of going through stages. `vus: 100, duration:
       [minute: 1]` is the same as `stages: [{0, 100}, {[minute: 1], 100}]`.
 
+    * `:rate` and `:duration` - start `rate` iterations per second for
+      `duration`, however long they take, instead of keeping a number of VUs
+      busy. Unlike VUs that wait for their last iteration to finish, a rate
+      keeps the pressure on a server that slows down, which is how real
+      traffic behaves. Rates can be fractions, such as `0.5`.
+
+    * `:rate_stages` - like `:stages`, but each target is a rate.
+
+    * `:max_vus` - how many iterations a `:rate` run may have in progress at
+      once. VUs are started as needed and reused once they finish an
+      iteration. When all of them are busy, iterations are dropped and counted
+      as `"iterations.dropped"`. Defaults to `1_000`.
+
     * `:thresholds` - a list of `{metric, limits}` tuples, such as
       `{"channel.join", p95: 250, max: 1_000}`. Each limit is the highest
       value the statistic may have for the run to pass. Timings have `:min`,
       `:mean`, `:p50`, `:p90`, `:p95`, `:p99` and `:max`, in milliseconds.
-      Every metric has `:count` and `:rate`, per second. Thresholds on a
-      timing with no samples fail, while a counter with no samples is zero.
+      Checks have `:failed` and `:failed_rate`, from 0 to 1. Every metric has
+      `:count` and `:rate`, per second. Thresholds on a timing with no samples
+      fail, while counters and checks with no samples are zero.
+
+    * `:nodes` - the nodes to run the VUs on, `[node()]` by default. VUs and
+      rates are split evenly between them, and their metrics are merged.
+      Every node must be connected and able to run Stampede and the
+      scenario's code, for example because it was started from the same
+      project. A scenario compiled to a `.beam` file is loaded on the nodes
+      that miss it.
 
     * `:progress` - prints the number of VUs, iterations and errors every
       second. Defaults to `false`.
@@ -111,8 +157,7 @@ defmodule Stampede do
   @spec record(String.t(), non_neg_integer(), System.time_unit()) :: :ok
   def record(name, duration, unit \\ :millisecond)
       when is_binary(name) and is_integer(duration) and duration >= 0 do
-    microseconds = System.convert_time_unit(duration, unit, :microsecond)
-    Metrics.record(Metrics.current(), name, microseconds)
+    Metrics.record(Metrics.current(), name, System.convert_time_unit(duration, unit, :native))
   end
 
   @doc """
@@ -121,5 +166,24 @@ defmodule Stampede do
   @spec increment(String.t(), pos_integer()) :: :ok
   def increment(name, amount \\ 1) when is_binary(name) and is_integer(amount) and amount > 0 do
     Metrics.increment(Metrics.current(), name, amount)
+  end
+
+  @doc """
+  Records whether `condition` holds as the check `name`, and returns it as a
+  boolean.
+
+  Unlike a failed match, a failed check does not end the iteration. The
+  summary shows how often each check passed, and thresholds can limit how
+  many fail:
+
+      Stampede.check("status is 200", response.status == 200)
+
+      thresholds: [{"status is 200", failed_rate: 0.01}]
+  """
+  @spec check(String.t(), as_boolean(term())) :: boolean()
+  def check(name, condition) when is_binary(name) do
+    passed? = !!condition
+    Metrics.check(Metrics.current(), name, passed?)
+    passed?
   end
 end

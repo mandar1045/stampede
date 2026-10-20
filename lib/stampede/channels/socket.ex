@@ -94,14 +94,14 @@ defmodule Stampede.Channels.Socket do
     send_request(state, message, from, :leave, opts)
   end
 
-  def handle_call({:await, topic, event, timeout}, from, state) do
-    case take_message(state, topic, event) do
+  def handle_call({:await, topic, event, match, timeout}, from, state) do
+    case take_message(state, topic, event, match) do
       {:ok, message, state} ->
         {:reply, {:ok, message.payload}, state}
 
       :error ->
         timer = start_timer({:await_timeout, from}, timeout)
-        {:noreply, %{state | waiters: state.waiters ++ [{from, topic, event, timer}]}}
+        {:noreply, %{state | waiters: state.waiters ++ [{from, topic, event, match, timer}]}}
     end
   end
 
@@ -369,9 +369,9 @@ defmodule Stampede.Channels.Socket do
 
   defp track_join(state, _request, _result), do: state
 
-  defp deliver(%Message{topic: topic, event: event} = message, state) do
-    case Enum.split_while(state.waiters, &(not waiting_for?(&1, topic, event))) do
-      {before, [{from, _topic, _event, timer} | rest]} ->
+  defp deliver(message, state) do
+    case Enum.split_while(state.waiters, &(not waiting_for?(&1, message))) do
+      {before, [{from, _topic, _event, _match, timer} | rest]} ->
         cancel_timer(timer)
         GenServer.reply(from, {:ok, message.payload})
         %{state | waiters: before ++ rest}
@@ -381,8 +381,19 @@ defmodule Stampede.Channels.Socket do
     end
   end
 
-  defp waiting_for?({_from, topic, event, _timer}, topic, event), do: true
-  defp waiting_for?(_waiter, _topic, _event), do: false
+  defp waiting_for?({_from, topic, event, match, _timer}, message) do
+    match?(%Message{topic: ^topic, event: ^event}, message) and matches?(match, message.payload)
+  end
+
+  # A match function that raises is treated as no match, rather than taking
+  # the socket down with it.
+  defp matches?(nil, _payload), do: true
+
+  defp matches?(match, payload) do
+    match.(payload) not in [nil, false]
+  rescue
+    _error -> false
+  end
 
   defp enqueue(%{inbox_size: @inbox_limit} = state, message) do
     Metrics.increment(state.metrics, "channel.messages.dropped")
@@ -393,10 +404,11 @@ defmodule Stampede.Channels.Socket do
     %{state | inbox: :queue.in(message, state.inbox), inbox_size: state.inbox_size + 1}
   end
 
-  defp take_message(state, topic, event) do
+  defp take_message(state, topic, event, match) do
     messages = :queue.to_list(state.inbox)
+    waiter = {nil, topic, event, match, nil}
 
-    case Enum.split_while(messages, &(not match?(%Message{topic: ^topic, event: ^event}, &1))) do
+    case Enum.split_while(messages, &(not waiting_for?(waiter, &1))) do
       {before, [message | rest]} ->
         inbox = :queue.from_list(before ++ rest)
         {:ok, message, %{state | inbox: inbox, inbox_size: state.inbox_size - 1}}
@@ -414,7 +426,7 @@ defmodule Stampede.Channels.Socket do
       GenServer.reply(request.from, {:error, {:closed, reason}})
     end
 
-    for {from, _topic, _event, _timer} <- state.waiters do
+    for {from, _topic, _event, _match, _timer} <- state.waiters do
       GenServer.reply(from, {:error, {:closed, reason}})
     end
 

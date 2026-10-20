@@ -6,6 +6,7 @@ defmodule Mix.Tasks.Stampede.Run do
 
       $ mix stampede.run loadtest/lobby.exs
       $ mix stampede.run loadtest/lobby.exs --vus 100 --duration 1m
+      $ mix stampede.run loadtest/api.exs --rate 200 --duration 5m --out results.json
 
   Every module in the file that implements `Stampede.Scenario` runs, one
   after the other, with a progress line every second and a summary at the
@@ -18,15 +19,38 @@ defmodule Mix.Tasks.Stampede.Run do
   ## Options
 
     * `--vus` - how many VUs to run at once
-    * `--duration` - how long to run them, such as `500ms`, `30s`, `5m` or `1h`
+    * `--rate` - how many iterations to start per second, instead of `--vus`
+    * `--duration` - how long to run, such as `500ms`, `30s`, `5m` or `1h`
+    * `--max-vus` - how many iterations a `--rate` run may have in progress
+    * `--out` - a file to write the results to, as a JSON array with one
+      object per scenario, in the format of `Stampede.Reporter.to_json/1`
+    * `--nodes` - other nodes to run VUs on too, separated by commas
 
-  Giving either one replaces the scenario's `:stages` with a constant number
-  of VUs.
+  `--vus` and `--rate` replace the scenario's own VUs, rate and stages, and
+  `--duration` replaces its stages.
+
+  ## Running on several machines
+
+  Start a node on every machine, from the same project, and the task with
+  a name and the same cookie:
+
+      $ iex --sname worker --cookie load -S mix
+      $ elixir --sname loader --cookie load -S mix stampede.run loadtest/lobby.exs --nodes worker@host
+
+  The VUs are split evenly between the task's node and the given ones, and
+  the scenarios in the file are loaded on all of them.
   """
 
   use Mix.Task
 
-  @switches [vus: :integer, duration: :string]
+  @switches [
+    vus: :integer,
+    rate: :float,
+    duration: :string,
+    max_vus: :integer,
+    out: :string,
+    nodes: :string
+  ]
 
   @impl true
   def run(args) do
@@ -37,15 +61,25 @@ defmodule Mix.Tasks.Stampede.Run do
     end
 
     overrides = overrides(opts)
+    nodes = connect!(opts[:nodes])
     Mix.Task.run("app.config")
     {:ok, _apps} = Application.ensure_all_started(:stampede)
 
     results =
-      for file <- files, scenario <- scenarios!(file) do
-        result = Stampede.run(scenario, [progress: true] ++ overrides)
+      for file <- files, scenario <- scenarios!(file, nodes) do
+        opts = Keyword.merge([progress: true, nodes: [node() | nodes]], overrides)
+        result = Stampede.run(scenario, opts)
         Mix.shell().info(["\n", Stampede.Reporter.format(result)])
         result
       end
+
+    if out = opts[:out] do
+      File.write!(out, [
+        "[",
+        Enum.map_intersperse(results, ",", &Stampede.Reporter.to_json/1),
+        "]"
+      ])
+    end
 
     if not Enum.all?(results, & &1.passed?) do
       exit({:shutdown, 1})
@@ -53,12 +87,30 @@ defmodule Mix.Tasks.Stampede.Run do
   end
 
   defp overrides(opts) do
-    opts =
-      opts
-      |> Keyword.take([:vus, :duration])
-      |> Keyword.replace_lazy(:duration, &parse_duration!/1)
+    if opts[:vus] && opts[:rate] do
+      Mix.raise("Expected either --vus or --rate, not both")
+    end
 
-    if opts == [], do: [], else: [stages: nil] ++ opts
+    Enum.reduce(opts, [], fn
+      {:vus, vus}, overrides ->
+        Keyword.merge(overrides, stages: nil, rate: nil, rate_stages: nil, vus: vus)
+
+      {:rate, rate}, overrides ->
+        Keyword.merge(overrides, stages: nil, rate_stages: nil, rate: rate)
+
+      {:duration, duration}, overrides ->
+        Keyword.merge(overrides,
+          stages: nil,
+          rate_stages: nil,
+          duration: parse_duration!(duration)
+        )
+
+      {:max_vus, max_vus}, overrides ->
+        Keyword.put(overrides, :max_vus, max_vus)
+
+      {_option, _value}, overrides ->
+        overrides
+    end)
   end
 
   defp parse_duration!(duration) do
@@ -71,12 +123,40 @@ defmodule Mix.Tasks.Stampede.Run do
     end
   end
 
-  defp scenarios!(file) do
+  defp connect!(nil), do: []
+
+  defp connect!(nodes) do
+    if not Node.alive?() do
+      Mix.raise(
+        "Expected the task to run on a named node to use --nodes, such as: " <>
+          "elixir --sname loader --cookie load -S mix stampede.run ..."
+      )
+    end
+
+    for name <- String.split(nodes, ",", trim: true) do
+      node = name |> String.trim() |> String.to_atom()
+
+      if not Node.connect(node) do
+        Mix.raise("Could not connect to #{node}, check that it is running with the same cookie")
+      end
+
+      node
+    end
+  end
+
+  defp scenarios!(file, nodes) do
     if not File.regular?(file) do
       Mix.raise("Could not find scenario file #{file}")
     end
 
-    scenarios = for {module, _binary} <- Code.compile_file(file), scenario?(module), do: module
+    modules = Code.compile_file(file)
+
+    for node <- nodes, {module, binary} <- modules do
+      {:module, ^module} =
+        :erpc.call(node, :code, :load_binary, [module, to_charlist(file), binary])
+    end
+
+    scenarios = for {module, _binary} <- modules, scenario?(module), do: module
 
     if scenarios == [] do
       Mix.raise("No module in #{file} implements Stampede.Scenario")

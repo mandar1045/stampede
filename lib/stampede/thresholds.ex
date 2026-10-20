@@ -1,8 +1,10 @@
 defmodule Stampede.Thresholds do
   @moduledoc false
 
-  @stats [:min, :mean, :p50, :p90, :p95, :p99, :max, :count, :rate]
-  @counter_stats [:count, :rate]
+  @stats [:min, :mean, :p50, :p90, :p95, :p99, :max, :count, :rate, :failed, :failed_rate]
+
+  # Stats that are zero, rather than missing, when nothing was recorded.
+  @zero_stats [:count, :rate, :failed, :failed_rate]
 
   def normalize(thresholds) when is_list(thresholds) do
     Enum.flat_map(thresholds, fn
@@ -37,7 +39,7 @@ defmodule Stampede.Thresholds do
             "#{inspect(@stats)} followed by a number"
   end
 
-  defp value(nil, stat) when stat in @counter_stats, do: 0
+  defp value(nil, stat) when stat in @zero_stats, do: 0
   defp value(nil, _stat), do: nil
   defp value(summary, stat), do: Map.get(summary, stat)
 

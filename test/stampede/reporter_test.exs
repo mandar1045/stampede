@@ -47,4 +47,78 @@ defmodule Stampede.ReporterTest do
 
     assert output =~ "no metrics were recorded"
   end
+
+  @check %{type: :check, count: 4, rate: 4.0, passed: 3, failed: 1, failed_rate: 0.25}
+
+  test "formats checks apart from the other metrics" do
+    result = %Result{
+      scenario: MyApp.Load.Lobby,
+      duration: 1_000,
+      metrics: %{"status is 200" => @check},
+      thresholds: [
+        %{metric: "status is 200", stat: :failed_rate, limit: 0.1, value: 0.25, passed?: false}
+      ]
+    }
+
+    output = Reporter.format(result)
+
+    assert output =~ "  checks\n     75.0%  status is 200 (3 of 4)\n"
+    assert output =~ "FAIL  status is 200 failed_rate <= 0.10 (0.25)"
+    refute output =~ "metric"
+    refute output =~ "no metrics were recorded"
+  end
+
+  test "to_json/1 encodes every part of the result" do
+    result = %Result{
+      scenario: MyApp.Load.Lobby,
+      duration: 1_000,
+      metrics: %{"status is 200" => @check},
+      timeline: [%{at: 1_000, vus: 2, metrics: %{"status is 200" => @check}}],
+      thresholds: [%{metric: "status is 200", stat: :failed, limit: 0, value: 1, passed?: false}],
+      errors: [%{message: "** (RuntimeError) boom", count: 1}],
+      passed?: false
+    }
+
+    assert JSON.decode!(Reporter.to_json(result)) == %{
+             "scenario" => "MyApp.Load.Lobby",
+             "duration" => 1_000,
+             "passed?" => false,
+             "metrics" => %{
+               "status is 200" => %{
+                 "type" => "check",
+                 "count" => 4,
+                 "rate" => 4.0,
+                 "passed" => 3,
+                 "failed" => 1,
+                 "failed_rate" => 0.25
+               }
+             },
+             "timeline" => [
+               %{
+                 "at" => 1_000,
+                 "vus" => 2,
+                 "metrics" => %{
+                   "status is 200" => %{
+                     "type" => "check",
+                     "count" => 4,
+                     "rate" => 4.0,
+                     "passed" => 3,
+                     "failed" => 1,
+                     "failed_rate" => 0.25
+                   }
+                 }
+               }
+             ],
+             "thresholds" => [
+               %{
+                 "metric" => "status is 200",
+                 "stat" => "failed",
+                 "limit" => 0,
+                 "value" => 1,
+                 "passed?" => false
+               }
+             ],
+             "errors" => [%{"message" => "** (RuntimeError) boom", "count" => 1}]
+           }
+  end
 end

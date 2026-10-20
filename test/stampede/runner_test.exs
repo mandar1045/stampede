@@ -1,82 +1,13 @@
 defmodule Stampede.RunnerTest do
   use ExUnit.Case, async: true
 
-  import ExUnit.CaptureIO
-
-  defmodule Lobby do
-    use Stampede.Scenario
-
-    @impl true
-    def options, do: [vus: 2, duration: 300]
-
-    @impl true
-    def run(_vu) do
-      {:ok, socket} = Stampede.Channels.connect(Stampede.TestEndpoint.socket_url())
-      {:ok, _reply} = Stampede.Channels.join(socket, "room:lobby")
-      {:ok, _reply} = Stampede.Channels.push(socket, "room:lobby", "ping")
-      Process.sleep(10)
-    end
-  end
-
-  defmodule Failing do
-    use Stampede.Scenario
-
-    @impl true
-    def run(%{iteration: 0}), do: raise("boom")
-    def run(_vu), do: Process.sleep(10)
-  end
-
-  defmodule Custom do
-    use Stampede.Scenario
-
-    @impl true
-    def setup(opts), do: %{vus: opts[:vus]}
-
-    @impl true
-    def run(vu) do
-      Stampede.increment("seen.#{vu.id}")
-      Stampede.increment("setup.#{vu.data.vus}")
-      Stampede.measure("nap", fn -> Process.sleep(5) end)
-      Stampede.record("server", 7)
-    end
-  end
-
-  defmodule Reconnecting do
-    use Stampede.Scenario
-
-    @impl true
-    def setup(_opts), do: self()
-
-    @impl true
-    def run(vu) do
-      if previous = Process.get(:socket) do
-        Stampede.increment(if Process.alive?(previous), do: "leaked", else: "closed")
-      end
-
-      {:ok, socket} = Stampede.Channels.connect(Stampede.TestEndpoint.socket_url())
-      Process.put(:socket, socket)
-      send(vu.data, {:iteration, self(), socket})
-      Process.sleep(10)
-    end
-  end
-
-  defmodule Crashing do
-    use Stampede.Scenario
-
-    @impl true
-    def run(%{id: 1, iteration: 0}) do
-      spawn_link(fn -> exit(:boom) end)
-      Process.sleep(:infinity)
-    end
-
-    def run(vu), do: Stampede.increment("ran.#{vu.id}")
-  end
+  alias Stampede.Test.{Crashing, Custom, Failing, Lobby, Observed, Reconnecting}
 
   test "records the built-in metrics" do
     result = Stampede.run(Lobby)
 
     assert result.scenario == Lobby
-    assert result.duration >= 300
+    assert result.duration >= 1_000
     assert result.passed?
     assert result.errors == []
     assert %{type: :timing, count: iterations} = result.metrics["iteration"]
@@ -102,7 +33,7 @@ defmodule Stampede.RunnerTest do
   end
 
   test "counts iterations that fail and keeps going" do
-    result = Stampede.run(Failing, vus: 2, duration: 300)
+    result = Stampede.run(Failing, vus: 2, duration: 1_000)
 
     assert result.metrics["iteration.errors"].count == 2
     assert result.metrics["iteration"].count > 0
@@ -125,7 +56,7 @@ defmodule Stampede.RunnerTest do
   end
 
   test "closes sockets after every iteration and stops VUs at the end" do
-    result = Stampede.run(Reconnecting, vus: 2, duration: 200)
+    result = Stampede.run(Reconnecting, vus: 2, duration: 1_000)
 
     assert result.metrics["closed"].count > 0
     refute Map.has_key?(result.metrics, "leaked")
@@ -138,16 +69,16 @@ defmodule Stampede.RunnerTest do
   end
 
   test "replaces VUs that crash" do
-    result = Stampede.run(Crashing, vus: 1, duration: 300)
+    result = Stampede.run(Crashing, vus: 1, duration: 1_000)
 
     assert result.metrics["vu.crashes"].count == 1
     assert result.metrics["ran.2"].count > 0
   end
 
-  test "prints progress" do
-    output = capture_io(fn -> Stampede.run(Custom, vus: 1, duration: 1_100, progress: true) end)
+  test "leaves nothing in the caller's mailbox" do
+    Stampede.run(Observed, vus: 2, duration: 300)
 
-    assert output =~ ~r/1\.\ds  vus: 1  iterations: \d+  errors: 0/
+    assert Process.info(self(), :messages) == {:messages, []}
   end
 
   test "raises on invalid options" do

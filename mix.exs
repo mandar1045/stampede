@@ -1,7 +1,7 @@
 defmodule Stampede.MixProject do
   use Mix.Project
 
-  @version "0.1.0"
+  @version "0.2.0"
   @source_url "https://github.com/mandar1045/stampede"
 
   def project do
@@ -32,6 +32,7 @@ defmodule Stampede.MixProject do
     [
       {:mint, "~> 1.6"},
       {:mint_web_socket, "~> 1.0"},
+      {:telemetry, "~> 1.0"},
       {:phoenix, "~> 1.7", only: :test},
       {:phoenix_live_view, "~> 1.0", only: :test},
       {:bandit, "~> 1.0", only: :test},
@@ -52,7 +53,7 @@ defmodule Stampede.MixProject do
       source_ref: "v#{@version}",
       extras: ["README.md", "CHANGELOG.md"],
       groups_for_modules: [
-        Clients: [Stampede.Channels, Stampede.LiveView],
+        Clients: [Stampede.HTTP, Stampede.Channels, Stampede.LiveView],
         Results: [Stampede.Result, Stampede.Reporter]
       ]
     ]

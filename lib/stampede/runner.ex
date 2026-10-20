@@ -1,11 +1,20 @@
 defmodule Stampede.Runner do
   @moduledoc false
 
-  alias Stampede.{Channels, Metrics, Result, Stages, Thresholds, VU}
+  alias Stampede.{Metrics, Plan, Result, Thresholds}
+  alias Stampede.Runner.Driver
 
-  @tick 100
-  @progress_interval 1_000
-  @error_pause 100
+  @options [
+    stages: nil,
+    vus: 1,
+    duration: nil,
+    rate: nil,
+    rate_stages: nil,
+    max_vus: 1_000,
+    thresholds: [],
+    nodes: nil,
+    progress: false
+  ]
 
   def run(scenario, opts) when is_atom(scenario) and is_list(opts) do
     Code.ensure_loaded!(scenario)
@@ -18,173 +27,212 @@ defmodule Stampede.Runner do
       scenario
       |> default_options()
       |> Keyword.merge(opts)
-      |> Keyword.validate!(stages: nil, vus: 1, duration: nil, thresholds: [], progress: false)
+      |> Keyword.validate!(@options)
 
-    stages = Stages.from_options(opts)
+    plan = Plan.from_options(opts)
     thresholds = Thresholds.normalize(opts[:thresholds])
+    nodes = nodes!(opts[:nodes])
+    Enum.each(nodes, &prepare!(&1, scenario))
     data = if function_exported?(scenario, :setup, 1), do: scenario.setup(opts)
-    metrics = Metrics.new()
+
+    metadata = %{scenario: scenario, options: opts}
+    :telemetry.execute([:stampede, :run, :start], %{system_time: System.system_time()}, metadata)
+    started_at = System.monotonic_time()
 
     config = %{
-      caller: self(),
+      controller: self(),
       scenario: scenario,
       data: data,
-      metrics: metrics,
-      stages: stages,
-      progress?: opts[:progress]
+      plan: plan,
+      count: length(nodes)
     }
 
-    # The VUs are driven from their own process, which traps exits, so that a
-    # crashing VU becomes a message instead of taking the caller down.
-    duration = fn -> drive(config) end |> Task.async() |> Task.await(:infinity)
+    drivers = start_drivers(nodes, config)
+    Enum.each(drivers, fn {pid, _driver} -> send(pid, :go) end)
 
-    summary = Metrics.summary(metrics, duration)
-    :ets.delete(metrics)
-    Result.new(scenario, duration, summary, Thresholds.evaluate(thresholds, summary.metrics))
+    state =
+      collect(%{
+        scenario: scenario,
+        progress?: opts[:progress],
+        running: drivers,
+        count: map_size(drivers),
+        pending: %{},
+        next_index: 0,
+        timeline: [],
+        last_at: 0,
+        iterations: 0,
+        errors: 0,
+        finals: []
+      })
+
+    state = flush(state, true)
+    duration = state.finals |> Enum.map(& &1.duration) |> Enum.max()
+    summary = state.finals |> Enum.map(& &1.rows) |> Metrics.merge() |> Metrics.summary(duration)
+
+    result =
+      Result.new(
+        scenario,
+        duration,
+        summary,
+        Thresholds.evaluate(thresholds, summary.metrics),
+        Enum.reverse(state.timeline)
+      )
+
+    measurements = %{duration: System.monotonic_time() - started_at}
+
+    :telemetry.execute([:stampede, :run, :stop], measurements, %{
+      scenario: scenario,
+      result: result
+    })
+
+    result
   end
 
   defp default_options(scenario) do
     if function_exported?(scenario, :options, 0), do: scenario.options(), else: []
   end
 
-  defp drive(config) do
-    Process.flag(:trap_exit, true)
+  defp nodes!(nil), do: [node()]
 
-    state = Map.merge(config, %{vus: %{}, next_id: 1, started_at: now(), reported_at: 0})
-    state = loop(state, Stages.duration(state.stages))
-    duration = now() - state.started_at
+  defp nodes!([_ | _] = nodes) do
+    nodes = Enum.uniq(nodes)
 
-    state.vus |> Map.keys() |> Enum.each(&Process.exit(&1, :shutdown))
-    await_exits(state.vus)
-    duration
-  end
-
-  defp await_exits(vus) when map_size(vus) == 0, do: :ok
-
-  defp await_exits(vus) do
-    receive do
-      {:EXIT, pid, _reason} -> await_exits(Map.delete(vus, pid))
+    if nodes != [node()] and not Node.alive?() do
+      raise ArgumentError,
+            "expected this node to be named to reach other nodes, " <>
+              "start it with --sname or --name"
     end
-  end
 
-  defp loop(state, total) do
-    elapsed = now() - state.started_at
-
-    if elapsed < total do
-      state
-      |> scale(Stages.target_at(state.stages, elapsed))
-      |> report_progress()
-      |> wait(now() + min(@tick, total - elapsed))
-      |> loop(total)
-    else
-      state
+    for node <- nodes, node != node() do
+      if not is_atom(node) or Node.ping(node) != :pong do
+        raise ArgumentError, "could not connect to node #{inspect(node)}"
+      end
     end
+
+    nodes
   end
 
-  defp scale(state, target) do
-    case map_size(state.vus) do
-      count when count < target -> start_vus(state, target - count)
-      count when count > target -> stop_vus(state, Enum.take(Map.keys(state.vus), count - target))
-      _count -> state
+  defp nodes!(other) do
+    raise ArgumentError, "expected :nodes to be a non-empty list of nodes, got: #{inspect(other)}"
+  end
+
+  # Every node runs Stampede and the scenario. A scenario compiled to a .beam
+  # file is loaded on the nodes that do not have it yet.
+  defp prepare!(node, _scenario) when node == node(), do: :ok
+
+  defp prepare!(node, scenario) do
+    case :erpc.call(node, Application, :ensure_all_started, [:stampede]) do
+      {:ok, _apps} ->
+        :ok
+
+      {:error, reason} ->
+        raise ArgumentError, "could not start Stampede on #{node}: #{inspect(reason)}"
     end
+
+    if not :erpc.call(node, Code, :ensure_loaded?, [scenario]) do
+      case :code.get_object_code(scenario) do
+        {^scenario, binary, file} ->
+          {:module, ^scenario} = :erpc.call(node, :code, :load_binary, [scenario, file, binary])
+
+        :error ->
+          raise ArgumentError, "#{inspect(scenario)} is not available on #{node}"
+      end
+    end
+
+    :ok
   end
 
-  defp start_vus(state, count) do
-    %{scenario: scenario, data: data, metrics: metrics} = state
+  defp start_drivers(nodes, config) do
+    nodes
+    |> Enum.with_index()
+    |> Map.new(fn {node, index} ->
+      config = Map.put(config, :index, index)
 
-    Enum.reduce(1..count, state, fn _, state ->
-      vu = %VU{id: state.next_id, data: data}
-      pid = spawn_link(fn -> run_vu(scenario, vu, metrics) end)
-      %{state | vus: Map.put(state.vus, pid, vu.id), next_id: state.next_id + 1}
+      {:ok, pid} =
+        if node == node(),
+          do: Driver.start(config),
+          else: :erpc.call(node, Driver, :start, [config])
+
+      {pid, {node, Process.monitor(pid)}}
     end)
   end
 
-  defp stop_vus(state, pids) do
-    for pid <- pids, do: Process.exit(pid, :shutdown)
-    %{state | vus: Map.drop(state.vus, pids)}
-  end
+  defp collect(%{running: running} = state) when map_size(running) == 0, do: state
 
-  defp wait(state, deadline) do
-    caller = state.caller
+  defp collect(state) do
+    running = state.running
 
     receive do
-      {:EXIT, ^caller, reason} ->
-        stop_vus(state, Map.keys(state.vus))
-        exit(reason)
+      {:interval, pid, interval} when is_map_key(running, pid) ->
+        state |> add_interval(interval) |> flush(false) |> collect()
 
-      {:EXIT, pid, reason} ->
-        state = exited(state, pid, reason)
-        if now() < deadline, do: wait(state, deadline), else: state
-    after
-      max(deadline - now(), 0) -> state
+      {:done, pid, final} when is_map_key(running, pid) ->
+        {{_node, monitor}, running} = Map.pop!(running, pid)
+        Process.demonitor(monitor, [:flush])
+        collect(%{state | running: running, finals: [final | state.finals]})
+
+      {:DOWN, _monitor, :process, pid, reason} when is_map_key(running, pid) ->
+        for {other, _driver} <- running, other != pid, do: send(other, :stop)
+        {node, _monitor} = Map.fetch!(running, pid)
+        raise "lost the VUs on #{node}: #{inspect(reason)}"
     end
   end
 
-  defp exited(state, pid, reason) do
-    case Map.pop(state.vus, pid) do
-      {nil, _vus} ->
-        state
+  defp add_interval(state, interval) do
+    entry = Map.get(state.pending, interval.index, %{reports: 0, at: 0, vus: 0, rows: %{}})
 
-      {_id, vus} ->
-        if reason not in [:normal, :shutdown] do
-          Metrics.increment(state.metrics, "vu.crashes")
-        end
+    entry = %{
+      reports: entry.reports + 1,
+      at: max(entry.at, interval.at),
+      vus: entry.vus + interval.vus,
+      rows: Map.merge(entry.rows, interval.delta, fn _key, left, right -> left + right end)
+    }
 
-        %{state | vus: vus}
-    end
+    %{state | pending: Map.put(state.pending, interval.index, entry)}
   end
 
-  defp report_progress(%{progress?: true, reported_at: reported_at} = state) do
-    elapsed = now() - state.started_at
-
-    if elapsed - reported_at >= @progress_interval do
-      IO.puts(
-        "#{seconds(elapsed)}  vus: #{map_size(state.vus)}  " <>
-          "iterations: #{Metrics.count(state.metrics, "iteration")}  " <>
-          "errors: #{Metrics.count(state.metrics, "iteration.errors")}"
-      )
-
-      %{state | reported_at: elapsed}
-    else
+  # Turns each second into a point of the timeline once every node reported
+  # it, or at the end of the run, whatever was reported.
+  defp flush(state, all?) do
+    with {:ok, entry} <- Map.fetch(state.pending, state.next_index),
+         true <- all? or entry.reports == state.count do
       state
+      |> Map.update!(:pending, &Map.delete(&1, state.next_index))
+      |> Map.update!(:next_index, &(&1 + 1))
+      |> add_point(entry)
+      |> flush(all?)
+    else
+      _incomplete -> state
     end
   end
 
-  defp report_progress(state), do: state
+  defp add_point(state, entry) do
+    summary = Metrics.summary(entry.rows, entry.at - state.last_at)
+    point = %{at: entry.at, vus: entry.vus, metrics: summary.metrics}
+    iterations = state.iterations + Metrics.count(entry.rows, "iteration")
+    errors = state.errors + Metrics.count(entry.rows, "iteration.errors")
 
-  defp run_vu(scenario, vu, metrics) do
-    Metrics.put_current(metrics)
-    iterate(scenario, vu, metrics)
-  end
+    :telemetry.execute([:stampede, :run, :interval], %{vus: entry.vus}, %{
+      scenario: state.scenario,
+      interval: point
+    })
 
-  defp iterate(scenario, vu, metrics) do
-    started_at = System.monotonic_time()
-
-    case run_iteration(scenario, vu) do
-      :ok ->
-        Metrics.record_since(metrics, "iteration", started_at)
-
-      {kind, reason, stacktrace} ->
-        Metrics.increment(metrics, "iteration.errors")
-        Metrics.error(metrics, kind, reason, stacktrace)
-        Process.sleep(@error_pause)
+    if state.progress? do
+      IO.puts(
+        "#{seconds(entry.at)}  vus: #{entry.vus}  iterations: #{iterations}  errors: #{errors}"
+      )
     end
 
-    iterate(scenario, %{vu | iteration: vu.iteration + 1}, metrics)
-  end
-
-  defp run_iteration(scenario, vu) do
-    scenario.run(vu)
-    :ok
-  catch
-    kind, reason -> {kind, reason, __STACKTRACE__}
-  after
-    Channels.close_all()
+    %{
+      state
+      | timeline: [point | state.timeline],
+        last_at: entry.at,
+        iterations: iterations,
+        errors: errors
+    }
   end
 
   defp seconds(milliseconds) do
     String.pad_leading(:erlang.float_to_binary(milliseconds / 1000, decimals: 1) <> "s", 7)
   end
-
-  defp now, do: System.monotonic_time(:millisecond)
 end
