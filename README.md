@@ -13,14 +13,12 @@ modules, so one machine can hold thousands of connections, several machines
 can share one test over Erlang distribution, and your load tests can reuse
 your own code.
 
-> Stampede is new and its API may still change before 1.0.
-
 ## Installation
 
 ```elixir
 def deps do
   [
-    {:stampede, "~> 0.3", only: :dev}
+    {:stampede, "~> 1.0", only: :dev}
   ]
 end
 ```
@@ -291,7 +289,7 @@ merged as if they ran on one. From code, pass `nodes: [node() | Node.list()]`.
 Load tests can also run from a script, without a Mix project:
 
 ```elixir
-Mix.install([{:stampede, "~> 0.3"}])
+Mix.install([{:stampede, "~> 1.0"}])
 
 defmodule Lobby do
   use Stampede.Scenario
