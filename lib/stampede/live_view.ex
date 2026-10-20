@@ -39,21 +39,25 @@ defmodule Stampede.LiveView do
 
     * `:headers` - extra headers for both the page and the socket, such as a
       `cookie` for pages behind a login
+    * `:max_redirects` - how many redirects to follow while loading the page,
+      keeping the cookies they set. Defaults to `5`.
     * `:socket_path` - where the LiveView socket is mounted. Defaults to
       `"/live"`.
-    * `:timeout` - how long to wait for the page and for the join, in
-      milliseconds. Defaults to `5_000`.
+    * `:timeout` - how long to wait for each page request and for the join,
+      in milliseconds. Defaults to `5_000`.
     * `:transport_opts` - options for `:gen_tcp` or `:ssl`
 
-  Returns `{:error, {:http_status, status}}` when the page does not load,
-  `{:error, :no_live_view}` when it has no LiveView, and `{:error, reply}`
-  when the LiveView refuses the join, for example to redirect.
+  Returns `{:error, {:http_status, status}}` when the page does not load or
+  redirects too many times, `{:error, :no_live_view}` when it has no
+  LiveView, and `{:error, reply}` when the LiveView refuses the join, for
+  example to redirect.
   """
   @spec connect(String.t(), keyword()) :: {:ok, t()} | {:error, term()}
   def connect(url, opts \\ []) when is_binary(url) do
     opts =
       Keyword.validate!(opts,
         headers: [],
+        max_redirects: 5,
         socket_path: "/live",
         timeout: 5_000,
         transport_opts: []
@@ -69,12 +73,12 @@ defmodule Stampede.LiveView do
          {:ok, root} <- root_view(page.body),
          params = connect_params(page.body),
          {:ok, socket} <-
-           Channels.connect(socket_url(uri, opts[:socket_path]),
+           Channels.connect(socket_url(page.url, opts[:socket_path]),
              params: params,
-             headers: socket_headers(opts[:headers], page.headers),
+             headers: with_cookies(opts[:headers], page.cookies),
              transport_opts: opts[:transport_opts]
            ) do
-      join(socket, url, root, params, opts)
+      join(socket, page.url, root, params, opts)
     end
   end
 
@@ -87,7 +91,13 @@ defmodule Stampede.LiveView do
   `{:noreply, socket}`. Returns `{:error, :channel_crashed}` if the LiveView
   crashes while handling it.
 
-  Takes a `:timeout` option, in milliseconds, that defaults to `5_000`.
+  ## Options
+
+    * `:target` - the component to send the event to, like `phx-target`
+      does. It is the number LiveView renders for `phx-target={@myself}`;
+      components are numbered from 1, in the order they first render.
+    * `:timeout` - how long to wait for the reply, in milliseconds. Defaults
+      to `5_000`.
   """
   @spec click(t(), String.t(), map(), keyword()) :: {:ok, map() | nil} | {:error, term()}
   def click(%__MODULE__{} = view, event, value \\ %{}, opts \\ []) when is_map(value) do
@@ -98,8 +108,8 @@ defmodule Stampede.LiveView do
   Sends a form change, like a form with `phx-change={event}` would.
 
   `params` are the form's fields, nested the way `handle_event/3` should
-  get them, such as `%{"user" => %{"name" => "jo"}}`. Returns the same as
-  `click/4`.
+  get them, such as `%{"user" => %{"name" => "jo"}}`. Takes the same
+  options and returns the same as `click/4`.
   """
   @spec change(t(), String.t(), map(), keyword()) :: {:ok, map() | nil} | {:error, term()}
   def change(%__MODULE__{} = view, event, params, opts \\ []) when is_map(params) do
@@ -135,18 +145,32 @@ defmodule Stampede.LiveView do
     started_at = System.monotonic_time()
     metrics = Metrics.current()
 
-    case HTTP.get(url, opts[:headers], opts) do
-      {:ok, %{status: 200} = page} ->
+    case load(url, [], opts[:max_redirects], opts) do
+      {:ok, page} ->
         Metrics.record_since(metrics, "live.page", started_at)
         {:ok, page}
-
-      {:ok, %{status: status}} ->
-        Metrics.increment(metrics, "live.page.errors")
-        {:error, {:http_status, status}}
 
       {:error, reason} ->
         Metrics.increment(metrics, "live.page.errors")
         {:error, reason}
+    end
+  end
+
+  defp load(url, cookies, redirects_left, opts) do
+    with {:ok, response} <- HTTP.get(url, with_cookies(opts[:headers], cookies), opts) do
+      cookies = store_cookies(cookies, response.headers)
+
+      case {response.status, List.keyfind(response.headers, "location", 0)} do
+        {200, _location} ->
+          {:ok, %{url: url, body: response.body, cookies: cookies}}
+
+        {status, {"location", location}}
+        when status in [301, 302, 303, 307, 308] and redirects_left > 0 ->
+          url |> URI.merge(location) |> URI.to_string() |> load(cookies, redirects_left - 1, opts)
+
+        {status, _location} ->
+          {:error, {:http_status, status}}
+      end
     end
   end
 
@@ -172,8 +196,9 @@ defmodule Stampede.LiveView do
   end
 
   defp push(view, type, event, value, opts) when is_binary(event) do
-    opts = Keyword.validate!(opts, timeout: 5_000)
+    opts = Keyword.validate!(opts, target: nil, timeout: 5_000)
     payload = %{"type" => type, "event" => event, "value" => value}
+    payload = if opts[:target], do: Map.put(payload, "cid", opts[:target]), else: payload
 
     case Channels.push(view.socket, view.topic, "event", payload,
            timeout: opts[:timeout],
@@ -211,24 +236,31 @@ defmodule Stampede.LiveView do
     end
   end
 
-  defp socket_url(%URI{} = uri, path) do
+  defp socket_url(url, path) do
+    %URI{} = uri = URI.parse(url)
     scheme = if uri.scheme == "https", do: "wss", else: "ws"
     URI.to_string(%URI{uri | scheme: scheme, path: path, query: nil, fragment: nil})
   end
 
-  defp socket_headers(headers, page_headers) do
-    page_cookies =
-      for {"set-cookie", value} <- page_headers do
-        value |> String.split(";", parts: 2) |> hd()
-      end
+  # Cookies are kept as {name, "name=value"}, so a later Set-Cookie with the
+  # same name replaces the earlier one.
+  defp store_cookies(cookies, headers) do
+    for {"set-cookie", value} <- headers, reduce: cookies do
+      cookies ->
+        [pair | _attributes] = String.split(value, ";", parts: 2)
+        [name | _value] = String.split(pair, "=", parts: 2)
+        List.keystore(cookies, name, 0, {name, pair})
+    end
+  end
 
-    {cookies, headers} =
+  defp with_cookies(headers, []), do: headers
+
+  defp with_cookies(headers, cookies) do
+    {given, headers} =
       Enum.split_with(headers, fn {name, _value} -> String.downcase(name) == "cookie" end)
 
-    case Enum.map(cookies, &elem(&1, 1)) ++ page_cookies do
-      [] -> headers
-      cookies -> [{"cookie", Enum.join(cookies, "; ")} | headers]
-    end
+    values = Enum.map(given, &elem(&1, 1)) ++ Enum.map(cookies, &elem(&1, 1))
+    [{"cookie", Enum.join(values, "; ")} | headers]
   end
 
   defp encode_form(params) do

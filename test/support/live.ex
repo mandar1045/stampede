@@ -19,9 +19,13 @@ defmodule Stampede.TestRouter do
     live "/redirecting", Stampede.TestRedirectLive
     get "/plain", Stampede.TestPageController, :plain
     get "/moved", Stampede.TestPageController, :moved
+    get "/loop", Stampede.TestPageController, :loop
+    get "/sign-in/:name", Stampede.TestPageController, :sign_in
   end
 
-  defp put_visitor(conn, _opts), do: put_session(conn, "visitor", "jo")
+  defp put_visitor(conn, _opts) do
+    if get_session(conn, "visitor"), do: conn, else: put_session(conn, "visitor", "jo")
+  end
 end
 
 defmodule Stampede.TestLayouts do
@@ -44,6 +48,23 @@ defmodule Stampede.TestPageController do
 
   def plain(conn, _params), do: html(conn, "<p>no LiveView here</p>")
   def moved(conn, _params), do: redirect(conn, to: "/counter")
+  def loop(conn, _params), do: redirect(conn, to: "/loop")
+
+  def sign_in(conn, %{"name" => name}) do
+    conn
+    |> Plug.Conn.put_session("visitor", name)
+    |> redirect(to: "/counter")
+  end
+end
+
+defmodule Stampede.TestWidget do
+  use Phoenix.LiveComponent
+
+  @impl true
+  def render(assigns), do: ~H"<p phx-target={@myself}>widget</p>"
+
+  @impl true
+  def handle_event("whoami", _params, socket), do: {:reply, %{id: socket.assigns.id}, socket}
 end
 
 defmodule Stampede.TestCounterLive do
@@ -60,6 +81,7 @@ defmodule Stampede.TestCounterLive do
     ~H"""
     <p>count: {@count}</p>
     <p>name: {@name}</p>
+    <.live_component module={Stampede.TestWidget} id="widget" />
     """
   end
 

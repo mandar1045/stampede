@@ -159,9 +159,14 @@ end
 
 `click/4`, `change/4` and `submit/4` send what `phx-click`, `phx-change` and
 `phx-submit` would, and return what `handle_event/3` replied, if anything.
+Pass `target: 1` to send an event to a component, like `phx-target` does.
 `await/2` waits for updates the LiveView sends on its own. A run records
 `live.page`, `live.join` and `live.event`, and a LiveView that crashes on an
 event fails it with `{:error, :channel_crashed}` instead of a timeout.
+
+`connect/2` follows redirects and keeps the cookies they set, so a route that
+signs a test user in and redirects to the page under test is enough to load
+test pages behind a login.
 
 With the server on the same laptop, 3,000 LiveView users that each load the
 page, join and click every 500ms ran with no errors, a join p95 of 117ms and
@@ -192,8 +197,7 @@ System.halt(if result.passed?, do: 0, else: 1)
 
 ## Roadmap
 
-  * LiveView uploads, components targeted with `phx-target`, and following
-    redirects
+  * LiveView uploads and live navigation between pages
   * Spreading the load over several machines with Erlang distribution
   * Telemetry events and a live dashboard
   * Plain WebSocket and TCP clients

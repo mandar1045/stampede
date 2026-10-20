@@ -27,8 +27,20 @@ defmodule Stampede.LiveViewTest do
       assert {:ok, %{"visitor" => "jo"}} = LiveView.click(view, "state")
     end
 
-    test "returns an error when the page does not load" do
-      assert {:error, {:http_status, 302}} = LiveView.connect(url("/moved"))
+    test "follows redirects to the LiveView" do
+      assert {:ok, view} = LiveView.connect(url("/moved"))
+      assert view.url == url("/counter")
+    end
+
+    test "keeps the cookies set by redirects" do
+      {:ok, view} = LiveView.connect(url("/sign-in/sam"))
+
+      assert {:ok, %{"visitor" => "sam"}} = LiveView.click(view, "state")
+    end
+
+    test "returns an error after too many redirects" do
+      assert {:error, {:http_status, 302}} = LiveView.connect(url("/loop"))
+      assert {:error, {:http_status, 302}} = LiveView.connect(url("/moved"), max_redirects: 0)
     end
 
     test "returns an error when the page has no LiveView" do
@@ -63,6 +75,10 @@ defmodule Stampede.LiveViewTest do
     test "click/4 sends clicks", %{view: view} do
       assert {:ok, nil} = LiveView.click(view, "inc")
       assert {:ok, %{"count" => 1}} = LiveView.click(view, "state")
+    end
+
+    test "sends events to components with :target", %{view: view} do
+      assert {:ok, %{"id" => "widget"}} = LiveView.click(view, "whoami", %{}, target: 1)
     end
 
     test "submit/4 and change/4 send nested form fields", %{view: view} do
