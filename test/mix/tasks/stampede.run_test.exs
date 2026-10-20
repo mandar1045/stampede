@@ -74,7 +74,7 @@ defmodule Mix.Tasks.Stampede.RunTest do
     end
   end
 
-  test "runs at a rate and writes the results as JSON", %{tmp_dir: tmp_dir} do
+  test "runs at a rate and writes the results as JSON and HTML", %{tmp_dir: tmp_dir} do
     path =
       write_scenario!(tmp_dir, "Steady", """
         @impl true
@@ -85,9 +85,20 @@ defmodule Mix.Tasks.Stampede.RunTest do
       """)
 
     out = Path.join(tmp_dir, "results.json")
+    html = Path.join(tmp_dir, "report.html")
 
     capture_io(fn ->
-      Mix.Tasks.Stampede.Run.run([path, "--rate", "20", "--duration", "500ms", "--out", out])
+      Mix.Tasks.Stampede.Run.run([
+        path,
+        "--rate",
+        "20",
+        "--duration",
+        "500ms",
+        "--out",
+        out,
+        "--html",
+        html
+      ])
     end)
 
     assert [%{"scenario" => "Stampede.TaskTest.Steady", "duration" => duration} = result] =
@@ -95,5 +106,6 @@ defmodule Mix.Tasks.Stampede.RunTest do
 
     assert duration in 500..600
     assert result["metrics"]["iteration"]["count"] in 8..10
+    assert File.read!(html) =~ "<h2>Stampede.TaskTest.Steady</h2>"
   end
 end

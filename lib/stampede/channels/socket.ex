@@ -5,6 +5,7 @@ defmodule Stampede.Channels.Socket do
 
   alias Stampede.Channels.{Message, Serializer}
   alias Stampede.Metrics
+  alias Stampede.WebSocket.Connection
 
   @inbox_limit 1_000
 
@@ -38,8 +39,8 @@ defmodule Stampede.Channels.Socket do
   def init({uri, path, vsn, opts, metrics}) do
     started_at = System.monotonic_time()
 
-    case connect(uri, path, opts) do
-      {:ok, conn, ref, websocket} ->
+    case Connection.connect(uri, path, opts) do
+      {:ok, conn, ref, websocket, frames} ->
         Metrics.record_since(metrics, "ws.connect", started_at)
 
         state = %__MODULE__{
@@ -51,7 +52,10 @@ defmodule Stampede.Channels.Socket do
           heartbeat_interval: opts[:heartbeat_interval]
         }
 
-        {:ok, schedule_heartbeat(state)}
+        case handle_frames(frames, state) do
+          {:ok, state} -> {:ok, schedule_heartbeat(state)}
+          {:error, _state, reason} -> {:error, reason}
+        end
 
       {:error, reason} ->
         Metrics.increment(metrics, "ws.connect.errors")
@@ -168,85 +172,20 @@ defmodule Stampede.Channels.Socket do
   end
 
   def handle_info(message, state) do
-    case Mint.WebSocket.stream(state.conn, message) do
-      {:ok, conn, responses} -> handle_responses(responses, %{state | conn: conn})
-      {:error, conn, reason, _responses} -> disconnect(%{state | conn: conn}, reason)
-      :unknown -> {:noreply, state}
-    end
-  end
-
-  defp connect(uri, path, opts) do
-    {http_scheme, ws_scheme} = if uri.scheme == "wss", do: {:https, :wss}, else: {:http, :ws}
-    timeout = opts[:connect_timeout]
-    deadline = System.monotonic_time(:millisecond) + timeout
-    transport_opts = Keyword.put_new(opts[:transport_opts], :timeout, timeout)
-
-    with {:ok, conn} <-
-           Mint.HTTP.connect(http_scheme, uri.host, uri.port,
-             protocols: [:http1],
-             transport_opts: transport_opts
-           ),
-         {:ok, conn, ref} <- Mint.WebSocket.upgrade(ws_scheme, conn, path, opts[:headers]),
-         {:ok, conn, status, headers} <- await_upgrade(conn, ref, deadline, nil, []),
-         {:ok, conn, websocket} <- Mint.WebSocket.new(conn, ref, status, headers) do
-      {:ok, conn, ref, websocket}
-    else
-      {:error, conn, reason} ->
-        Mint.HTTP.close(conn)
-        {:error, reason}
-
-      {:error, reason} ->
-        {:error, reason}
-    end
-  end
-
-  defp await_upgrade(conn, ref, deadline, status, headers) do
-    timeout = max(deadline - System.monotonic_time(:millisecond), 0)
-
-    receive do
-      message ->
-        case Mint.WebSocket.stream(conn, message) do
-          {:ok, conn, responses} ->
-            case upgrade_responses(responses, ref, status, headers) do
-              {:done, status, headers} -> {:ok, conn, status, headers}
-              {:more, status, headers} -> await_upgrade(conn, ref, deadline, status, headers)
-            end
-
-          {:error, conn, reason, _responses} ->
-            {:error, conn, reason}
-
-          :unknown ->
-            await_upgrade(conn, ref, deadline, status, headers)
-        end
-    after
-      timeout -> {:error, conn, %Mint.TransportError{reason: :timeout}}
-    end
-  end
-
-  defp upgrade_responses(responses, ref, status, headers) do
-    Enum.reduce(responses, {:more, status, headers}, fn
-      {:status, ^ref, status}, {:more, _status, headers} -> {:more, status, headers}
-      {:headers, ^ref, more}, {:more, status, headers} -> {:more, status, headers ++ more}
-      {:done, ^ref}, {:more, status, headers} -> {:done, status, headers}
-      _response, acc -> acc
-    end)
-  end
-
-  defp handle_responses([{:data, ref, data} | responses], %{ref: ref} = state) do
-    case Mint.WebSocket.decode(state.websocket, data) do
-      {:ok, websocket, frames} ->
-        case handle_frames(frames, %{state | websocket: websocket}) do
-          {:ok, state} -> handle_responses(responses, state)
+    case Connection.stream(state.conn, state.ref, state.websocket, message) do
+      {:ok, conn, websocket, frames} ->
+        case handle_frames(frames, %{state | conn: conn, websocket: websocket}) do
+          {:ok, state} -> {:noreply, state}
           {:error, state, reason} -> disconnect(state, reason)
         end
 
-      {:error, websocket, reason} ->
-        disconnect(%{state | websocket: websocket}, reason)
+      {:error, conn, websocket, reason} ->
+        disconnect(%{state | conn: conn, websocket: websocket}, reason)
+
+      :unknown ->
+        {:noreply, state}
     end
   end
-
-  defp handle_responses([_response | responses], state), do: handle_responses(responses, state)
-  defp handle_responses([], state), do: {:noreply, state}
 
   defp handle_frames([{:text, text} | frames], state) do
     case Serializer.decode(text, state.vsn) do
@@ -439,16 +378,12 @@ defmodule Stampede.Channels.Socket do
   end
 
   defp send_frame(state, frame) do
-    with {:ok, websocket, data} <- Mint.WebSocket.encode(state.websocket, frame),
-         state = %{state | websocket: websocket},
-         {:ok, conn} <- Mint.WebSocket.stream_request_body(state.conn, state.ref, data) do
-      {:ok, %{state | conn: conn}}
-    else
-      {:error, %Mint.WebSocket{} = websocket, reason} ->
-        {:error, %{state | websocket: websocket}, reason}
+    case Connection.send_frame(state.conn, state.ref, state.websocket, frame) do
+      {:ok, conn, websocket} ->
+        {:ok, %{state | conn: conn, websocket: websocket}}
 
-      {:error, conn, reason} ->
-        {:error, %{state | conn: conn}, reason}
+      {:error, conn, websocket, reason} ->
+        {:error, %{state | conn: conn, websocket: websocket}, reason}
     end
   end
 

@@ -11,6 +11,7 @@ defmodule Stampede.Runner do
     rate: nil,
     rate_stages: nil,
     max_vus: 1_000,
+    graceful_stop: 0,
     thresholds: [],
     nodes: nil,
     progress: false
@@ -44,6 +45,7 @@ defmodule Stampede.Runner do
       scenario: scenario,
       data: data,
       plan: plan,
+      graceful_stop: Plan.milliseconds!(opts[:graceful_stop]),
       count: length(nodes)
     }
 

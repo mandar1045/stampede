@@ -7,6 +7,7 @@ defmodule Mix.Tasks.Stampede.Run do
       $ mix stampede.run loadtest/lobby.exs
       $ mix stampede.run loadtest/lobby.exs --vus 100 --duration 1m
       $ mix stampede.run loadtest/api.exs --rate 200 --duration 5m --out results.json
+      $ mix stampede.run loadtest/api.exs --html report.html
 
   Every module in the file that implements `Stampede.Scenario` runs, one
   after the other, with a progress line every second and a summary at the
@@ -24,6 +25,8 @@ defmodule Mix.Tasks.Stampede.Run do
     * `--max-vus` - how many iterations a `--rate` run may have in progress
     * `--out` - a file to write the results to, as a JSON array with one
       object per scenario, in the format of `Stampede.Reporter.to_json/1`
+    * `--html` - a file to write an HTML report of every scenario to, with
+      charts of how each run went, see `Stampede.Reporter.to_html/1`
     * `--nodes` - other nodes to run VUs on too, separated by commas
 
   `--vus` and `--rate` replace the scenario's own VUs, rate and stages, and
@@ -49,6 +52,7 @@ defmodule Mix.Tasks.Stampede.Run do
     duration: :string,
     max_vus: :integer,
     out: :string,
+    html: :string,
     nodes: :string
   ]
 
@@ -79,6 +83,10 @@ defmodule Mix.Tasks.Stampede.Run do
         Enum.map_intersperse(results, ",", &Stampede.Reporter.to_json/1),
         "]"
       ])
+    end
+
+    if html = opts[:html] do
+      File.write!(html, Stampede.Reporter.to_html(results))
     end
 
     if not Enum.all?(results, & &1.passed?) do

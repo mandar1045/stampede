@@ -6,7 +6,7 @@ Generic load testing tools see a Phoenix channel as a plain WebSocket, so each
 test has to rebuild the protocol by hand: join messages, refs, replies and
 heartbeats. LiveView is harder still, since every session starts with a page
 load that hands out the tokens the socket needs. Stampede speaks both
-natively, along with plain HTTP.
+natively, along with plain HTTP and WebSockets.
 
 Every virtual user (VU) is a BEAM process and scenarios are plain Elixir
 modules, so one machine can hold thousands of connections, several machines
@@ -20,7 +20,7 @@ your own code.
 ```elixir
 def deps do
   [
-    {:stampede, "~> 0.2", only: :dev}
+    {:stampede, "~> 0.3", only: :dev}
   ]
 end
 ```
@@ -121,6 +121,11 @@ ones that cannot start are counted as `iterations.dropped`.
 
 From the command line, `--vus 100` or `--rate 200` with `--duration 1m`
 replace a scenario's own settings.
+
+VUs that are no longer needed, during a ramp down or at the end of the run,
+are stopped at once. `graceful_stop: [second: 30]` lets them finish their
+current iteration first, so the last iterations are recorded instead of cut
+off.
 
 ## Checks and thresholds
 
@@ -224,12 +229,44 @@ signs a test user in and redirects to the page under test is enough to load
 test pages behind a login. A run records `live.page`, `live.join`,
 `live.event`, `live.patch` and `live.navigate`.
 
+## Plain WebSockets
+
+`Stampede.WebSocket` is for servers that don't use Phoenix Channels, such as
+a `WebSock` handler or a GraphQL subscription endpoint:
+
+```elixir
+{:ok, ws} = Stampede.WebSocket.connect("ws://localhost:4000/ws")
+:ok = Stampede.WebSocket.send(ws, JSON.encode!(%{subscribe: "prices"}))
+{:ok, {:text, text}} = Stampede.WebSocket.await(ws, match: &match?({:text, "{\"price\"" <> _}, &1))
+```
+
+It answers pings, and keeps the frames the server sends until `await/2`
+reads them, even after the server closed the connection. It records
+`ws.connect`, `ws.disconnects`, `ws.messages` and `ws.messages.sent`.
+
 ## Results
 
 `Stampede.run/2` returns a `Stampede.Result`, with every metric's summary and
 a timeline of what happened during each second of the run, to see when
 latency went up during a ramp. `--out results.json` writes it all as JSON,
 and so does `Stampede.Reporter.to_json/1`.
+
+`--html report.html` writes a page with a chart of the VUs, the iterations
+per second and the percentiles of every timing over the run, along with the
+summary. It is a single file with nothing to load, so CI can keep it as an
+artifact.
+
+To catch regressions, compare two runs:
+
+```console
+$ mix stampede.run loadtest/api.exs --out main.json
+$ git switch my-branch
+$ mix stampede.run loadtest/api.exs --out branch.json
+$ mix stampede.compare main.json branch.json --max-regression 10
+```
+
+It prints how the p50, p95 and p99 of every timing changed, and exits with
+status 1 when one got more than 10% slower.
 
 Stampede also emits `:telemetry` events for every timing, counter and check,
 and for every second of a run, to send them to your own metrics system while
@@ -254,7 +291,7 @@ merged as if they ran on one. From code, pass `nodes: [node() | Node.list()]`.
 Load tests can also run from a script, without a Mix project:
 
 ```elixir
-Mix.install([{:stampede, "~> 0.2"}])
+Mix.install([{:stampede, "~> 0.3"}])
 
 defmodule Lobby do
   use Stampede.Scenario
@@ -276,7 +313,7 @@ System.halt(if result.passed?, do: 0, else: 1)
 
   * LiveView uploads
   * A live dashboard
-  * Plain WebSocket and TCP clients
+  * A TCP client
 
 ## License
 

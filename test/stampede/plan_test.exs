@@ -51,7 +51,7 @@ defmodule Stampede.PlanTest do
 
       assert Plan.started_by(plan, 1_000) == 5
       assert Plan.started_by(plan, 2_000) == 15
-      assert Plan.started_by(plan, 2_500) == 18
+      assert Plan.started_by(plan, 2_500) == 19
       assert Plan.started_by(plan, 3_000) == 20
       assert Plan.target_at(plan, 500) == 5
     end

@@ -121,4 +121,58 @@ defmodule Stampede.ReporterTest do
              "errors" => [%{"message" => "** (RuntimeError) boom", "count" => 1}]
            }
   end
+
+  @join %{
+    type: :timing,
+    count: 2,
+    rate: 2.0,
+    min: 1.0,
+    mean: 1.5,
+    p50: 1.0,
+    p90: 2.0,
+    p95: 2.0,
+    p99: 2.0,
+    max: 2.0
+  }
+
+  test "to_html/1 renders charts and tables in one page" do
+    result = %Result{
+      scenario: MyApp.Load.Lobby,
+      duration: 2_000,
+      metrics: %{"channel.join" => @join, ~s(<b> & "quoted") => @check},
+      timeline: [
+        %{at: 1_000, vus: 2, metrics: %{}},
+        %{at: 2_000, vus: 4, metrics: %{"channel.join" => @join}}
+      ],
+      thresholds: [%{metric: "channel.join", stat: :p95, limit: 1, value: 2.0, passed?: false}],
+      errors: [%{message: "** (RuntimeError) <script>", count: 3}],
+      passed?: false
+    }
+
+    html = Reporter.to_html(result)
+
+    assert html =~ ~r/\A<!doctype html>/
+    assert html =~ "<h2>MyApp.Load.Lobby</h2>"
+    assert html =~ ~s(<span class="status failed">Failed</span>)
+    assert length(String.split(html, ~s(<figure class="chart"))) == 4
+    assert html =~ ~s(<circle class="dot s1")
+    assert html =~ "&lt;b&gt; &amp; &quot;quoted&quot;"
+    assert html =~ "** (RuntimeError) &lt;script&gt;"
+    refute html =~ "<b> &"
+    assert length(String.split(html, "<script")) == 2
+  end
+
+  test "to_html/1 renders several results, with or without a timeline" do
+    results = [
+      %Result{scenario: MyApp.Load.Lobby, duration: 0},
+      %Result{scenario: MyApp.Load.Checkout, duration: 0}
+    ]
+
+    html = Reporter.to_html(results)
+
+    assert html =~ "<h2>MyApp.Load.Lobby</h2>"
+    assert html =~ "<h2>MyApp.Load.Checkout</h2>"
+    refute html =~ ~s(<figure)
+    refute html =~ ~s(<span class="status)
+  end
 end

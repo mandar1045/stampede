@@ -1,7 +1,7 @@
 defmodule Stampede.MixProject do
   use Mix.Project
 
-  @version "0.2.0"
+  @version "0.3.0"
   @source_url "https://github.com/mandar1045/stampede"
 
   def project do
@@ -53,7 +53,7 @@ defmodule Stampede.MixProject do
       source_ref: "v#{@version}",
       extras: ["README.md", "CHANGELOG.md"],
       groups_for_modules: [
-        Clients: [Stampede.HTTP, Stampede.Channels, Stampede.LiveView],
+        Clients: [Stampede.HTTP, Stampede.Channels, Stampede.LiveView, Stampede.WebSocket],
         Results: [Stampede.Result, Stampede.Reporter]
       ]
     ]

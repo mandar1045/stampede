@@ -45,6 +45,7 @@ defmodule Stampede do
     * the request metrics listed in `Stampede.HTTP`
     * the connection and channel metrics listed in `Stampede.Channels`
     * the page, join and event metrics listed in `Stampede.LiveView`
+    * the connection and message metrics listed in `Stampede.WebSocket`
 
   Record your own with `measure/2`, `record/3`, `increment/2` and `check/2`.
   Timings, counters and checks share one set of names.
@@ -107,6 +108,12 @@ defmodule Stampede do
       once. VUs are started as needed and reused once they finish an
       iteration. When all of them are busy, iterations are dropped and counted
       as `"iterations.dropped"`. Defaults to `1_000`.
+
+    * `:graceful_stop` - how long a VU that is no longer needed, because
+      of a ramp down or the end of the run, may take to finish its current
+      iteration. Iterations that finish in time are recorded, while the rest
+      are stopped. Defaults to `0`, stopping them at once, so a VU that loops
+      forever does not hold up the run.
 
     * `:thresholds` - a list of `{metric, limits}` tuples, such as
       `{"channel.join", p95: 250, max: 1_000}`. Each limit is the highest

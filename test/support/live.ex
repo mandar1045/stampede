@@ -35,6 +35,7 @@ defmodule Stampede.TestRouter do
     get "/port", Stampede.TestApiController, :port
     get "/fail", Stampede.TestApiController, :fail
     get "/close", Stampede.TestApiController, :close
+    get "/echo-socket", Stampede.TestApiController, :echo_socket
   end
 
   defp put_visitor(conn, _opts) do
@@ -86,6 +87,35 @@ defmodule Stampede.TestApiController do
     |> Plug.Conn.put_resp_header("connection", "close")
     |> text("bye")
   end
+
+  def echo_socket(conn, _params) do
+    conn
+    |> WebSockAdapter.upgrade(Stampede.TestEchoSocket, nil, [])
+    |> halt()
+  end
+end
+
+# Echoes every frame, after a welcome, and closes when asked to.
+defmodule Stampede.TestEchoSocket do
+  @behaviour WebSock
+
+  @impl true
+  def init(state), do: {:push, {:text, "welcome"}, state}
+
+  @impl true
+  def handle_in({"close", [opcode: :text]}, state) do
+    {:stop, :normal, {1000, "bye"}, [{:text, "closing"}], state}
+  end
+
+  def handle_in({"ping me", [opcode: :text]}, state), do: {:push, {:ping, "hi"}, state}
+  def handle_in({data, [opcode: opcode]}, state), do: {:push, {opcode, data}, state}
+
+  @impl true
+  def handle_control({data, [opcode: :pong]}, state), do: {:push, {:text, "pong " <> data}, state}
+  def handle_control(_frame, state), do: {:ok, state}
+
+  @impl true
+  def handle_info(_message, state), do: {:ok, state}
 end
 
 defmodule Stampede.TestWidget do

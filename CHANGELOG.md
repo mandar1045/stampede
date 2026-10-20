@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.3.0 (2026-10-20)
+
+  * `:graceful_stop`, to let VUs finish their iteration during a ramp down
+    and at the end of the run
+  * HTML reports with charts, from `Stampede.Reporter.to_html/1` and
+    `mix stampede.run --html`
+  * `mix stampede.compare`, to compare the timings of two runs and fail on
+    regressions with `--max-regression`
+  * `Stampede.WebSocket`, a client for plain WebSockets
+
+### Changes
+
+  * A `:rate` run starts its first iteration right away, so it starts
+    exactly `rate * duration` iterations instead of one less.
+  * The timeline ends with a point for the end of the plan, and one more for
+    the time VUs took to stop when `:graceful_stop` is set.
+
+### Fixes
+
+  * Frames a server sends in the same packet as the upgrade response are no
+    longer dropped.
+
 ## v0.2.0 (2026-10-20)
 
   * Start iterations at a rate with `:rate`, `:rate_stages` and `:max_vus`,

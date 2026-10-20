@@ -1,6 +1,6 @@
 defmodule Stampede.Reporter do
   @moduledoc """
-  Formats a `Stampede.Result` for the terminal, or as JSON.
+  Formats a `Stampede.Result` for the terminal, as JSON or as an HTML page.
   """
 
   alias Stampede.Result
@@ -37,6 +37,17 @@ defmodule Stampede.Reporter do
     |> Map.update!(:scenario, &inspect/1)
     |> JSON.encode!()
   end
+
+  @doc """
+  Returns `results` as an HTML page, with charts of their timelines, along
+  with the tables of `format/1`.
+
+  The page is a single file that needs nothing else to open, so it can be
+  kept as a CI artifact or shared as is.
+  """
+  @spec to_html(Result.t() | [Result.t()]) :: String.t()
+  def to_html(%Result{} = result), do: to_html([result])
+  def to_html(results) when is_list(results), do: Stampede.Reporter.HTML.render(results)
 
   defp metrics([], []), do: "\n  no metrics were recorded\n"
   defp metrics([], _checks), do: []
@@ -94,12 +105,15 @@ defmodule Stampede.Reporter do
   defp actual(%{value: nil}), do: "no samples"
   defp actual(%{stat: stat, value: value}), do: stat(stat, value)
 
-  defp stat(stat, value) when stat in [:count, :failed], do: to_string(value)
-  defp stat(:failed_rate, value), do: decimal(value)
-  defp stat(:rate, value), do: decimal(value) <> "/s"
-  defp stat(_timing, value), do: milliseconds(value)
+  # Shared with the HTML report and mix stampede.compare.
+  @doc false
+  def stat(stat, value) when stat in [:count, :failed], do: to_string(value)
+  def stat(:failed_rate, value), do: decimal(value)
+  def stat(:rate, value), do: decimal(value) <> "/s"
+  def stat(_timing, value), do: milliseconds(value)
 
-  defp table(rows) do
+  @doc false
+  def table(rows) do
     widths =
       for row <- rows, {cell, index} <- Enum.with_index(row), reduce: %{} do
         widths -> Map.update(widths, index, String.length(cell), &max(&1, String.length(cell)))
@@ -117,11 +131,14 @@ defmodule Stampede.Reporter do
     end
   end
 
-  defp milliseconds(value) when value < 1, do: "#{round(value * 1000)}µs"
-  defp milliseconds(value) when value < 1000, do: decimal(value) <> "ms"
-  defp milliseconds(value), do: decimal(value / 1000) <> "s"
+  @doc false
+  def milliseconds(value) when value < 1, do: "#{round(value * 1000)}µs"
+  def milliseconds(value) when value < 1000, do: decimal(value) <> "ms"
+  def milliseconds(value), do: decimal(value / 1000) <> "s"
 
-  defp seconds(milliseconds), do: :erlang.float_to_binary(milliseconds / 1000, decimals: 1) <> "s"
+  @doc false
+  def seconds(milliseconds), do: :erlang.float_to_binary(milliseconds / 1000, decimals: 1) <> "s"
 
-  defp decimal(number), do: :erlang.float_to_binary(number / 1, decimals: 2)
+  @doc false
+  def decimal(number), do: :erlang.float_to_binary(number / 1, decimals: 2)
 end

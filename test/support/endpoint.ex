@@ -18,6 +18,11 @@ defmodule Stampede.TestEndpoint do
     "ws://127.0.0.1:#{port}/socket"
   end
 
+  def echo_url do
+    {:ok, {_ip, port}} = server_info(:http)
+    "ws://127.0.0.1:#{port}/api/echo-socket"
+  end
+
   def page_url(path) do
     {:ok, {_ip, port}} = server_info(:http)
     "http://127.0.0.1:#{port}#{path}"

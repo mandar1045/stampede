@@ -46,8 +46,10 @@ defmodule Stampede.Plan do
 
   # How many iterations a rate plan has started by `elapsed` milliseconds: the
   # area under its rate, which is exact since every stage is a straight line.
+  # Rounding up starts the first iteration right away, so a constant rate
+  # starts exactly `rate * duration` iterations.
   def started_by(%__MODULE__{mode: :rate, stages: stages}, elapsed) do
-    floor(area(stages, elapsed, 0, 0.0))
+    ceil(area(stages, elapsed, 0, 0.0))
   end
 
   defp area([{duration, target} | stages], elapsed, from, acc) when elapsed >= duration do
@@ -105,11 +107,11 @@ defmodule Stampede.Plan do
     raise ArgumentError, "expected :max_vus to be a positive integer, got: #{inspect(other)}"
   end
 
-  defp milliseconds!(:infinity) do
-    raise ArgumentError, "expected stage durations to be finite, got: :infinity"
+  def milliseconds!(:infinity) do
+    raise ArgumentError, "expected durations to be finite, got: :infinity"
   end
 
-  defp milliseconds!(duration) do
+  def milliseconds!(duration) do
     to_timeout(duration)
   rescue
     _error in [ArgumentError, FunctionClauseError] ->

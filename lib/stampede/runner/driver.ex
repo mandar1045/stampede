@@ -5,10 +5,11 @@ defmodule Stampede.Runner.Driver do
   # sends them all :go at once. Every second, a driver sends the controller
   # how its metrics changed, and once the plan is over, all of its rows.
 
-  alias Stampede.{Channels, Metrics, Plan, VU}
+  alias Stampede.{Channels, Metrics, Plan, VU, WebSocket}
 
   @vus_tick 100
   @rate_tick 10
+  @finish_tick 10
   @interval 1_000
   @error_pause 100
 
@@ -35,6 +36,7 @@ defmodule Stampede.Runner.Driver do
         metrics: metrics,
         vus: %{},
         idle: [],
+        stopping: %{},
         next_seq: 0,
         started: 0,
         interval: 0,
@@ -44,11 +46,12 @@ defmodule Stampede.Runner.Driver do
       })
 
     state = loop(state, Plan.duration(state.plan))
-    elapsed = now() - state.started_at
-    state = report(state, elapsed)
+    state = report(state, now() - state.started_at)
+    state = state |> stop_vus(Map.keys(state.vus)) |> finish()
     stop(state)
 
-    send(state.controller, {:done, self(), %{duration: elapsed, rows: Metrics.rows(metrics)}})
+    final = %{duration: state.reported_at, rows: Metrics.rows(metrics)}
+    send(state.controller, {:done, self(), final})
     :ets.delete(metrics)
   end
 
@@ -60,11 +63,27 @@ defmodule Stampede.Runner.Driver do
 
       state
       |> advance(elapsed)
+      |> expire()
       |> maybe_report(elapsed)
       |> wait(now() + min(tick, total - elapsed))
       |> loop(total)
     else
       state
+    end
+  end
+
+  # After the plan, VUs still finishing an iteration get until their deadline,
+  # and the time they take is reported as one more interval.
+  defp finish(state) when map_size(state.stopping) == 0, do: state
+
+  defp finish(state) do
+    state = state |> wait(now() + @finish_tick) |> expire()
+    elapsed = now() - state.started_at
+
+    if map_size(state.stopping) == 0 do
+      report(state, elapsed)
+    else
+      state |> maybe_report(elapsed) |> finish()
     end
   end
 
@@ -118,9 +137,25 @@ defmodule Stampede.Runner.Driver do
     %{state | vus: Map.put(state.vus, pid, vu.id), next_seq: state.next_seq + 1}
   end
 
-  defp stop_vus(state, pids) do
+  # VUs that are no longer needed stop at once, or, with a graceful stop, once
+  # their current iteration is over. Either way they stop counting as running.
+  defp stop_vus(%{graceful_stop: 0} = state, pids) do
     Enum.each(pids, &Process.exit(&1, :shutdown))
     %{state | vus: Map.drop(state.vus, pids), idle: state.idle -- pids}
+  end
+
+  defp stop_vus(state, pids) do
+    deadline = now() + state.graceful_stop
+    Enum.each(pids, &send(&1, :finish))
+    stopping = Map.merge(state.stopping, Map.new(pids, &{&1, deadline}))
+    %{state | vus: Map.drop(state.vus, pids), idle: state.idle -- pids, stopping: stopping}
+  end
+
+  defp expire(state) do
+    now = now()
+    {late, stopping} = Map.split_with(state.stopping, fn {_pid, deadline} -> deadline <= now end)
+    Enum.each(late, fn {pid, _deadline} -> Process.exit(pid, :shutdown) end)
+    %{state | stopping: stopping}
   end
 
   defp wait(state, deadline) do
@@ -155,16 +190,19 @@ defmodule Stampede.Runner.Driver do
   end
 
   defp exited(state, pid, reason) do
-    case Map.pop(state.vus, pid) do
-      {nil, _vus} ->
-        state
-
-      {_id, vus} ->
+    cond do
+      Map.has_key?(state.vus, pid) ->
         if reason not in [:normal, :shutdown] do
           Metrics.increment(state.metrics, "vu.crashes")
         end
 
-        %{state | vus: vus, idle: List.delete(state.idle, pid)}
+        %{state | vus: Map.delete(state.vus, pid), idle: List.delete(state.idle, pid)}
+
+      Map.has_key?(state.stopping, pid) ->
+        %{state | stopping: Map.delete(state.stopping, pid)}
+
+      true ->
+        state
     end
   end
 
@@ -178,7 +216,7 @@ defmodule Stampede.Runner.Driver do
     interval = %{
       index: state.interval,
       at: elapsed,
-      vus: map_size(state.vus) - length(state.idle),
+      vus: map_size(state.vus) - length(state.idle) + map_size(state.stopping),
       delta: Metrics.delta(snapshot, state.snapshot)
     }
 
@@ -187,8 +225,9 @@ defmodule Stampede.Runner.Driver do
   end
 
   defp stop(state) do
-    state.vus |> Map.keys() |> Enum.each(&Process.exit(&1, :shutdown))
-    await_exits(state.vus)
+    vus = Map.merge(state.vus, state.stopping)
+    vus |> Map.keys() |> Enum.each(&Process.exit(&1, :shutdown))
+    await_exits(vus)
   end
 
   defp await_exits(vus) when map_size(vus) == 0, do: :ok
@@ -208,10 +247,15 @@ defmodule Stampede.Runner.Driver do
     end
   end
 
-  # A VU of a :vus plan iterates for as long as it runs.
+  # A VU of a :vus plan iterates until the driver asks it to finish.
   defp closed_loop(scenario, vu, metrics) do
     if iterate(scenario, vu, metrics) == :error, do: Process.sleep(@error_pause)
-    closed_loop(scenario, %{vu | iteration: vu.iteration + 1}, metrics)
+
+    receive do
+      :finish -> :ok
+    after
+      0 -> closed_loop(scenario, %{vu | iteration: vu.iteration + 1}, metrics)
+    end
   end
 
   # A VU of a :rate plan iterates when the driver says so, and keeps its
@@ -222,6 +266,7 @@ defmodule Stampede.Runner.Driver do
 
     receive do
       :iterate -> open_loop(driver, scenario, %{vu | iteration: vu.iteration + 1}, metrics)
+      :finish -> :ok
     end
   end
 
@@ -247,6 +292,7 @@ defmodule Stampede.Runner.Driver do
     kind, reason -> {kind, reason, __STACKTRACE__}
   after
     Channels.close_all()
+    WebSocket.close_all()
   end
 
   defp now, do: System.monotonic_time(:millisecond)

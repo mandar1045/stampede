@@ -3,6 +3,30 @@
 # last a second, since the first connections of a test run are slow while
 # the server's modules load.
 
+defmodule Stampede.Test.Lingering do
+  use Stampede.Scenario
+
+  @impl true
+  def run(_vu) do
+    Stampede.increment("started")
+    Process.sleep(300)
+    Stampede.increment("finished")
+  end
+end
+
+defmodule Stampede.Test.Echoing do
+  use Stampede.Scenario
+
+  @impl true
+  def run(_vu) do
+    {:ok, ws} = Stampede.WebSocket.connect(Stampede.TestEndpoint.echo_url())
+    {:ok, {:text, "welcome"}} = Stampede.WebSocket.await(ws)
+    :ok = Stampede.WebSocket.send(ws, "hello")
+    {:ok, {:text, "hello"}} = Stampede.WebSocket.await(ws)
+    Process.sleep(10)
+  end
+end
+
 defmodule Stampede.Test.Lobby do
   use Stampede.Scenario
 
