@@ -196,4 +196,71 @@ defmodule Stampede.ChannelsTest do
     refute Process.alive?(socket)
     assert {:error, :closed} = Channels.join(socket, "room:lobby")
   end
+
+  describe "binary payloads" do
+    setup :join_lobby
+
+    test "are pushed and replied to", %{socket: socket} do
+      assert {:ok, {:binary, <<1, 2, 3>>}} =
+               Channels.push(socket, "room:lobby", "bytes", {:binary, <<1, 2, 3>>})
+    end
+
+    test "are received from pushes and broadcasts", %{socket: socket} do
+      :ok = Channels.cast(socket, "room:lobby", "push_bytes", %{data: "pushed"})
+      assert {:ok, {:binary, "pushed"}} = Channels.await(socket, "room:lobby", "bytes")
+
+      :ok = Channels.cast(socket, "room:lobby", "shout_bytes", %{data: "shouted"})
+      assert {:ok, {:binary, "shouted"}} = Channels.await(socket, "room:lobby", "bytes")
+    end
+
+    test "raise with the 1.0.0 serializer, leaving the socket open", %{url: url} do
+      {:ok, socket} = Channels.connect(url, vsn: "1.0.0")
+      {:ok, _reply} = Channels.join(socket, "room:lobby")
+
+      assert_raise ArgumentError, ~r/binary payloads need the 2.0.0 serializer/, fn ->
+        Channels.push(socket, "room:lobby", "bytes", {:binary, <<1>>})
+      end
+
+      assert {:ok, _reply} = Channels.push(socket, "room:lobby", "ping")
+    end
+  end
+
+  test "raises where a payload that cannot be encoded was pushed", context do
+    %{socket: socket} = join_lobby(context)
+
+    assert_raise Protocol.UndefinedError, fn ->
+      Channels.push(socket, "room:lobby", "ping", %{tuple: {1, 2}})
+    end
+
+    assert_raise Protocol.UndefinedError, fn ->
+      Channels.cast(socket, "room:lobby", "ping", %{tuple: {1, 2}})
+    end
+
+    assert {:ok, _reply} = Channels.push(socket, "room:lobby", "ping")
+  end
+
+  defmodule Renaming do
+    @behaviour Stampede.Channels.Serializer
+
+    alias Stampede.Channels.Serializer.V2
+
+    @impl true
+    def encode(message), do: V2.encode(message)
+
+    @impl true
+    def decode(frame) do
+      case V2.decode(frame) do
+        {:ok, %{event: "shout"} = message} -> {:ok, %{message | event: "renamed"}}
+        other -> other
+      end
+    end
+  end
+
+  test "uses the :serializer it is given", %{url: url} do
+    {:ok, socket} = Channels.connect(url, serializer: Renaming)
+    {:ok, _reply} = Channels.join(socket, "room:lobby")
+
+    :ok = Channels.cast(socket, "room:lobby", "shout", %{"body" => "hi"})
+    assert {:ok, %{"body" => "hi"}} = Channels.await(socket, "room:lobby", "renamed")
+  end
 end

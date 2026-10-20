@@ -54,6 +54,12 @@ defmodule Stampede.MixProject do
       extras: ["README.md", "CHANGELOG.md"],
       groups_for_modules: [
         Clients: [Stampede.HTTP, Stampede.Channels, Stampede.LiveView, Stampede.WebSocket],
+        "Channels protocol": [
+          Stampede.Channels.Serializer,
+          Stampede.Channels.Serializer.V2,
+          Stampede.Channels.Serializer.V1,
+          Stampede.Channels.Message
+        ],
         Results: [Stampede.Result, Stampede.Reporter]
       ]
     ]

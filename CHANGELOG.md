@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+  * Binary payloads in `Stampede.Channels`, sent and received as
+    `{:binary, data}` with the `"2.0.0"` serializer, as in Phoenix
+  * `Stampede.Channels.Serializer`, with a `:serializer` option in
+    `Stampede.Channels.connect/2` for servers that extend the protocol
+
+### Fixes
+
+  * A payload that cannot be encoded raises in the caller of `push/5` or
+    `cast/4`, instead of crashing the socket.
+
 ## v1.0.0 (2026-10-20)
 
 First release.

@@ -189,6 +189,9 @@ p99 of 1.56ms.
   * `await/4` for pushes and broadcasts from the server, with an optional
     `:match` function to pick one out of many
   * heartbeats, sent every 30 seconds by default
+  * binary payloads, as `{:binary, data}`, with the `"2.0.0"` serializer
+  * a `:serializer` option for servers that extend the protocol, such as
+    Supabase Realtime with its binary broadcasts
 
 It records `ws.connect`, `ws.disconnects`, `channel.join`, `channel.push`,
 `channel.leave` and `channel.messages`, plus an `.errors` counter for each

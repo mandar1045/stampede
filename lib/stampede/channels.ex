@@ -25,12 +25,24 @@ defmodule Stampede.Channels do
       already held 1,000 unread ones
 
   Error replies, timeouts and closed connections all count as errors.
+
+  ## Binary payloads
+
+  With the default `"2.0.0"` serializer, a payload can be `{:binary, data}`
+  instead of a map, and pushes, replies and broadcasts with binary payloads
+  from the server come back the same way, as with Phoenix itself:
+
+      {:ok, {:binary, chunk}} = Stampede.Channels.push(socket, "file:1", "read", {:binary, <<0, 64>>})
+
+  Servers that extend the protocol, such as Supabase Realtime with its binary
+  broadcasts, can be given their own `Stampede.Channels.Serializer`.
   """
 
-  alias Stampede.Channels.Socket
+  alias Stampede.Channels.{Serializer, Socket}
   alias Stampede.Metrics
 
   @type socket :: pid()
+  @type payload :: map() | {:binary, binary()}
 
   @sockets_key {__MODULE__, :sockets}
   @versions ["1.0.0", "2.0.0"]
@@ -49,6 +61,9 @@ defmodule Stampede.Channels do
     * `:headers` - extra headers for the upgrade request
     * `:vsn` - the serializer version, `"2.0.0"` (the default) or `"1.0.0"`.
       A `vsn` query parameter in `url` takes precedence.
+    * `:serializer` - a module that implements `Stampede.Channels.Serializer`,
+      to use instead of the built-in one for `:vsn`, for servers that extend
+      the protocol
     * `:connect_timeout` - how long to wait for the connection, in
       milliseconds. Defaults to `10_000`.
     * `:heartbeat_interval` - how often to send a heartbeat, in milliseconds,
@@ -70,14 +85,16 @@ defmodule Stampede.Channels do
         params: %{},
         headers: [],
         vsn: "2.0.0",
+        serializer: nil,
         connect_timeout: 10_000,
         heartbeat_interval: 30_000,
         transport_opts: []
       )
 
     {uri, path, vsn} = request(url, opts)
+    serializer = opts[:serializer] || if(vsn == "1.0.0", do: Serializer.V1, else: Serializer.V2)
 
-    with {:ok, socket} <- Socket.start_link(uri, path, vsn, opts) do
+    with {:ok, socket} <- Socket.start_link(uri, path, serializer, opts) do
       track(socket)
       {:ok, socket}
     end
@@ -114,7 +131,7 @@ defmodule Stampede.Channels do
   Takes the same options as `join/4`, with `:metric` defaulting to
   `"channel.push"`.
   """
-  @spec push(socket(), String.t(), String.t(), map(), keyword()) ::
+  @spec push(socket(), String.t(), String.t(), payload(), keyword()) ::
           {:ok, term()} | {:error, term()}
   def push(socket, topic, event, payload \\ %{}, opts \\ [])
       when is_binary(topic) and is_binary(event) do
@@ -125,9 +142,10 @@ defmodule Stampede.Channels do
   @doc """
   Pushes `event` with `payload` to `topic` without waiting for a reply.
   """
-  @spec cast(socket(), String.t(), String.t(), map()) :: :ok
+  @spec cast(socket(), String.t(), String.t(), payload()) :: :ok
   def cast(socket, topic, event, payload \\ %{}) when is_binary(topic) and is_binary(event) do
-    GenServer.cast(socket, {:cast, topic, event, payload})
+    Socket.request(socket, {:cast, topic, event, payload})
+    :ok
   end
 
   @doc """

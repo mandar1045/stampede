@@ -59,4 +59,16 @@ defmodule Stampede.TestChannel do
     broadcast!(socket, "shout", payload)
     {:noreply, socket}
   end
+
+  def handle_in("bytes", {:binary, data}, socket), do: {:reply, {:ok, {:binary, data}}, socket}
+
+  def handle_in("push_bytes", %{"data" => data}, socket) do
+    push(socket, "bytes", {:binary, data})
+    {:noreply, socket}
+  end
+
+  def handle_in("shout_bytes", %{"data" => data}, socket) do
+    broadcast!(socket, "bytes", {:binary, data})
+    {:noreply, socket}
+  end
 end

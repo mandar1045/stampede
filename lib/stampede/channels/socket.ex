@@ -3,7 +3,7 @@ defmodule Stampede.Channels.Socket do
 
   use GenServer
 
-  alias Stampede.Channels.{Message, Serializer}
+  alias Stampede.Channels.Message
   alias Stampede.Metrics
   alias Stampede.WebSocket.Connection
 
@@ -13,7 +13,7 @@ defmodule Stampede.Channels.Socket do
     :conn,
     :ref,
     :websocket,
-    :vsn,
+    :serializer,
     :metrics,
     :heartbeat_interval,
     :heartbeat_ref,
@@ -25,18 +25,21 @@ defmodule Stampede.Channels.Socket do
     inbox_size: 0
   ]
 
-  def start_link(uri, path, vsn, opts) do
-    GenServer.start_link(__MODULE__, {uri, path, vsn, opts, Metrics.current()})
+  def start_link(uri, path, serializer, opts) do
+    GenServer.start_link(__MODULE__, {uri, path, serializer, opts, Metrics.current()})
   end
 
   def request(socket, request) do
-    GenServer.call(socket, request, :infinity)
+    case GenServer.call(socket, request, :infinity) do
+      {:raise, exception} -> raise exception
+      reply -> reply
+    end
   catch
     :exit, _reason -> {:error, :closed}
   end
 
   @impl true
-  def init({uri, path, vsn, opts, metrics}) do
+  def init({uri, path, serializer, opts, metrics}) do
     started_at = System.monotonic_time()
 
     case Connection.connect(uri, path, opts) do
@@ -47,7 +50,7 @@ defmodule Stampede.Channels.Socket do
           conn: conn,
           ref: ref,
           websocket: websocket,
-          vsn: vsn,
+          serializer: serializer,
           metrics: metrics,
           heartbeat_interval: opts[:heartbeat_interval]
         }
@@ -115,8 +118,7 @@ defmodule Stampede.Channels.Socket do
     {:stop, :normal, :ok, state}
   end
 
-  @impl true
-  def handle_cast({:cast, topic, event, payload}, state) do
+  def handle_call({:cast, topic, event, payload}, from, state) do
     {ref, state} = next_ref(state)
 
     message = %Message{
@@ -128,8 +130,15 @@ defmodule Stampede.Channels.Socket do
     }
 
     case send_message(state, message) do
-      {:ok, state} -> {:noreply, state}
-      {:error, state, reason} -> disconnect(state, reason)
+      {:ok, state} ->
+        {:reply, :ok, state}
+
+      {:error, state, reason} ->
+        GenServer.reply(from, :ok)
+        disconnect(state, reason)
+
+      {:raise, exception} ->
+        {:reply, {:raise, exception}, state}
     end
   end
 
@@ -164,6 +173,7 @@ defmodule Stampede.Channels.Socket do
     case send_message(state, message) do
       {:ok, state} -> {:noreply, schedule_heartbeat(%{state | heartbeat_ref: ref})}
       {:error, state, reason} -> disconnect(state, reason)
+      {:raise, exception} -> raise exception
     end
   end
 
@@ -187,8 +197,8 @@ defmodule Stampede.Channels.Socket do
     end
   end
 
-  defp handle_frames([{:text, text} | frames], state) do
-    case Serializer.decode(text, state.vsn) do
+  defp handle_frames([{type, _data} = frame | frames], state) when type in [:text, :binary] do
+    case state.serializer.decode(frame) do
       {:ok, message} -> handle_frames(frames, handle_message(message, state))
       :error -> handle_frames(frames, state)
     end
@@ -278,6 +288,9 @@ defmodule Stampede.Channels.Socket do
         count_error(state, opts[:metric])
         GenServer.reply(from, {:error, {:closed, reason}})
         disconnect(state, reason)
+
+      {:raise, exception} ->
+        {:reply, {:raise, exception}, state}
     end
   end
 
@@ -373,8 +386,19 @@ defmodule Stampede.Channels.Socket do
     {:stop, :normal, %{state | pending: %{}, waiters: []}}
   end
 
+  # A message that cannot be encoded fails the call that sent it, where the
+  # exception is raised again, rather than the socket.
   defp send_message(state, message) do
-    send_frame(state, {:text, Serializer.encode(message, state.vsn)})
+    case encode(state, message) do
+      {:ok, frame} -> send_frame(state, frame)
+      {:raise, exception} -> {:raise, exception}
+    end
+  end
+
+  defp encode(state, message) do
+    {:ok, state.serializer.encode(message)}
+  rescue
+    exception -> {:raise, exception}
   end
 
   defp send_frame(state, frame) do
