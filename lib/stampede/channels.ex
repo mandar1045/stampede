@@ -95,8 +95,8 @@ defmodule Stampede.Channels do
 
     * `:timeout` - how long to wait for the reply, in milliseconds. Defaults
       to `5_000`.
-    * `:metric` - the timing to record the join as. Defaults to
-      `"channel.join"`.
+    * `:metric` - the timing to record the join as, or `nil` to record
+      nothing. Defaults to `"channel.join"`.
   """
   @spec join(socket(), String.t(), map(), keyword()) :: {:ok, term()} | {:error, term()}
   def join(socket, topic, payload \\ %{}, opts \\ []) when is_binary(topic) do

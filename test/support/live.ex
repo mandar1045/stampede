@@ -16,11 +16,16 @@ defmodule Stampede.TestRouter do
     pipe_through :browser
 
     live "/counter", Stampede.TestCounterLive
+    live "/other", Stampede.TestOtherLive
     live "/redirecting", Stampede.TestRedirectLive
     get "/plain", Stampede.TestPageController, :plain
     get "/moved", Stampede.TestPageController, :moved
     get "/loop", Stampede.TestPageController, :loop
     get "/sign-in/:name", Stampede.TestPageController, :sign_in
+
+    live_session :elsewhere do
+      live "/elsewhere", Stampede.TestOtherLive
+    end
   end
 
   defp put_visitor(conn, _opts) do
@@ -86,12 +91,18 @@ defmodule Stampede.TestCounterLive do
   end
 
   @impl true
+  def handle_params(params, _url, socket), do: {:noreply, assign(socket, page: params["page"])}
+
+  @impl true
   def handle_event("inc", _params, socket), do: {:noreply, update(socket, :count, &(&1 + 1))}
   def handle_event("crash", _params, _socket), do: raise("boom")
+  def handle_event("go", _params, socket), do: {:noreply, push_navigate(socket, to: "/other")}
+  def handle_event("leave", _params, socket), do: {:noreply, redirect(socket, to: "/plain")}
 
   def handle_event("state", _params, socket) do
-    %{count: count, name: name, connect_session: session} = socket.assigns
-    {:reply, %{count: count, name: name, visitor: session && session["visitor"]}, socket}
+    %{count: count, name: name, page: page, connect_session: session} = socket.assigns
+    visitor = session && session["visitor"]
+    {:reply, %{count: count, name: name, page: page, visitor: visitor}, socket}
   end
 
   def handle_event("save", %{"user" => user}, socket) do
@@ -105,6 +116,19 @@ defmodule Stampede.TestCounterLive do
 
   @impl true
   def handle_info(:inc, socket), do: {:noreply, update(socket, :count, &(&1 + 1))}
+end
+
+defmodule Stampede.TestOtherLive do
+  use Phoenix.LiveView, log: false
+
+  @impl true
+  def mount(_params, _session, socket), do: {:ok, socket}
+
+  @impl true
+  def render(assigns), do: ~H"<p>other</p>"
+
+  @impl true
+  def handle_event("whoami", _params, socket), do: {:reply, %{view: "other"}, socket}
 end
 
 defmodule Stampede.TestRedirectLive do

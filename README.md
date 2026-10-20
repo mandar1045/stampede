@@ -168,6 +168,18 @@ event fails it with `{:error, :channel_crashed}` instead of a timeout.
 signs a test user in and redirects to the page under test is enough to load
 test pages behind a login.
 
+`patch/3` and `navigate/3` move between pages like `<.link patch>` and
+`<.link navigate>` do, over the same socket when LiveView allows it:
+
+```elixir
+{:ok, view} = Stampede.LiveView.patch(view, "/posts?page=2")
+{:ok, view} = Stampede.LiveView.navigate(view, "/posts/1")
+```
+
+When an event makes the LiveView navigate on its own, it returns
+`{:error, {:live_redirect, %{"to" => to}}}` as `Phoenix.LiveViewTest` does,
+and `navigate/3` follows it.
+
 With the server on the same laptop, 3,000 LiveView users that each load the
 page, join and click every 500ms ran with no errors, a join p95 of 117ms and
 an event p99 of 14ms.
@@ -197,7 +209,7 @@ System.halt(if result.passed?, do: 0, else: 1)
 
 ## Roadmap
 
-  * LiveView uploads and live navigation between pages
+  * LiveView uploads
   * Spreading the load over several machines with Erlang distribution
   * Telemetry events and a live dashboard
   * Plain WebSocket and TCP clients

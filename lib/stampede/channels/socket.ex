@@ -136,7 +136,7 @@ defmodule Stampede.Channels.Socket do
         {:noreply, state}
 
       {request, pending} ->
-        Metrics.increment(state.metrics, request.metric <> ".errors")
+        count_error(state, request.metric)
         GenServer.reply(request.from, {:error, :timeout})
         {:noreply, %{state | pending: pending}}
     end
@@ -280,26 +280,36 @@ defmodule Stampede.Channels.Socket do
   end
 
   # Phoenix does not reply to pushes that were in flight when a channel
-  # crashed or closed, so they fail now instead of waiting for their timeout.
-  # Both messages carry the join ref of the channel they are about as `ref`.
-  defp handle_message(%Message{event: event, topic: topic, ref: join_ref} = message, state)
+  # crashed or closed, so they end now instead of waiting for their timeout.
+  # A close also ends a leave, since LiveView sends it before the leave's
+  # reply. Both messages carry the join ref of their channel as `ref`.
+  defp handle_message(%Message{event: event, topic: topic, ref: join_ref}, state)
        when event in ["phx_error", "phx_close"] and is_binary(join_ref) do
-    reason = if event == "phx_error", do: :channel_crashed, else: :channel_closed
-
-    {failed, pending} =
+    {ended, pending} =
       Map.split_with(state.pending, fn {_ref, request} -> request.join_ref == join_ref end)
 
-    for {_ref, request} <- failed do
+    for {_ref, request} <- ended do
       cancel_timer(request.timer)
-      Metrics.increment(state.metrics, request.metric <> ".errors")
-      GenServer.reply(request.from, {:error, reason})
+
+      case {event, request.kind} do
+        {"phx_close", :leave} ->
+          record_time(state, request.metric, request.started_at)
+          GenServer.reply(request.from, {:ok, %{}})
+
+        {"phx_close", _kind} ->
+          count_error(state, request.metric)
+          GenServer.reply(request.from, {:error, :channel_closed})
+
+        {"phx_error", _kind} ->
+          count_error(state, request.metric)
+          GenServer.reply(request.from, {:error, :channel_crashed})
+      end
     end
 
     joins =
       if state.joins[topic] == join_ref, do: Map.delete(state.joins, topic), else: state.joins
 
-    Metrics.increment(state.metrics, "channel.messages")
-    deliver(message, %{state | pending: pending, joins: joins})
+    %{state | pending: pending, joins: joins}
   end
 
   defp handle_message(message, state) do
@@ -326,7 +336,7 @@ defmodule Stampede.Channels.Socket do
         {:noreply, %{state | pending: Map.put(state.pending, message.ref, request)}}
 
       {:error, state, reason} ->
-        Metrics.increment(state.metrics, opts[:metric] <> ".errors")
+        count_error(state, opts[:metric])
         GenServer.reply(from, {:error, {:closed, reason}})
         disconnect(state, reason)
     end
@@ -337,8 +347,8 @@ defmodule Stampede.Channels.Socket do
     result = reply_result(payload)
 
     case result do
-      {:ok, _response} -> Metrics.record_since(state.metrics, request.metric, request.started_at)
-      {:error, _response} -> Metrics.increment(state.metrics, request.metric <> ".errors")
+      {:ok, _response} -> record_time(state, request.metric, request.started_at)
+      {:error, _response} -> count_error(state, request.metric)
     end
 
     GenServer.reply(request.from, result)
@@ -400,7 +410,7 @@ defmodule Stampede.Channels.Socket do
     Metrics.increment(state.metrics, "ws.disconnects")
 
     for {_ref, request} <- state.pending do
-      Metrics.increment(state.metrics, request.metric <> ".errors")
+      count_error(state, request.metric)
       GenServer.reply(request.from, {:error, {:closed, reason}})
     end
 
@@ -441,6 +451,14 @@ defmodule Stampede.Channels.Socket do
     Process.send_after(self(), :heartbeat, state.heartbeat_interval)
     state
   end
+
+  defp record_time(_state, nil, _started_at), do: :ok
+
+  defp record_time(state, metric, started_at),
+    do: Metrics.record_since(state.metrics, metric, started_at)
+
+  defp count_error(_state, nil), do: :ok
+  defp count_error(state, metric), do: Metrics.increment(state.metrics, metric <> ".errors")
 
   defp start_timer(_message, :infinity), do: nil
   defp start_timer(message, timeout), do: Process.send_after(self(), message, timeout)

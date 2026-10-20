@@ -5,6 +5,7 @@ defmodule Stampede.LiveView do
       {:ok, view} = Stampede.LiveView.connect("http://localhost:4000/counter")
       {:ok, _reply} = Stampede.LiveView.click(view, "inc")
       {:ok, _reply} = Stampede.LiveView.submit(view, "save", %{"user" => %{"name" => "jo"}})
+      {:ok, view} = Stampede.LiveView.navigate(view, "/posts")
 
   `connect/2` does what a browser does. It fetches the page over HTTP, reads
   the CSRF token and the LiveView's signed session from it, opens the
@@ -12,7 +13,16 @@ defmodule Stampede.LiveView do
 
   The connection is a `Stampede.Channels` socket, available as `view.socket`,
   so it sends heartbeats and is closed at the end of an iteration like any
-  other.
+  other. `view.url` is the URL of the LiveView the view is on.
+
+  ## Navigation
+
+  `patch/3` and `navigate/3` move between pages like `<.link patch>` and
+  `<.link navigate>` do, without loading the page again when LiveView would
+  not. When an event makes the LiveView navigate on its own, it returns
+  `{:error, {:live_redirect, %{"to" => to}}}`, or `{:error, {:redirect,
+  %{"to" => to}}}` for a full redirect, as `Phoenix.LiveViewTest` does.
+  Follow either one with `navigate/3`.
 
   ## Metrics
 
@@ -21,14 +31,19 @@ defmodule Stampede.LiveView do
     * `"live.page"` and `"live.page.errors"` - fetching the page
     * `"live.join"` and `"live.join.errors"` - joining the LiveView
     * `"live.event"` and `"live.event.errors"` - events and their replies
+    * `"live.patch"` and `"live.patch.errors"` - patches
+    * `"live.navigate"` and `"live.navigate.errors"` - navigations over the
+      same socket. A navigation that needs a new page load records that
+      load instead.
 
   along with the connection metrics listed in `Stampede.Channels`.
   """
 
   alias Stampede.{Channels, HTTP, Metrics}
 
+  @derive {Inspect, only: [:socket, :topic, :url]}
   @enforce_keys [:socket, :topic, :url]
-  defstruct [:socket, :topic, :url]
+  defstruct [:socket, :topic, :url, :root, :params, :opts]
 
   @type t :: %__MODULE__{socket: Channels.socket(), topic: String.t(), url: String.t()}
 
@@ -72,13 +87,83 @@ defmodule Stampede.LiveView do
     with {:ok, page} <- fetch_page(url, opts),
          {:ok, root} <- root_view(page.body),
          params = connect_params(page.body),
+         opts = Keyword.put(opts, :headers, with_cookies(opts[:headers], page.cookies)),
          {:ok, socket} <-
            Channels.connect(socket_url(page.url, opts[:socket_path]),
              params: params,
-             headers: with_cookies(opts[:headers], page.cookies),
+             headers: opts[:headers],
              transport_opts: opts[:transport_opts]
            ) do
       join(socket, page.url, root, params, opts)
+    end
+  end
+
+  @doc """
+  Patches the LiveView to `to`, like `<.link patch={to}>` would.
+
+  `to` is a path, such as `"/posts?page=2"`, or a full URL. The LiveView's
+  `handle_params/3` runs, and `{:ok, view}` returns the view at its new URL.
+  When `to` belongs to another LiveView, it navigates there with
+  `navigate/3` instead, as a browser does.
+
+  Takes a `:timeout` option, in milliseconds, that defaults to `5_000`.
+  """
+  @spec patch(t(), String.t(), keyword()) :: {:ok, t()} | {:error, term()}
+  def patch(%__MODULE__{} = view, to, opts \\ []) when is_binary(to) do
+    opts = Keyword.validate!(opts, timeout: 5_000)
+    url = view.url |> URI.merge(to) |> URI.to_string()
+
+    case Channels.push(view.socket, view.topic, "live_patch", %{"url" => url},
+           timeout: opts[:timeout],
+           metric: "live.patch"
+         ) do
+      {:ok, %{"link_redirect" => true}} ->
+        navigate(view, url, opts)
+
+      result ->
+        with {:ok, _reply} <- event_result(result), do: {:ok, %{view | url: url}}
+    end
+  end
+
+  @doc """
+  Navigates to the LiveView at `to`, like `<.link navigate={to}>` would.
+
+  `to` is a path or a full URL. When the new LiveView is in the same
+  `live_session`, it joins over the same socket. Otherwise the page is
+  loaded again with `connect/2`, as a browser does. Returns `{:ok, view}`
+  for the new LiveView.
+
+  Takes a `:timeout` option, in milliseconds, that defaults to `5_000`.
+  """
+  @spec navigate(t(), String.t(), keyword()) :: {:ok, t()} | {:error, term()}
+  def navigate(%__MODULE__{} = view, to, opts \\ []) when is_binary(to) do
+    opts = Keyword.validate!(opts, timeout: 5_000)
+    url = view.url |> URI.merge(to) |> URI.to_string()
+    started_at = System.monotonic_time()
+    _ = Channels.leave(view.socket, view.topic, timeout: opts[:timeout])
+
+    payload = %{
+      "redirect" => url,
+      "params" => Map.merge(view.params, %{"_mounts" => 0, "_live_referer" => view.url}),
+      "session" => view.root.session,
+      "static" => view.root.static,
+      "sticky" => false
+    }
+
+    # The metric is recorded here, since a refused join is how LiveView asks
+    # for a page load and is not an error.
+    case Channels.join(view.socket, view.topic, payload, timeout: opts[:timeout], metric: nil) do
+      {:ok, _rendered} ->
+        Metrics.record_since(Metrics.current(), "live.navigate", started_at)
+        {:ok, %{view | url: url}}
+
+      {:error, %{"reason" => "unauthorized"}} ->
+        Channels.close(view.socket)
+        connect(url, view.opts)
+
+      {:error, reason} ->
+        Metrics.increment(Metrics.current(), "live.navigate.errors")
+        {:error, redirect_reason(reason)}
     end
   end
 
@@ -187,28 +272,59 @@ defmodule Stampede.LiveView do
 
     case Channels.join(socket, topic, payload, timeout: opts[:timeout], metric: "live.join") do
       {:ok, _rendered} ->
-        {:ok, %__MODULE__{socket: socket, topic: topic, url: url}}
+        {:ok,
+         %__MODULE__{
+           socket: socket,
+           topic: topic,
+           url: url,
+           root: root,
+           params: params,
+           opts: opts
+         }}
 
       {:error, reason} ->
         Channels.close(socket)
-        {:error, reason}
+        follow(url, redirect_reason(reason), opts)
     end
   end
+
+  # A LiveView that redirects while mounting is followed like an HTTP redirect.
+  defp follow(url, {kind, %{"to" => to}} = reason, opts)
+       when kind in [:live_redirect, :redirect] do
+    if opts[:max_redirects] > 0 do
+      url
+      |> URI.merge(to)
+      |> URI.to_string()
+      |> connect(Keyword.update!(opts, :max_redirects, &(&1 - 1)))
+    else
+      {:error, reason}
+    end
+  end
+
+  defp follow(_url, reason, _opts), do: {:error, reason}
 
   defp push(view, type, event, value, opts) when is_binary(event) do
     opts = Keyword.validate!(opts, target: nil, timeout: 5_000)
     payload = %{"type" => type, "event" => event, "value" => value}
     payload = if opts[:target], do: Map.put(payload, "cid", opts[:target]), else: payload
 
-    case Channels.push(view.socket, view.topic, "event", payload,
-           timeout: opts[:timeout],
-           metric: "live.event"
-         ) do
-      {:ok, %{"diff" => %{"r" => reply}}} -> {:ok, reply}
-      {:ok, _response} -> {:ok, nil}
-      {:error, reason} -> {:error, reason}
-    end
+    view.socket
+    |> Channels.push(view.topic, "event", payload, timeout: opts[:timeout], metric: "live.event")
+    |> event_result()
   end
+
+  defp event_result({:ok, %{"diff" => %{"r" => reply}}}), do: {:ok, reply}
+
+  defp event_result({:ok, %{"live_redirect" => _} = response}),
+    do: {:error, redirect_reason(response)}
+
+  defp event_result({:ok, %{"redirect" => _} = response}), do: {:error, redirect_reason(response)}
+  defp event_result({:ok, _response}), do: {:ok, nil}
+  defp event_result({:error, reason}), do: {:error, reason}
+
+  defp redirect_reason(%{"live_redirect" => opts}), do: {:live_redirect, opts}
+  defp redirect_reason(%{"redirect" => opts}), do: {:redirect, opts}
+  defp redirect_reason(reason), do: reason
 
   defp root_view(html) do
     with [tag] <- Regex.run(~r/<[a-z]+\s[^>]*\bdata-phx-main\b[^>]*>/, html),
