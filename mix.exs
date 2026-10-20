@@ -48,9 +48,13 @@ defmodule Stampede.MixProject do
 
   defp docs do
     [
-      main: "Stampede",
+      main: "readme",
       source_ref: "v#{@version}",
-      extras: ["README.md", "CHANGELOG.md"]
+      extras: ["README.md", "CHANGELOG.md"],
+      groups_for_modules: [
+        Clients: [Stampede.Channels, Stampede.LiveView],
+        Results: [Stampede.Result, Stampede.Reporter]
+      ]
     ]
   end
 end
