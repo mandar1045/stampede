@@ -1,0 +1,16 @@
+name: Feature request
+description: Something Stampede should do
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What you want to load test
+      description: The app or the situation, and what is missing or hard to do today.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: How it could work
+      description: The API or the option you have in mind, if any.

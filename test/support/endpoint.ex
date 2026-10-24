@@ -33,6 +33,7 @@ defmodule Stampede.TestSocket do
   use Phoenix.Socket, log: false
 
   channel "room:*", Stampede.TestChannel
+  channel "presence:*", Stampede.TestPresenceChannel
 
   @impl true
   def connect(%{"token" => "invalid"}, _socket, _connect_info), do: :error
@@ -69,6 +70,30 @@ defmodule Stampede.TestChannel do
 
   def handle_in("shout_bytes", %{"data" => data}, socket) do
     broadcast!(socket, "bytes", {:binary, data})
+    {:noreply, socket}
+  end
+end
+
+defmodule Stampede.TestPresence do
+  use Phoenix.Presence, otp_app: :stampede, pubsub_server: Stampede.TestPubSub
+end
+
+# Tracks everyone who joins, as in the Phoenix.Presence docs.
+defmodule Stampede.TestPresenceChannel do
+  use Phoenix.Channel, log_join: false, log_handle_in: false
+
+  alias Stampede.TestPresence
+
+  @impl true
+  def join("presence:" <> _room, %{"name" => name}, socket) do
+    send(self(), :after_join)
+    {:ok, assign(socket, :name, name)}
+  end
+
+  @impl true
+  def handle_info(:after_join, socket) do
+    {:ok, _ref} = TestPresence.track(socket, socket.assigns.name, %{})
+    push(socket, "presence_state", TestPresence.list(socket))
     {:noreply, socket}
   end
 end

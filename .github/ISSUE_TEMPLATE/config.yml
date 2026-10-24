@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/mandar1045/stampede/discussions
+    about: Ask how to load test something, or share what you built with Stampede.

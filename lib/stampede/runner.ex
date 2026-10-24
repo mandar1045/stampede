@@ -18,6 +18,23 @@ defmodule Stampede.Runner do
   ]
 
   def run(scenario, opts) when is_atom(scenario) and is_list(opts) do
+    scenario |> prepare_run(opts) |> execute(false)
+  end
+
+  # Every scenario is checked and set up before any of them starts, so they
+  # all start together.
+  def run_parallel([_ | _] = scenarios, opts) when is_list(opts) do
+    scenarios
+    |> Enum.map(&prepare_run(&1, opts))
+    |> Enum.map(fn run -> Task.async(fn -> execute(run, true) end) end)
+    |> Task.await_many(:infinity)
+  end
+
+  def run_parallel(other, _opts) do
+    raise ArgumentError, "expected a non-empty list of scenarios, got: #{inspect(other)}"
+  end
+
+  defp prepare_run(scenario, opts) when is_atom(scenario) and is_list(opts) do
     Code.ensure_loaded!(scenario)
 
     if not function_exported?(scenario, :run, 1) do
@@ -34,7 +51,22 @@ defmodule Stampede.Runner do
     thresholds = Thresholds.normalize(opts[:thresholds])
     nodes = nodes!(opts[:nodes])
     Enum.each(nodes, &prepare!(&1, scenario))
+    graceful_stop = Plan.milliseconds!(opts[:graceful_stop])
     data = if function_exported?(scenario, :setup, 1), do: scenario.setup(opts)
+
+    %{
+      scenario: scenario,
+      opts: opts,
+      plan: plan,
+      thresholds: thresholds,
+      nodes: nodes,
+      graceful_stop: graceful_stop,
+      data: data
+    }
+  end
+
+  defp execute(run, named?) do
+    %{scenario: scenario, opts: opts, thresholds: thresholds, nodes: nodes} = run
 
     metadata = %{scenario: scenario, options: opts}
     :telemetry.execute([:stampede, :run, :start], %{system_time: System.system_time()}, metadata)
@@ -43,9 +75,9 @@ defmodule Stampede.Runner do
     config = %{
       controller: self(),
       scenario: scenario,
-      data: data,
-      plan: plan,
-      graceful_stop: Plan.milliseconds!(opts[:graceful_stop]),
+      data: run.data,
+      plan: run.plan,
+      graceful_stop: run.graceful_stop,
       count: length(nodes)
     }
 
@@ -56,6 +88,7 @@ defmodule Stampede.Runner do
       collect(%{
         scenario: scenario,
         progress?: opts[:progress],
+        named?: named?,
         running: drivers,
         count: map_size(drivers),
         pending: %{},
@@ -220,8 +253,11 @@ defmodule Stampede.Runner do
     })
 
     if state.progress? do
+      name = if state.named?, do: "  #{inspect(state.scenario)}", else: ""
+
       IO.puts(
-        "#{seconds(entry.at)}  vus: #{entry.vus}  iterations: #{iterations}  errors: #{errors}"
+        "#{seconds(entry.at)}#{name}  vus: #{entry.vus}  iterations: #{iterations}  " <>
+          "errors: #{errors}"
       )
     end
 

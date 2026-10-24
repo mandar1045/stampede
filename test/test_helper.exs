@@ -1,6 +1,11 @@
 {:ok, _pid} =
   Supervisor.start_link(
-    [{Phoenix.PubSub, name: Stampede.TestPubSub}, Stampede.TestEndpoint, Stampede.TestTLS],
+    [
+      {Phoenix.PubSub, name: Stampede.TestPubSub},
+      Stampede.TestPresence,
+      Stampede.TestEndpoint,
+      Stampede.TestTLS
+    ],
     strategy: :one_for_one
   )
 

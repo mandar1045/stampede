@@ -18,6 +18,7 @@ defmodule Stampede.TestRouter do
     live "/counter", Stampede.TestCounterLive
     live "/other", Stampede.TestOtherLive
     live "/redirecting", Stampede.TestRedirectLive
+    live "/upload", Stampede.TestUploadLive
     get "/plain", Stampede.TestPageController, :plain
     get "/moved", Stampede.TestPageController, :moved
     get "/loop", Stampede.TestPageController, :loop
@@ -199,4 +200,74 @@ defmodule Stampede.TestRedirectLive do
 
   @impl true
   def render(assigns), do: ~H"<p>redirecting</p>"
+end
+
+defmodule Stampede.TestUploadLive do
+  use Phoenix.LiveView, log: false
+
+  @impl true
+  def mount(_params, _session, socket) do
+    {:ok,
+     socket
+     |> assign(form: to_form(%{"title" => ""}))
+     |> allow_upload(:avatar,
+       accept: ~w(.jpg .png),
+       max_entries: 2,
+       max_file_size: 50_000,
+       chunk_size: 1_000
+     )
+     |> allow_upload(:document, accept: :any, auto_upload: true)}
+  end
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <.form for={@form} phx-change="validate" phx-submit="save">
+      <input type="text" name="title" />
+      <.live_file_input upload={@uploads.avatar} />
+      <.live_file_input upload={@uploads.document} />
+    </.form>
+    <.live_component module={Stampede.TestUploadWidget} id="widget" />
+    """
+  end
+
+  @impl true
+  def handle_event("validate", _params, socket), do: {:noreply, socket}
+
+  def handle_event("save", params, socket) do
+    files = consume_uploaded_entries(socket, :avatar, &uploaded/2)
+    documents = consume_uploaded_entries(socket, :document, &uploaded/2)
+    {:reply, %{title: params["title"], files: files, documents: documents}, socket}
+  end
+
+  @doc false
+  def uploaded(%{path: path}, entry) do
+    content = File.read!(path)
+    hash = :sha256 |> :crypto.hash(content) |> Base.encode16(case: :lower)
+
+    {:ok,
+     %{name: entry.client_name, type: entry.client_type, size: byte_size(content), sha256: hash}}
+  end
+end
+
+defmodule Stampede.TestUploadWidget do
+  use Phoenix.LiveComponent
+
+  @impl true
+  def mount(socket), do: {:ok, allow_upload(socket, :photo, accept: :any)}
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <form phx-submit="save" phx-target={@myself}>
+      <.live_file_input upload={@uploads.photo} />
+    </form>
+    """
+  end
+
+  @impl true
+  def handle_event("save", _params, socket) do
+    files = consume_uploaded_entries(socket, :photo, &Stampede.TestUploadLive.uploaded/2)
+    {:reply, %{files: files}, socket}
+  end
 end

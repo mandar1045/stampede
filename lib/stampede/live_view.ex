@@ -24,6 +24,14 @@ defmodule Stampede.LiveView do
   %{"to" => to}}}` for a full redirect, as `Phoenix.LiveViewTest` does.
   Follow either one with `navigate/3`.
 
+  ## Uploads
+
+  `upload/4` sends files to an upload, the way a browser does once they are
+  chosen in a `live_file_input/1`, so that a form can be submitted with them:
+
+      :ok = Stampede.LiveView.upload(view, "avatar", [%{name: "me.jpg", content: photo}])
+      {:ok, _reply} = Stampede.LiveView.submit(view, "save", %{"user" => %{"name" => "jo"}})
+
   ## Metrics
 
   Inside a run, a view records:
@@ -35,6 +43,8 @@ defmodule Stampede.LiveView do
     * `"live.navigate"` and `"live.navigate.errors"` - navigations over the
       same socket. A navigation that needs a new page load records that
       load instead.
+    * `"live.upload"` and `"live.upload.errors"` - uploads, from asking the
+      LiveView to allow them to the last chunk
 
   along with the connection metrics listed in `Stampede.Channels`.
   """
@@ -46,6 +56,8 @@ defmodule Stampede.LiveView do
   defstruct [:socket, :topic, :url, :root, :params, :opts]
 
   @type t :: %__MODULE__{socket: Channels.socket(), topic: String.t(), url: String.t()}
+
+  @uploads_key {__MODULE__, :uploads}
 
   @doc """
   Fetches the page at `url` and connects to the LiveView it renders.
@@ -121,7 +133,8 @@ defmodule Stampede.LiveView do
         navigate(view, url, opts)
 
       result ->
-        with {:ok, _reply} <- event_result(result), do: {:ok, %{view | url: url}}
+        with {:ok, _reply} <- result |> diff_uploads(view) |> event_result(),
+             do: {:ok, %{view | url: url}}
     end
   end
 
@@ -153,8 +166,9 @@ defmodule Stampede.LiveView do
     # The metric is recorded here, since a refused join is how LiveView asks
     # for a page load and is not an error.
     case Channels.join(view.socket, view.topic, payload, timeout: opts[:timeout], metric: nil) do
-      {:ok, _rendered} ->
+      {:ok, reply} ->
         Metrics.record_since(Metrics.current(), "live.navigate", started_at)
+        remember_uploads(view.socket, view.topic, reply["rendered"], :replace)
         {:ok, %{view | url: url}}
 
       {:error, %{"reason" => "unauthorized"}} ->
@@ -209,6 +223,73 @@ defmodule Stampede.LiveView do
   @spec submit(t(), String.t(), map(), keyword()) :: {:ok, map() | nil} | {:error, term()}
   def submit(%__MODULE__{} = view, event, params, opts \\ []) when is_map(params) do
     push(view, "form", event, encode_form(params), opts)
+  end
+
+  @typedoc """
+  A file for `upload/4`: its `:name`, its `:content` and optionally its MIME
+  `:type`.
+  """
+  @type file :: %{
+          required(:name) => String.t(),
+          required(:content) => binary(),
+          optional(:type) => String.t()
+        }
+
+  @doc """
+  Uploads `files` to the LiveView's upload `name`, as a browser does once
+  they are chosen in its `live_file_input/1`.
+
+  Each file is a map with its `:name` and `:content`, and optionally its
+  MIME `:type`, otherwise guessed from the name's extension for common
+  files:
+
+      photo = :crypto.strong_rand_bytes(200_000)
+      :ok = Stampede.LiveView.upload(view, "avatar", [%{name: "me.jpg", content: photo}])
+      {:ok, _reply} = Stampede.LiveView.submit(view, "save", %{"user" => %{"name" => "jo"}})
+
+  It asks the LiveView to allow the files, sends each one in chunks over the
+  view's socket and reports its progress, so that once it returns `:ok`,
+  `consume_uploaded_entries/3` can read them. The `phx-change` event a
+  browser sends when files are chosen is not sent; use `change/4` if the
+  LiveView needs it.
+
+  The upload's input must have been rendered when the view joined, or in
+  the reply to one of its events. An upload of a component is sent to that
+  component.
+
+  Returns `{:error, {:no_upload, name}}` when no such upload was rendered,
+  and `{:error, {:rejected, errors}}` when the LiveView refuses the files,
+  with a `{name, reason}` tuple per error. `name` is the file's, or the
+  upload's for errors about the whole upload, such as
+  `{"avatar", "too_many_files"}`.
+
+  ## Options
+
+    * `:target` - the component the upload belongs to, when it is not the
+      one that renders its input
+    * `:timeout` - how long to wait for each reply, in milliseconds.
+      Defaults to `5_000`.
+  """
+  @spec upload(t(), String.t(), [file()], keyword()) :: :ok | {:error, term()}
+  def upload(%__MODULE__{} = view, name, files, opts \\ [])
+      when is_binary(name) and is_list(files) do
+    opts = Keyword.validate!(opts, target: nil, timeout: 5_000)
+    entries = Enum.map(files, &entry!/1)
+    started_at = System.monotonic_time()
+    uploads = Process.get(@uploads_key, %{}) |> Map.get({view.socket, view.topic}, %{})
+
+    result =
+      case Map.fetch(uploads, name) do
+        {:ok, {ref, cid}} -> send_files(view, name, ref, opts[:target] || cid, entries, opts)
+        :error -> {:error, {:no_upload, name}}
+      end
+
+    case result do
+      :ok -> Metrics.record_since(Metrics.current(), "live.upload", started_at)
+      {:error, _reason} -> Metrics.increment(Metrics.current(), "live.upload.errors")
+    end
+
+    result
   end
 
   @doc """
@@ -281,7 +362,9 @@ defmodule Stampede.LiveView do
     }
 
     case Channels.join(socket, topic, payload, timeout: opts[:timeout], metric: "live.join") do
-      {:ok, _rendered} ->
+      {:ok, reply} ->
+        remember_uploads(socket, topic, reply["rendered"], :replace)
+
         {:ok,
          %__MODULE__{
            socket: socket,
@@ -320,7 +403,250 @@ defmodule Stampede.LiveView do
 
     view.socket
     |> Channels.push(view.topic, "event", payload, timeout: opts[:timeout], metric: "live.event")
+    |> diff_uploads(view)
     |> event_result()
+  end
+
+  @types %{
+    ".csv" => "text/csv",
+    ".gif" => "image/gif",
+    ".jpeg" => "image/jpeg",
+    ".jpg" => "image/jpeg",
+    ".json" => "application/json",
+    ".mp3" => "audio/mpeg",
+    ".mp4" => "video/mp4",
+    ".pdf" => "application/pdf",
+    ".png" => "image/png",
+    ".svg" => "image/svg+xml",
+    ".txt" => "text/plain",
+    ".webp" => "image/webp",
+    ".zip" => "application/zip"
+  }
+
+  # Entry refs only need to be unique within a page, like the counter the
+  # JavaScript client uses.
+  defp entry!(%{name: name, content: content} = file)
+       when is_binary(name) and is_binary(content) do
+    %{
+      ref: Integer.to_string(System.unique_integer([:positive])),
+      name: name,
+      type: file[:type] || Map.get(@types, String.downcase(Path.extname(name)), ""),
+      content: content
+    }
+  end
+
+  defp entry!(other) do
+    raise ArgumentError,
+          "expected a file to be a map with a :name and a :content, got: #{inspect(other)}"
+  end
+
+  defp send_files(view, name, ref, cid, entries, opts) do
+    preflight = %{
+      "ref" => ref,
+      "entries" =>
+        for entry <- entries do
+          %{
+            "ref" => entry.ref,
+            "name" => entry.name,
+            "relative_path" => "",
+            "size" => byte_size(entry.content),
+            "type" => entry.type,
+            "last_modified" => System.system_time(:millisecond)
+          }
+        end
+    }
+
+    with {:ok, reply} <- allow(view, preflight, cid, opts),
+         {:ok, tokens, config} <- allowed(reply, name, ref, entries) do
+      Enum.reduce_while(entries, :ok, fn entry, :ok ->
+        case send_file(view, ref, cid, entry, tokens[entry.ref], config, opts) do
+          :ok -> {:cont, :ok}
+          error -> {:halt, error}
+        end
+      end)
+    end
+  end
+
+  # With max_entries: 1, a new file cancels the previous one, but LiveView
+  # only drops it once its upload channel exits. Browsers send phx-change
+  # first, which gives it that time. Here, a second preflight does.
+  defp allow(view, payload, cid, opts) do
+    with {:ok, %{"entries" => tokens, "errors" => errors}}
+         when map_size(tokens) == 0 and map_size(errors) == 0 <-
+           upload_push(view, "allow_upload", payload, cid, opts) do
+      upload_push(view, "allow_upload", payload, cid, opts)
+    end
+  end
+
+  defp allowed(%{"entries" => tokens, "errors" => errors} = reply, _name, _ref, entries)
+       when map_size(tokens) == length(entries) and map_size(errors) == 0 do
+    {:ok, tokens, reply["config"]}
+  end
+
+  # Errors of files from earlier calls stay on the upload until LiveView
+  # drops them, so only the ones about these files are returned.
+  defp allowed(reply, name, ref, entries) do
+    names = entries |> Map.new(&{&1.ref, &1.name}) |> Map.put(ref, name)
+
+    errors =
+      case reply do
+        %{"error" => errors} ->
+          Enum.map(errors, fn [ref, reason] -> {ref, reason} end)
+
+        %{"errors" => errors} ->
+          for {ref, reasons} <- errors, reason <- reasons, do: {ref, reason}
+
+        _other ->
+          []
+      end
+
+    case for({ref, reason} <- errors, Map.has_key?(names, ref), do: {names[ref], reason}) do
+      [] ->
+        tokens = Map.get(reply, "entries", %{})
+        not_allowed = for entry <- entries, not is_map_key(tokens, entry.ref), do: entry.name
+        {:error, {:rejected, Enum.map(not_allowed, &{&1, "not_allowed"})}}
+
+      errors ->
+        {:error, {:rejected, errors}}
+    end
+  end
+
+  # Each file is joined to a channel of its own with the token the LiveView
+  # gave it, and sent in chunks. Its progress goes to the LiveView after
+  # every chunk, and an upload is done once it reaches 100.
+  defp send_file(view, ref, cid, entry, token, config, opts) do
+    topic = "lvu:" <> entry.ref
+    channel_opts = [timeout: opts[:timeout], metric: nil]
+
+    with {:ok, _reply} <- Channels.join(view.socket, topic, %{"token" => token}, channel_opts) do
+      upload = %{
+        view: view,
+        topic: topic,
+        ref: ref,
+        cid: cid,
+        entry: entry,
+        chunk_size: config["chunk_size"],
+        chunk_opts: [timeout: config["chunk_timeout"] || opts[:timeout], metric: nil],
+        opts: opts
+      }
+
+      send_chunks(upload, entry.content, 0, -1)
+    end
+  end
+
+  # An empty file is sent as one empty chunk, which completes it too.
+  defp send_chunks(upload, content, sent, reported) do
+    size = min(byte_size(content), upload.chunk_size)
+    chunk = binary_part(content, 0, size)
+    rest = binary_part(content, size, byte_size(content) - size)
+    sent = sent + size
+    total = byte_size(upload.entry.content)
+    progress = if sent == total, do: 100, else: div(sent * 100, total)
+
+    with {:ok, _reply} <-
+           Channels.push(
+             upload.view.socket,
+             upload.topic,
+             "chunk",
+             {:binary, chunk},
+             upload.chunk_opts
+           ),
+         {:ok, _reply} <- report_progress(upload, progress, reported) do
+      if rest == <<>>, do: :ok, else: send_chunks(upload, rest, sent, max(progress, reported))
+    end
+  end
+
+  # Like the JavaScript client, progress is only reported when it grows.
+  defp report_progress(_upload, progress, reported) when progress <= reported, do: {:ok, nil}
+
+  defp report_progress(upload, progress, _reported) do
+    payload = %{
+      "event" => nil,
+      "ref" => upload.ref,
+      "entry_ref" => upload.entry.ref,
+      "progress" => progress
+    }
+
+    upload_push(upload.view, "progress", payload, upload.cid, upload.opts)
+  end
+
+  defp upload_push(view, event, payload, cid, opts) do
+    payload = if cid, do: Map.put(payload, "cid", cid), else: payload
+
+    view.socket
+    |> Channels.push(view.topic, event, payload, timeout: opts[:timeout], metric: nil)
+    |> diff_uploads(view)
+  end
+
+  # LiveView renders upload inputs with refs of its own, which the client
+  # reads from what it renders: when the LiveView joins, and in the diffs
+  # that replies carry. Each VU keeps them by socket and topic.
+  defp diff_uploads({:ok, %{"diff" => diff}} = result, view) do
+    remember_uploads(view.socket, view.topic, diff, :merge)
+    result
+  end
+
+  defp diff_uploads(result, _view), do: result
+
+  defp remember_uploads(socket, topic, rendered, mode) when is_map(rendered) do
+    found = find_uploads(rendered)
+
+    if mode == :replace or found != %{} do
+      all = Process.get(@uploads_key, %{})
+
+      all =
+        if mode == :replace,
+          do: Map.filter(all, fn {{socket, _topic}, _uploads} -> Process.alive?(socket) end),
+          else: all
+
+      Process.put(@uploads_key, Map.update(all, {socket, topic}, found, &Map.merge(&1, found)))
+    end
+
+    :ok
+  end
+
+  defp remember_uploads(_socket, _topic, _rendered, _mode), do: :ok
+
+  # `live_file_input/1` renders each attribute of its input as a dynamic of
+  # one node, so the node with an upload ref also has the input's name.
+  # Uploads of components are found under "c", by the component's ID.
+  defp find_uploads(rendered) do
+    {components, view} = Map.pop(rendered, "c", %{})
+
+    for {cid, component} <- components, reduce: find_uploads(view, nil, %{}) do
+      found -> find_uploads(component, String.to_integer(cid), found)
+    end
+  end
+
+  defp find_uploads(node, cid, found) when is_map(node) or is_list(node) do
+    values = if is_map(node), do: Map.values(node), else: node
+
+    found =
+      with [ref] <-
+             for(" data-phx-upload-ref=" <> _ = value <- values, do: attribute_value(value)),
+           [name] <- for(" name=" <> _ = value <- values, do: attribute_value(value)) do
+        Map.put_new(found, name, {ref, cid})
+      else
+        _other -> found
+      end
+
+    Enum.reduce(values, found, &find_uploads(&1, cid, &2))
+  end
+
+  defp find_uploads(_value, _cid, found), do: found
+
+  defp attribute_value(attribute) do
+    [_name, value] = String.split(attribute, "=", parts: 2)
+    value |> String.trim("\"") |> unescape_html()
+  end
+
+  defp unescape_html(value) do
+    value
+    |> String.replace("&quot;", "\"")
+    |> String.replace("&#39;", "'")
+    |> String.replace("&lt;", "<")
+    |> String.replace("&gt;", ">")
+    |> String.replace("&amp;", "&")
   end
 
   defp event_result({:ok, %{"diff" => %{"r" => reply}}}), do: {:ok, reply}

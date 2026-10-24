@@ -1,33 +1,57 @@
 # Stampede
 
-Load testing for Elixir and Phoenix, with built-in Phoenix Channels and LiveView support.
+[![Hex version](https://img.shields.io/hexpm/v/stampede.svg)](https://hex.pm/packages/stampede)
+[![CI](https://github.com/mandar1045/stampede/actions/workflows/ci.yml/badge.svg)](https://github.com/mandar1045/stampede/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/badge/hex-docs-blue.svg)](https://stampede.hexdocs.pm)
+[![License](https://img.shields.io/hexpm/l/stampede.svg)](https://github.com/mandar1045/stampede/blob/main/LICENSE)
 
-Generic load testing tools see a Phoenix channel as a plain WebSocket, so each
-test has to rebuild the protocol by hand: join messages, refs, replies and
-heartbeats. LiveView is harder still, since every session starts with a page
-load that hands out the tokens the socket needs. Stampede speaks both
-natively, along with plain HTTP and WebSockets.
+Load testing for Phoenix that speaks Phoenix: Channels, LiveView, HTTP and
+plain WebSockets, with scenarios written in Elixir.
 
-Every virtual user (VU) is a BEAM process and scenarios are plain Elixir
-modules, so one machine can hold thousands of connections, several machines
-can share one test over Erlang distribution, and your load tests can reuse
+![The dashboard following a run as it ramps up to 400 users and back down](assets/dashboard.gif)
+
+## Why I built this
+
+I wanted to see how a real-time Phoenix app held up with hundreds of people
+in one channel. Generic load testers see a channel as just another
+WebSocket, so the scripts end up building `phx_join` messages, refs and
+heartbeats by hand. Chaperon, the Elixir load tester I found, hasn't had a
+release since 2020. And "how do I load test LiveView?" keeps coming up on
+Elixir Forum without a good answer.
+
+So I wrote the tool I wanted. Stampede already knows the Channels protocol
+and how a LiveView session starts, so a scenario is just what a user does.
+Every virtual user (VU) is a BEAM process, which means one laptop can hold
+thousands of connections, and when it can't, more machines can join over
+Erlang distribution. Scenarios are plain Elixir modules, so they can call
 your own code.
 
 ## Installation
 
+The quickest way is [Igniter](https://hexdocs.pm/igniter), which also drops a
+first scenario into `loadtest/home.exs`:
+
+```console
+$ mix igniter.install stampede
+```
+
+Without Igniter, add it to your dependencies:
+
 ```elixir
 def deps do
   [
-    {:stampede, "~> 1.0", only: :dev}
+    {:stampede, "~> 1.1", only: [:dev, :test]}
   ]
 end
 ```
 
-Stampede requires Elixir 1.19 or later.
+You'll need Elixir 1.18 or newer.
 
-## A first load test
+## Your first load test
 
-Create `loadtest/lobby.exs`:
+`mix stampede.gen.scenario Lobby --channels` gives you something to start
+from. There's also `--live` and `--websocket`, and no flag gets you plain
+HTTP. Written by hand, a channels scenario looks like this:
 
 ```elixir
 defmodule MyApp.Load.Lobby do
@@ -54,16 +78,16 @@ defmodule MyApp.Load.Lobby do
 end
 ```
 
-And run it:
+Save it as `loadtest/lobby.exs` and run it:
 
 ```console
 $ mix stampede.run loadtest/lobby.exs
 ```
 
-Stampede ramps up to 500 VUs over 30 seconds, holds them for a minute and
-ramps down, printing progress every second. Each VU calls `run/1` over and
-over. At the end it prints a summary like this one, from a run with 6,000 VUs
-spread over three nodes, against a Phoenix app on the same laptop:
+That ramps up to 500 VUs over 30 seconds, holds them for a minute and ramps
+back down, with a progress line every second. Each VU calls `run/1` over and
+over. At the end you get a summary. This one is from a run with 6,000 VUs
+across three nodes, all on my laptop along with the Phoenix app:
 
 ```
 Demo.Chat ran for 15.0s
@@ -78,63 +102,90 @@ Demo.Chat ran for 15.0s
     pass  iteration.errors count <= 0 (0)
 ```
 
-The task exits with status 1 when a threshold fails, so it can run in CI.
+If a threshold fails, the task exits with status 1, so it works in CI as it
+is.
+
+## Watching a run
+
+Add `--dashboard` and open http://127.0.0.1:4040:
+
+```console
+$ mix stampede.run loadtest/lobby.exs --dashboard
+```
+
+That's the page in the animation at the top. It updates every second while
+the test runs, and shows the full results when it's done.
 
 ## Scenarios
 
-A scenario implements `Stampede.Scenario`:
+A scenario is a module that implements `Stampede.Scenario`. Only `run/1` is
+required:
 
-  * `run/1` runs one iteration of a VU. It gets a `Stampede.VU` with the VU's
+  * `run/1` is one iteration of a VU. It gets a `Stampede.VU` with the VU's
     `id`, its `iteration` count and the `data` returned by `setup/1`.
-  * `options/0` returns the default options of the run, optional.
-  * `setup/1` runs once before the first VU starts, optional. Use it to create
+  * `options/0` returns the default options of the run.
+  * `setup/1` runs once, before any VU starts. It's the place to create
     accounts or sign tokens that every VU needs.
 
-If an iteration raises, the error is counted under `iteration.errors`, shown
-in the summary, and the VU moves on to its next iteration. Sockets opened
-during an iteration are closed when it ends.
+When an iteration raises, the error is counted under `iteration.errors` and
+listed in the summary, and the VU simply starts its next iteration. Sockets
+opened during an iteration are closed when it ends, so nothing leaks from one
+iteration to the next.
 
 ## VUs or a rate
 
-A run either keeps a number of VUs busy, or starts iterations at a rate.
+There are two ways to apply load: keep a number of VUs busy, or start
+iterations at a fixed rate.
 
-`stages` are `{duration, target}` tuples, each moving the number of VUs in a
-straight line from the previous target to its own. `vus: 100, duration:
-[minute: 1]` holds 100 VUs for a minute. Durations are milliseconds or
-anything `Kernel.to_timeout/1` accepts, such as `[second: 30]`.
+`stages` is a list of `{duration, target}` tuples, each moving the number of
+VUs in a straight line to its target. `vus: 100, duration: [minute: 1]` just
+holds 100 VUs for a minute. Durations are milliseconds, or anything
+`Kernel.to_timeout/1` takes, like `[second: 30]`.
 
-A VU only starts its next iteration once the last one is done, so when the
-server slows down, the load eases off too. Real users don't wait for each
-other, which is why `rate` starts iterations at a fixed pace instead, however
-long they take:
+The catch with VUs is that each one waits for its last iteration to finish
+before starting the next. When your server slows down, the load quietly eases
+off with it, and real users don't do that. `rate` keeps starting iterations
+on schedule, however long they take:
 
 ```elixir
 [rate: 200, duration: [minute: 5], max_vus: 1_000]
 [rate_stages: [{[minute: 1], 500}, {[minute: 5], 500}]]
 ```
 
-VUs are started as needed and reused between iterations, keeping their
-connections. `max_vus` caps how many iterations may be in progress, and the
-ones that cannot start are counted as `iterations.dropped`.
+VUs are started as needed and reused, keeping their connections. `max_vus`
+caps how many iterations can be in flight, and the ones that can't start are
+counted as `iterations.dropped`.
 
-From the command line, `--vus 100` or `--rate 200` with `--duration 1m`
-replace a scenario's own settings.
+On the command line, `--vus 100` or `--rate 200` with `--duration 1m`
+override whatever the scenario says.
 
-VUs that are no longer needed, during a ramp down or at the end of the run,
-are stopped at once. `graceful_stop: [second: 30]` lets them finish their
-current iteration first, so the last iterations are recorded instead of cut
-off.
+VUs that aren't needed anymore, during a ramp down or at the end, are stopped
+right away. Set `graceful_stop: [second: 30]` to let them finish their
+current iteration first, so it gets recorded instead of cut off.
+
+## Mixing kinds of traffic
+
+Real traffic is rarely one kind of user. Usually lots of people are reading
+while a few are writing. `--parallel` runs every scenario you give it at the
+same time, each with its own load and thresholds:
+
+```console
+$ mix stampede.run loadtest/reading.exs loadtest/posting.exs --parallel
+```
+
+From code, it's `Stampede.run_parallel([Reading, Posting])`, which returns
+one result per scenario.
 
 ## Checks and thresholds
 
-Checks are assertions that do not end the iteration when they fail:
+Checks are assertions that don't stop the iteration when they fail:
 
 ```elixir
 {:ok, response} = Stampede.HTTP.get("http://localhost:4000/api/posts")
 Stampede.check("status is 200", response.status == 200)
 ```
 
-Thresholds are the highest value a statistic may reach for the run to pass:
+Thresholds are the limits a run has to stay within to pass:
 
 ```elixir
 thresholds: [
@@ -145,17 +196,40 @@ thresholds: [
 ```
 
 Timings have `min`, `mean`, `p50`, `p90`, `p95`, `p99` and `max`, in
-milliseconds. Checks have `failed` and `failed_rate`. Every metric has
-`count` and `rate`, per second. Percentiles are within 1% of the exact value,
-however many samples a run collects.
+milliseconds. Checks have `failed` and `failed_rate`, and every metric has
+`count` and `rate`, per second. Percentiles stay within 1% of the exact
+value, however many samples a run collects.
+
+## In your test suite
+
+If you'd rather keep load tests with your other tests, `Stampede.ExUnit`
+fails a test when a threshold fails, with the run's summary in the failure
+message:
+
+```elixir
+Code.require_file("../loadtest/lobby.exs", __DIR__)
+
+defmodule MyApp.LoadTest do
+  use ExUnit.Case
+  import Stampede.ExUnit
+
+  @moduletag :load
+
+  test "the lobby holds 200 users" do
+    assert_load(MyApp.Load.Lobby, vus: 200, duration: [second: 30])
+  end
+end
+```
+
+Put `ExUnit.start(exclude: [:load])` in `test/test_helper.exs`, so they only
+run with `mix test --only load`.
 
 ## Metrics
 
-Stampede records `iteration`, `iteration.errors`, `iterations.dropped` and
-`vu.crashes` for every scenario, and the clients below record their own.
-
-Record your own with `Stampede.measure/2`, `Stampede.record/3`,
-`Stampede.increment/2` and `Stampede.check/2`:
+Every scenario records `iteration`, `iteration.errors`, `iterations.dropped`
+and `vu.crashes`, and each client below records its own. Add yours with
+`Stampede.measure/2`, `Stampede.record/3`, `Stampede.increment/2` and
+`Stampede.check/2`. Timing a broadcast round trip, for example:
 
 ```elixir
 Stampede.measure("broadcast.roundtrip", fn ->
@@ -166,42 +240,46 @@ end)
 
 ## HTTP
 
-`Stampede.HTTP` sends requests and records them as `http.request`, counting
-transport errors and statuses of 400 or more as `http.request.errors`:
+`Stampede.HTTP` records requests as `http.request`, and counts transport
+errors and responses of 400 or more under `http.request.errors`:
 
 ```elixir
 {:ok, %{status: 200, body: body}} = Stampede.HTTP.get("http://localhost:4000/api/posts")
 {:ok, %{status: 201}} = Stampede.HTTP.post("http://localhost:4000/api/posts", json: %{title: "Hi"})
 ```
 
-Each VU keeps its connections open between requests, as browsers do, and
-reconnects when the server closed one. Against a Phoenix app on the same
-laptop, 2,000 GET requests per second for 10 seconds held their rate with a
-p99 of 1.56ms.
+Each VU keeps its connections open between requests, like a browser, and
+reconnects when the server has closed one. On my laptop, against a Phoenix
+app on the same machine, 2,000 GET requests a second for 10 seconds held
+their rate with a p99 of 1.56ms.
 
 ## Phoenix Channels
 
-`Stampede.Channels` covers what a JavaScript client does:
+`Stampede.Channels` does what the JavaScript client does:
 
   * `connect/2` with params, headers and either serializer (`"2.0.0"` or `"1.0.0"`)
   * `join/4`, `push/5` and `leave/3`, which wait for the reply
-  * `cast/4` for events the channel does not reply to
+  * `cast/4` for events the channel doesn't reply to
   * `await/4` for pushes and broadcasts from the server, with an optional
     `:match` function to pick one out of many
-  * heartbeats, sent every 30 seconds by default
+  * heartbeats, every 30 seconds by default
   * binary payloads, as `{:binary, data}`, with the `"2.0.0"` serializer
-  * a `:serializer` option for servers that extend the protocol, such as
-    Supabase Realtime with its binary broadcasts
+  * a `:serializer` option for servers that add message types of their own,
+    such as custom binary frames
 
 It records `ws.connect`, `ws.disconnects`, `channel.join`, `channel.push`,
 `channel.leave` and `channel.messages`, plus an `.errors` counter for each
-request type. A push to a channel that crashes fails with
-`{:error, :channel_crashed}` instead of a timeout.
+kind of request. A push to a channel that crashes fails right away with
+`{:error, :channel_crashed}`, instead of waiting for its timeout.
+
+[Phoenix Presence](guides/presence.md) and
+[Absinthe subscriptions](guides/absinthe.md) both run over channels, and
+each has a guide.
 
 ## LiveView
 
-`Stampede.LiveView` loads a page the way a browser does, then joins the
-LiveView it renders, with the page's CSRF token and cookies:
+`Stampede.LiveView` loads the page, then joins the LiveView on it with the
+page's CSRF token and cookies, just like a browser:
 
 ```elixir
 @impl true
@@ -215,25 +293,34 @@ end
 ```
 
 `click/4`, `change/4` and `submit/4` send what `phx-click`, `phx-change` and
-`phx-submit` would, and return what `handle_event/3` replied, if anything.
-Pass `target: 1` to send an event to a component, like `phx-target` does.
-`await/2` waits for updates the LiveView sends on its own.
+`phx-submit` would, and give back whatever `handle_event/3` replied. Pass
+`target: 1` to talk to a component, like `phx-target` does. `await/2` waits
+for updates the LiveView pushes on its own.
 
-`patch/3` and `navigate/3` move between pages like `<.link patch>` and
-`<.link navigate>` do, over the same socket when LiveView allows it. When an
-event makes the LiveView navigate on its own, it returns
-`{:error, {:live_redirect, %{"to" => to}}}` as `Phoenix.LiveViewTest` does,
-and `navigate/3` follows it.
+`patch/3` and `navigate/3` work like `<.link patch>` and `<.link navigate>`,
+reusing the socket when LiveView allows it. If an event makes the LiveView
+navigate, you get `{:error, {:live_redirect, %{"to" => to}}}` back, the same
+as with `Phoenix.LiveViewTest`, and `navigate/3` will follow it.
 
-`connect/2` follows redirects and keeps the cookies they set, so a route that
-signs a test user in and redirects to the page under test is enough to load
-test pages behind a login. A run records `live.page`, `live.join`,
-`live.event`, `live.patch` and `live.navigate`.
+`upload/4` sends files to a `live_file_input`, in chunks over the same
+socket, so you can submit the form with them afterwards:
+
+```elixir
+photo = :crypto.strong_rand_bytes(200_000)
+:ok = Stampede.LiveView.upload(view, "avatar", [%{name: "me.jpg", content: photo}])
+{:ok, _reply} = Stampede.LiveView.submit(view, "save", %{"user" => %{"name" => "jo"}})
+```
+
+Pages behind a login work too. `connect/2` follows redirects and keeps the
+cookies they set, so a route that signs in a test user and redirects is
+enough, and the [login guide](guides/login.md) walks through it. LiveView
+runs record `live.page`, `live.join`, `live.event`, `live.patch`,
+`live.navigate` and `live.upload`.
 
 ## Plain WebSockets
 
-`Stampede.WebSocket` is for servers that don't use Phoenix Channels, such as
-a `WebSock` handler or a GraphQL subscription endpoint:
+For servers that don't use Phoenix Channels, like a `WebSock` handler or a
+GraphQL subscription endpoint, there's `Stampede.WebSocket`:
 
 ```elixir
 {:ok, ws} = Stampede.WebSocket.connect("ws://localhost:4000/ws")
@@ -241,21 +328,19 @@ a `WebSock` handler or a GraphQL subscription endpoint:
 {:ok, {:text, text}} = Stampede.WebSocket.await(ws, match: &match?({:text, "{\"price\"" <> _}, &1))
 ```
 
-It answers pings, and keeps the frames the server sends until `await/2`
-reads them, even after the server closed the connection. It records
+It answers pings and holds on to the frames it receives until `await/2`
+reads them, even after the server has closed the connection. It records
 `ws.connect`, `ws.disconnects`, `ws.messages` and `ws.messages.sent`.
 
 ## Results
 
-`Stampede.run/2` returns a `Stampede.Result`, with every metric's summary and
-a timeline of what happened during each second of the run, to see when
-latency went up during a ramp. `--out results.json` writes it all as JSON,
-and so does `Stampede.Reporter.to_json/1`.
+`Stampede.run/2` returns a `Stampede.Result` with a summary of every metric
+and a timeline of each second of the run, which is handy for spotting when
+latency started to climb during a ramp. `--out results.json` saves all of
+it as JSON.
 
-`--html report.html` writes a page with a chart of the VUs, the iterations
-per second and the percentiles of every timing over the run, along with the
-summary. It is a single file with nothing to load, so CI can keep it as an
-artifact.
+`--html report.html` writes the same charts as the dashboard into a single
+file with nothing else to load, so CI can keep it as an artifact.
 
 To catch regressions, compare two runs:
 
@@ -266,33 +351,35 @@ $ mix stampede.run loadtest/api.exs --out branch.json
 $ mix stampede.compare main.json branch.json --max-regression 10
 ```
 
-It prints how the p50, p95 and p99 of every timing changed, and exits with
-status 1 when one got more than 10% slower.
+It shows how the p50, p95 and p99 of every timing changed, and exits with
+status 1 if one got more than 10% slower.
 
-Stampede also emits `:telemetry` events for every timing, counter and check,
-and for every second of a run, to send them to your own metrics system while
-a test runs. They are listed in the `Stampede` docs.
+There are also `:telemetry` events for every timing, counter and check, and
+for each second of a run, if you want the numbers in your own metrics system
+while a test runs. The `Stampede` docs list them.
 
 ## Spreading the load
 
-One machine runs out of CPU or ports long before a large Phoenix app runs out
-of room. Start a node on more machines, from the same project, and give them
-to the task:
+One machine will run out of CPU or ports long before a decent Phoenix server
+runs out of room. Start a node on each extra machine, from the same project,
+and hand them to the task:
 
 ```console
 $ iex --sname worker --cookie load -S mix
 $ elixir --sname loader --cookie load -S mix stampede.run loadtest/lobby.exs --nodes worker@host
 ```
 
-VUs and rates are split evenly between the nodes, and their metrics are
-merged as if they ran on one. From code, pass `nodes: [node() | Node.list()]`.
+VUs and rates are split evenly, and the metrics merged as if it all ran on
+one machine. From code, pass `nodes: [node() | Node.list()]`. The
+[guide](guides/distributed.md) covers the limits of a single machine and
+running across a network.
 
-## Running from code
+## Without a Mix project
 
-Load tests can also run from a script, without a Mix project:
+A load test can also be a plain script:
 
 ```elixir
-Mix.install([{:stampede, "~> 1.0"}])
+Mix.install([{:stampede, "~> 1.1"}])
 
 defmodule Lobby do
   use Stampede.Scenario
@@ -310,11 +397,51 @@ IO.puts(Stampede.Reporter.format(result))
 System.halt(if result.passed?, do: 0, else: 1)
 ```
 
+## Guides
+
+  * [Pages behind a login](guides/login.md)
+  * [Phoenix Presence](guides/presence.md)
+  * [GraphQL subscriptions with Absinthe](guides/absinthe.md)
+  * [Load tests in CI](guides/ci.md)
+  * [Spreading the load over machines](guides/distributed.md)
+  * [Case study: Supabase Realtime](guides/supabase_realtime.md)
+
+## Why not k6, Locust or Artillery?
+
+They're good tools, especially for plain HTTP APIs. For Phoenix, though, they
+see a channel as just another WebSocket, so you end up writing the protocol
+yourself: joins, refs, replies and heartbeats. LiveView is harder still,
+since the socket needs tokens from a page load before it can even connect.
+Stampede handles all of that, and because scenarios are Elixir, you can
+reuse your own modules and test data in them.
+
+## Status
+
+Stampede is young. I've used it to load test a real-world Phoenix server
+(there's a [case study](guides/supabase_realtime.md) with the numbers), and
+its test suite runs real load tests against a Phoenix app on every change. Still, expect rough edges,
+and please tell me when you hit one.
+
 ## Roadmap
 
-  * LiveView uploads
-  * A live dashboard
-  * A TCP client
+What I'm working on next:
+
+  * Metrics from inside the app shown next to the load test's own: BEAM
+    schedulers and memory, Ecto queue times, LiveView event durations
+  * Recording a session in the browser and turning it into a scenario
+  * A Livebook smart cell
+  * A command line tool that doesn't need Elixir installed
+  * More protocols: Socket.IO, GraphQL over WebSocket and Server-Sent Events
+
+If one of these would help you, or something else is missing, say so in
+[Discussions](https://github.com/mandar1045/stampede/discussions).
+
+## Contributing
+
+Bug reports go in the issues, questions and ideas in
+[Discussions](https://github.com/mandar1045/stampede/discussions). If you'd
+like to work on Stampede itself, [CONTRIBUTING.md](CONTRIBUTING.md) explains
+how to get set up.
 
 ## License
 

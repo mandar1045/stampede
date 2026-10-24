@@ -1,14 +1,14 @@
 defmodule Stampede.MixProject do
   use Mix.Project
 
-  @version "1.0.0"
+  @version "1.1.0"
   @source_url "https://github.com/mandar1045/stampede"
 
   def project do
     [
       app: :stampede,
       version: @version,
-      elixir: "~> 1.19",
+      elixir: "~> 1.18",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -33,6 +33,7 @@ defmodule Stampede.MixProject do
       {:mint, "~> 1.6"},
       {:mint_web_socket, "~> 1.0"},
       {:telemetry, "~> 1.0"},
+      {:igniter, "~> 0.8", optional: true},
       {:phoenix, "~> 1.7", only: :test},
       {:phoenix_live_view, "~> 1.0", only: :test},
       {:bandit, "~> 1.0", only: :test},
@@ -51,7 +52,19 @@ defmodule Stampede.MixProject do
     [
       main: "readme",
       source_ref: "v#{@version}",
-      extras: ["README.md", "CHANGELOG.md"],
+      extras: [
+        "README.md",
+        "guides/login.md",
+        "guides/presence.md",
+        "guides/absinthe.md",
+        "guides/ci.md",
+        "guides/distributed.md",
+        "guides/supabase_realtime.md",
+        "CHANGELOG.md",
+        "CONTRIBUTING.md"
+      ],
+      groups_for_extras: [Guides: ~r"guides/"],
+      assets: %{"assets" => "assets"},
       groups_for_modules: [
         Clients: [Stampede.HTTP, Stampede.Channels, Stampede.LiveView, Stampede.WebSocket],
         "Channels protocol": [
@@ -60,7 +73,7 @@ defmodule Stampede.MixProject do
           Stampede.Channels.Serializer.V1,
           Stampede.Channels.Message
         ],
-        Results: [Stampede.Result, Stampede.Reporter]
+        Results: [Stampede.Result, Stampede.Reporter, Stampede.Dashboard]
       ]
     ]
   end

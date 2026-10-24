@@ -73,8 +73,8 @@ defmodule Stampede do
       measurement, and its `:name` and whether it `:passed?` as metadata
 
   Durations are in native time units, as usual for telemetry. The run events
-  are emitted where `run/2` was called, the others on the node that recorded
-  them.
+  are emitted on the node that called `run/2` or `run_parallel/2`, the others
+  on the node that recorded them.
   """
 
   alias Stampede.Metrics
@@ -138,6 +138,25 @@ defmodule Stampede do
   """
   @spec run(module(), keyword()) :: Stampede.Result.t()
   defdelegate run(scenario, opts \\ []), to: Stampede.Runner
+
+  @doc """
+  Runs several scenarios at the same time, and returns their results in the
+  same order.
+
+  Real traffic mixes kinds of users, such as many people reading a page while
+  a few post to it. Each scenario runs with its own options, thresholds and
+  setup, as with `run/2`, so each kind of user can have its own number of
+  VUs or rate:
+
+      [reading, posting] = Stampede.run_parallel([MyApp.Load.Reading, MyApp.Load.Posting])
+
+  `opts` apply to every scenario and take precedence over their own options.
+  Every scenario's options are checked, and its `c:Stampede.Scenario.setup/1`
+  called, before any VU starts. With `progress: true`, each progress line
+  names its scenario.
+  """
+  @spec run_parallel([module()], keyword()) :: [Stampede.Result.t()]
+  defdelegate run_parallel(scenarios, opts \\ []), to: Stampede.Runner
 
   @doc """
   Calls `fun` and records how long it took as the timing `name`.

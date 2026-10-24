@@ -34,6 +34,34 @@ defmodule Mix.Tasks.Stampede.RunTest do
     assert output =~ ~r/iteration\s+\d+/
   end
 
+  test "runs the scenarios at the same time with --parallel", %{tmp_dir: tmp_dir} do
+    path = Path.join(tmp_dir, "mixed.exs")
+
+    File.write!(path, """
+    for name <- [Reading, Posting] do
+      defmodule Module.concat(Stampede.TaskTest, name) do
+        use Stampede.Scenario
+
+        @impl true
+        def run(_vu), do: Process.sleep(10)
+      end
+    end
+    """)
+
+    started_at = System.monotonic_time(:millisecond)
+
+    output =
+      capture_io(fn ->
+        Mix.Tasks.Stampede.Run.run([path, "--parallel", "--vus", "2", "--duration", "1s"])
+      end)
+
+    assert System.monotonic_time(:millisecond) - started_at < 1_800
+    assert output =~ ~r/1.0s  Stampede.TaskTest.Reading  vus: 2/
+    assert output =~ ~r/1.0s  Stampede.TaskTest.Posting  vus: 2/
+    assert output =~ "Stampede.TaskTest.Reading ran for"
+    assert output =~ "Stampede.TaskTest.Posting ran for"
+  end
+
   test "exits with status 1 when a threshold fails", %{tmp_dir: tmp_dir} do
     path =
       write_scenario!(tmp_dir, "Strict", """

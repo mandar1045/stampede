@@ -85,4 +85,58 @@ defmodule Stampede.RunnerTest do
     assert_raise ArgumentError, ~r/unknown keys \[:vu\]/, fn -> Stampede.run(Lobby, vu: 1) end
     assert_raise ArgumentError, ~r/to implement Stampede.Scenario/, fn -> Stampede.run(String) end
   end
+
+  defmodule Short do
+    use Stampede.Scenario
+
+    @impl true
+    def options, do: [vus: 1, duration: 300]
+
+    @impl true
+    def run(_vu), do: Process.sleep(10)
+  end
+
+  defmodule Long do
+    use Stampede.Scenario
+
+    @impl true
+    def options, do: [vus: 2, duration: 600, thresholds: [{"iteration", count: 0}]]
+
+    @impl true
+    def run(_vu), do: Process.sleep(10)
+  end
+
+  describe "run_parallel/2" do
+    test "runs scenarios at the same time, each with its own options" do
+      started_at = System.monotonic_time(:millisecond)
+      assert [short, long] = Stampede.run_parallel([Short, Long])
+
+      assert System.monotonic_time(:millisecond) - started_at < 850
+      assert {short.scenario, long.scenario} == {Short, Long}
+      assert short.duration in 300..450
+      assert long.duration in 600..750
+      assert short.passed?
+      refute long.passed?
+      assert long.timeline |> Enum.map(& &1.vus) |> Enum.max() == 2
+    end
+
+    test "gives its options to every scenario" do
+      assert [short, long] = Stampede.run_parallel([Short, Long], duration: 200)
+
+      assert short.duration in 200..350
+      assert long.duration in 200..350
+    end
+
+    test "checks every scenario before starting any" do
+      assert_raise ArgumentError, ~r/to implement Stampede.Scenario/, fn ->
+        Stampede.run_parallel([Short, String])
+      end
+
+      assert Process.info(self(), :messages) == {:messages, []}
+
+      assert_raise ArgumentError, ~r/non-empty list of scenarios/, fn ->
+        Stampede.run_parallel([])
+      end
+    end
+  end
 end

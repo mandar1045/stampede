@@ -3,6 +3,7 @@ defmodule Stampede.Reporter.HTML do
 
   # One self-contained page per report: the charts are inline SVG and the
   # tooltips a short script, so the file opens anywhere and can be shared.
+  # Stampede.Dashboard renders its page with the same parts.
 
   import Stampede.Reporter, only: [decimal: 1, milliseconds: 1, seconds: 1, stat: 2]
 
@@ -71,6 +72,13 @@ defmodule Stampede.Reporter.HTML do
   .status::before { margin-right: 4px; }
   .passed::before { content: "\\2713"; color: var(--good); }
   .failed::before { content: "\\2717"; color: var(--critical); }
+  .running::before { content: "\\25CF"; color: var(--series-1); }
+  .notice {
+    padding: 8px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
   .tiles, .charts { display: grid; gap: 12px; margin-top: 16px; }
   .tiles { grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); }
   .charts { grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); }
@@ -134,7 +142,8 @@ defmodule Stampede.Reporter.HTML do
   """
 
   @js """
-  for (const chart of document.querySelectorAll(".chart")) {
+  const setupCharts = (root) => {
+  for (const chart of root.querySelectorAll(".chart")) {
     const data = JSON.parse(chart.dataset.points);
     const svg = chart.querySelector("svg");
     const cross = chart.querySelector(".cross");
@@ -197,34 +206,152 @@ defmodule Stampede.Reporter.HTML do
       event.preventDefault();
     });
   }
+  };
+
+  setupCharts(document);
+  """
+
+  # The dashboard asks for its runs every second, with the version it has,
+  # and gets them back only when they changed.
+  @poll_js """
+  const runs = document.getElementById("runs");
+
+  const poll = async () => {
+    try {
+      const response = await fetch("runs?version=" + runs.dataset.version, { cache: "no-store" });
+
+      if (response.status === 200) {
+        const open = [...runs.querySelectorAll("details[open]")].map((details) => details.closest("section").id);
+        runs.dataset.version = response.headers.get("x-version");
+        runs.innerHTML = await response.text();
+        for (const id of open) runs.querySelector("#" + id + " details")?.setAttribute("open", "");
+        setupCharts(runs);
+      }
+
+      setTimeout(poll, 1000);
+    } catch (_error) {
+      document.getElementById("stopped").hidden = false;
+    }
+  };
+
+  setTimeout(poll, 1000);
   """
 
   def render(results) do
+    document("Stampede report", Enum.map(results, &scenario(&1, nil)), [])
+  end
+
+  # The dashboard's page, with the runs it knows of at `version`.
+  def dashboard(runs, version) do
+    body = [
+      ~s(<p class="meta notice" id="stopped" hidden>),
+      "The dashboard stopped, so this page no longer updates.</p>\n",
+      ~s(<div id="runs" data-version="#{version}">\n),
+      runs(runs),
+      "</div>\n"
+    ]
+
+    document("Stampede dashboard", body, @poll_js)
+  end
+
+  # Each run is a map with an `:id`, its `:scenario` and `:status`, and
+  # either its `:result` once it is over, or what the dashboard collected so
+  # far: its `:timeline`, the last `:summaries` of every metric, the `:totals`
+  # of their counts, and how long it is `:planned` to last.
+  def runs([]), do: ~s(<p class="meta">Waiting for a run to start.</p>\n)
+  def runs(runs), do: Enum.map(runs, &run/1)
+
+  defp run(%{result: %Result{} = result} = run), do: scenario(result, run.id)
+  defp run(run), do: live(run)
+
+  defp document(title, body, script) do
     IO.iodata_to_binary([
       ~s(<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n),
       ~s(<meta name="viewport" content="width=device-width, initial-scale=1">\n),
-      "<title>Stampede report</title>\n<style>\n",
+      "<title>",
+      title,
+      "</title>\n<style>\n",
       @css,
-      "</style>\n</head>\n<body>\n<main>\n<h1>Stampede report</h1>\n",
-      Enum.map(results, &scenario/1),
+      "</style>\n</head>\n<body>\n<main>\n<h1>",
+      title,
+      "</h1>\n",
+      body,
       "</main>\n<script>\n",
       @js,
+      script,
       "</script>\n</body>\n</html>\n"
     ])
   end
 
-  defp scenario(%Result{} = result) do
+  defp live(run) do
+    last = List.last(run.timeline)
+    at = if last, do: last.at, else: 0
+
+    result = %Result{
+      scenario: run.scenario,
+      duration: max(run.planned, at),
+      timeline: run.timeline
+    }
+
+    status =
+      case run.status do
+        :running -> ~s(<span class="status running">Running</span>)
+        :stopped -> ~s(<span class="status failed">Stopped</span>)
+      end
+
+    [
+      section_start(run.id, run.scenario, status),
+      seconds(at),
+      " of ",
+      seconds(run.planned),
+      "</p></header>\n",
+      live_tiles(run, last),
+      if(last,
+        do: charts(%{result | metrics: run.summaries}),
+        else: ~s(<p class="meta">Starting.</p>\n)
+      ),
+      if(last && last.metrics != %{},
+        do: ["<h3>The last second</h3>\n", metrics_table(last.metrics)],
+        else: []
+      ),
+      "</section>\n"
+    ]
+  end
+
+  defp live_tiles(run, last) do
+    metrics = if last, do: last.metrics, else: %{}
+    iteration = metrics["iteration"]
+
+    tiles = [
+      {"VUs", integer(if last, do: last.vus, else: 0)},
+      {"Iterations", integer(Map.get(run.totals, "iteration", 0))},
+      {"Iterations per second", decimal(if iteration, do: iteration.rate, else: 0)},
+      {"Iteration p95", if(iteration, do: milliseconds(iteration.p95), else: "–")},
+      {"Errors", integer(Map.get(run.totals, "iteration.errors", 0))}
+    ]
+
+    tile_grid(tiles)
+  end
+
+  defp section_start(id, scenario, status) do
+    [
+      if(id, do: ~s(<section id="run-#{id}">\n<header><h2>), else: "<section>\n<header><h2>"),
+      escape(inspect(scenario)),
+      "</h2>",
+      status,
+      ~s(<p class="meta">)
+    ]
+  end
+
+  defp scenario(%Result{} = result, id) do
     {checks, metrics} = Enum.split_with(result.metrics, &match?({_name, %{type: :check}}, &1))
 
     [
-      "<section>\n<header><h2>",
-      escape(inspect(result.scenario)),
-      "</h2>",
-      status(result),
-      ~s(<p class="meta">Ran for ),
+      section_start(id, result.scenario, status(result)),
+      "Ran for ",
       seconds(result.duration),
       "</p></header>\n",
-      tiles(result),
+      result_tiles(result),
       charts(result),
       metrics(metrics),
       checks(checks),
@@ -239,7 +366,7 @@ defmodule Stampede.Reporter.HTML do
   defp status(%Result{passed?: true}), do: ~s(<span class="status passed">Passed</span>)
   defp status(%Result{passed?: false}), do: ~s(<span class="status failed">Failed</span>)
 
-  defp tiles(result) do
+  defp result_tiles(result) do
     metrics = result.metrics
     iteration = metrics["iteration"]
 
@@ -255,6 +382,10 @@ defmodule Stampede.Reporter.HTML do
           do: [{"Dropped", integer(count(metrics, "iterations.dropped"))}],
           else: []
 
+    tile_grid(tiles)
+  end
+
+  defp tile_grid(tiles) do
     [
       ~s(<div class="tiles">\n),
       for {label, value} <- tiles do
@@ -419,8 +550,9 @@ defmodule Stampede.Reporter.HTML do
   defp value(value, :rate), do: decimal(value) <> "/s"
 
   defp metrics([]), do: []
+  defp metrics(metrics), do: ["<h3>Metrics</h3>\n", metrics_table(metrics)]
 
-  defp metrics(metrics) do
+  defp metrics_table(metrics) do
     header = ["metric", "count", "rate/s" | Enum.map(@timing_stats, &Atom.to_string/1)]
 
     rows =
@@ -433,7 +565,7 @@ defmodule Stampede.Reporter.HTML do
         [escape(name), integer(summary.count), decimal(summary.rate) | timings]
       end
 
-    ["<h3>Metrics</h3>\n", table(header, rows)]
+    table(header, rows)
   end
 
   defp checks([]), do: []

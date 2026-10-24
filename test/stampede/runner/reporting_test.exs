@@ -38,9 +38,10 @@ defmodule Stampede.Runner.ReportingTest do
     :telemetry.attach_many(
       "#{inspect(test)}",
       [[:stampede, :run, :start], [:stampede, :run, :interval], [:stampede, :run, :stop]],
-      # Other tests run at the same time, and a handler that raises is detached.
+      # Other tests run scenarios at the same time. The run events are emitted
+      # by the process that called Stampede.run/2, which is this test.
       fn event, measurements, metadata, _config ->
-        if metadata.scenario == Observed, do: send(test, {event, measurements, metadata})
+        if self() == test, do: send(test, {event, measurements, metadata})
       end,
       nil
     )

@@ -1,11 +1,29 @@
 # Changelog
 
-## Unreleased
+## v1.1.0 (2026-10-24)
 
-  * Binary payloads in `Stampede.Channels`, sent and received as
-    `{:binary, data}` with the `"2.0.0"` serializer, as in Phoenix
-  * `Stampede.Channels.Serializer`, with a `:serializer` option in
-    `Stampede.Channels.connect/2` for servers that extend the protocol
+This release is mostly about seeing what a load test is doing while it runs,
+and about covering more of a Phoenix app.
+
+  * A live dashboard: `mix stampede.run --dashboard`, or `Stampede.Dashboard`
+    from code
+  * `--parallel` and `Stampede.run_parallel/2` run several scenarios at once,
+    each with its own options
+  * LiveView uploads with `Stampede.LiveView.upload/4`, recorded as
+    `"live.upload"`
+  * `mix stampede.gen.scenario` generates HTTP, Channels, LiveView and
+    WebSocket scenarios
+  * `mix igniter.install stampede` adds Stampede and a first scenario to a
+    project
+  * `Stampede.ExUnit` runs load tests from a test suite
+  * Binary payloads in `Stampede.Channels` with the `"2.0.0"` serializer, as
+    `{:binary, data}`
+  * Custom serializers through `Stampede.Channels.Serializer` and the
+    `:serializer` option, for servers that extend the protocol
+  * Elixir 1.18 is supported
+  * New guides: pages behind a login, Phoenix Presence, Absinthe
+    subscriptions, load tests in CI, spreading the load over machines, and a
+    case study with real numbers
 
 ### Fixes
 

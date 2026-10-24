@@ -34,8 +34,8 @@ defmodule Stampede.Channels do
 
       {:ok, {:binary, chunk}} = Stampede.Channels.push(socket, "file:1", "read", {:binary, <<0, 64>>})
 
-  Servers that extend the protocol, such as Supabase Realtime with its binary
-  broadcasts, can be given their own `Stampede.Channels.Serializer`.
+  Servers that add message types of their own, such as custom binary frames,
+  can be given their own `Stampede.Channels.Serializer`.
   """
 
   alias Stampede.Channels.{Serializer, Socket}

@@ -1,0 +1,31 @@
+name: Bug report
+description: Something in Stampede does not work as documented
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: scenario
+    attributes:
+      label: Scenario
+      description: The scenario, or the smallest one that shows the bug.
+      render: elixir
+  - type: textarea
+    id: output
+    attributes:
+      label: Output
+      description: The output of `mix stampede.run`, or the error.
+      render: shell
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Stampede, Elixir and Erlang/OTP, and Phoenix and LiveView when they are involved.
+      placeholder: Stampede 1.1.0, Elixir 1.19.5, OTP 28, Phoenix 1.8.1, LiveView 1.1.8
+    validations:
+      required: true

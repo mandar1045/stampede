@@ -168,6 +168,131 @@ defmodule Stampede.LiveViewTest do
     end
   end
 
+  describe "upload/4" do
+    setup do
+      {:ok, view} = LiveView.connect(url("/upload"))
+      %{view: view}
+    end
+
+    defp file(name, size) do
+      content = :crypto.strong_rand_bytes(size)
+      hash = :sha256 |> :crypto.hash(content) |> Base.encode16(case: :lower)
+      {%{name: name, content: content}, hash}
+    end
+
+    test "sends files in chunks for the LiveView to consume", %{view: view} do
+      {photo, photo_hash} = file("me.jpg", 2_500)
+      {icon, icon_hash} = file("icon.PNG", 999)
+
+      assert :ok = LiveView.upload(view, "avatar", [photo, icon])
+
+      assert {:ok, %{"title" => "Hi", "files" => files}} =
+               LiveView.submit(view, "save", %{"title" => "Hi"})
+
+      assert Enum.sort_by(files, & &1["name"]) == [
+               %{
+                 "name" => "icon.PNG",
+                 "type" => "image/png",
+                 "size" => 999,
+                 "sha256" => icon_hash
+               },
+               %{
+                 "name" => "me.jpg",
+                 "type" => "image/jpeg",
+                 "size" => 2_500,
+                 "sha256" => photo_hash
+               }
+             ]
+    end
+
+    test "sends files to automatic uploads, of any type and size", %{view: view} do
+      {document, hash} = file("report.bin", 70_000)
+
+      assert :ok = LiveView.upload(view, "document", [document])
+
+      assert {:ok, %{"documents" => [%{"size" => 70_000, "sha256" => ^hash}]}} =
+               LiveView.submit(view, "save", %{})
+    end
+
+    test "replaces the file of an upload of one file", %{view: view} do
+      {document, _hash} = file("report.bin", 100)
+      empty = %{name: "empty", content: "", type: "application/x-empty"}
+
+      assert :ok = LiveView.upload(view, "document", [document])
+      assert :ok = LiveView.upload(view, "document", [empty])
+
+      assert {:ok, %{"documents" => [replaced]}} = LiveView.submit(view, "save", %{})
+
+      assert replaced == %{
+               "name" => "empty",
+               "type" => "application/x-empty",
+               "size" => 0,
+               "sha256" => sha256("")
+             }
+    end
+
+    test "sends files to the component that renders the upload", %{view: view} do
+      {photo, hash} = file("me.jpg", 10)
+
+      assert :ok = LiveView.upload(view, "photo", [photo])
+
+      assert {:ok, %{"files" => [%{"sha256" => ^hash}]}} =
+               LiveView.submit(view, "save", %{}, target: 1)
+    end
+
+    test "returns the files the LiveView rejects", %{view: view} do
+      {notes, _hash} = file("notes.txt", 10)
+      {big, _hash} = file("big.jpg", 50_001)
+      {photo, _hash} = file("me.jpg", 10)
+
+      assert {:error, {:rejected, [{"notes.txt", "not_accepted"}]}} =
+               LiveView.upload(view, "avatar", [notes])
+
+      # The rejected file stays until the LiveView cancels it.
+      assert {:error, {:rejected, [{"big.jpg", "too_large"}]}} =
+               LiveView.upload(view, "avatar", [big])
+
+      {:ok, view} = LiveView.connect(url("/upload"))
+
+      assert {:error, {:rejected, [{"avatar", "too_many_files"}]}} =
+               LiveView.upload(view, "avatar", [photo, photo, photo])
+    end
+
+    test "returns an error for uploads the page did not render", %{view: view} do
+      assert {:error, {:no_upload, "missing"}} = LiveView.upload(view, "missing", [])
+
+      {:ok, counter} = LiveView.connect(url("/counter"))
+      assert {:error, {:no_upload, "avatar"}} = LiveView.upload(counter, "avatar", [])
+    end
+
+    test "raises on files without a name or content", %{view: view} do
+      assert_raise ArgumentError, ~r/expected a file to be a map with a :name/, fn ->
+        LiveView.upload(view, "avatar", ["me.jpg"])
+      end
+    end
+  end
+
+  defp sha256(content), do: :sha256 |> :crypto.hash(content) |> Base.encode16(case: :lower)
+
+  defmodule Uploading do
+    use Stampede.Scenario
+
+    @impl true
+    def run(_vu) do
+      {:ok, view} = LiveView.connect(Stampede.TestEndpoint.page_url("/upload"))
+      :ok = LiveView.upload(view, "avatar", [%{name: "me.jpg", content: "photo"}])
+      {:ok, %{"files" => [_file]}} = LiveView.submit(view, "save", %{})
+    end
+  end
+
+  test "records uploads inside a run" do
+    result = Stampede.run(Uploading, vus: 2, duration: 1_000)
+
+    assert result.errors == []
+    assert result.metrics["live.upload"].count > 0
+    refute Map.has_key?(result.metrics, "live.upload.errors")
+  end
+
   defmodule Browsing do
     use Stampede.Scenario
 

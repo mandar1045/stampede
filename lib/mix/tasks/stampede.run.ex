@@ -8,10 +8,15 @@ defmodule Mix.Tasks.Stampede.Run do
       $ mix stampede.run loadtest/lobby.exs --vus 100 --duration 1m
       $ mix stampede.run loadtest/api.exs --rate 200 --duration 5m --out results.json
       $ mix stampede.run loadtest/api.exs --html report.html
+      $ mix stampede.run loadtest/lobby.exs --dashboard
 
   Every module in the file that implements `Stampede.Scenario` runs, one
   after the other, with a progress line every second and a summary at the
   end. The task exits with status 1 when a threshold fails, so it can gate CI.
+
+  With `--parallel`, the scenarios of every file given run at the same time
+  instead, each with its own options, to mix kinds of traffic. See
+  `Stampede.run_parallel/2`.
 
   Your project is compiled and configured, but its application is not
   started, since the system under test usually runs somewhere else. Start
@@ -28,9 +33,14 @@ defmodule Mix.Tasks.Stampede.Run do
     * `--html` - a file to write an HTML report of every scenario to, with
       charts of how each run went, see `Stampede.Reporter.to_html/1`
     * `--nodes` - other nodes to run VUs on too, separated by commas
+    * `--parallel` - runs the scenarios at the same time
+    * `--dashboard` - serves a page that shows the runs as they happen, see
+      `Stampede.Dashboard`
+    * `--dashboard-port` - the port of the dashboard, `4040` by default
 
   `--vus` and `--rate` replace the scenario's own VUs, rate and stages, and
-  `--duration` replaces its stages.
+  `--duration` replaces its stages. With `--parallel`, they apply to each
+  scenario.
 
   ## Running on several machines
 
@@ -53,7 +63,10 @@ defmodule Mix.Tasks.Stampede.Run do
     max_vus: :integer,
     out: :string,
     html: :string,
-    nodes: :string
+    nodes: :string,
+    parallel: :boolean,
+    dashboard: :boolean,
+    dashboard_port: :integer
   ]
 
   @impl true
@@ -69,13 +82,26 @@ defmodule Mix.Tasks.Stampede.Run do
     Mix.Task.run("app.config")
     {:ok, _apps} = Application.ensure_all_started(:stampede)
 
+    dashboard =
+      if opts[:dashboard] || opts[:dashboard_port], do: dashboard!(opts[:dashboard_port] || 4040)
+
+    run_opts = Keyword.merge([progress: true, nodes: [node() | nodes]], overrides)
+
     results =
-      for file <- files, scenario <- scenarios!(file, nodes) do
-        opts = Keyword.merge([progress: true, nodes: [node() | nodes]], overrides)
-        result = Stampede.run(scenario, opts)
-        Mix.shell().info(["\n", Stampede.Reporter.format(result)])
-        result
+      if opts[:parallel] do
+        scenarios = for file <- files, scenario <- scenarios!(file, nodes), do: scenario
+        results = Stampede.run_parallel(scenarios, run_opts)
+        Enum.each(results, &print/1)
+        results
+      else
+        for file <- files, scenario <- scenarios!(file, nodes) do
+          result = Stampede.run(scenario, run_opts)
+          print(result)
+          result
+        end
       end
+
+    if dashboard, do: Stampede.Dashboard.stop(dashboard)
 
     if out = opts[:out] do
       File.write!(out, [
@@ -93,6 +119,22 @@ defmodule Mix.Tasks.Stampede.Run do
       exit({:shutdown, 1})
     end
   end
+
+  defp dashboard!(port) do
+    case Stampede.Dashboard.start(port: port) do
+      {:ok, dashboard} ->
+        Mix.shell().info("Dashboard at #{Stampede.Dashboard.url(dashboard)}\n")
+        dashboard
+
+      {:error, reason} ->
+        Mix.raise(
+          "Could not start the dashboard on port #{port}: #{:inet.format_error(reason)}, " <>
+            "pick another one with --dashboard-port"
+        )
+    end
+  end
+
+  defp print(result), do: Mix.shell().info(["\n", Stampede.Reporter.format(result)])
 
   defp overrides(opts) do
     if opts[:vus] && opts[:rate] do
