@@ -1,0 +1,4 @@
+# Benchmark output and the generated assets of the benchmark's Phoenix app,
+# left out of GitHub's language stats.
+bench/million/results/** linguist-generated
+bench/million/app/priv/static/** linguist-vendored
