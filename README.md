@@ -153,21 +153,57 @@ LiveView users with joins under 12ms at p95 and not a single error, and
 Stampede never found where it breaks.
 
 Then I moved it to AWS: stock Phoenix on one 4-core, 32 GB server, and
-Stampede on a second machine, with Channels users that behave like Phoenix's
-JavaScript client (a heartbeat every 30 seconds, a message every 30 to 60):
+Stampede on a second machine of the same size. Every user behaves like
+Phoenix's JavaScript client: it joins a chat room, sends a heartbeat every 30
+seconds and a message every 30 to 60, and stays. Each step ramps over 100
+seconds:
 
-| Users | Join p95 | Message p95 | Errors | Server CPU | Server memory |
-|---:|---:|---:|---:|---:|---:|
-| 100,000 | 5.71ms | 0.57ms | 0 | 1% | 4.9 GB |
-| 200,000 | 6.84ms | 1.35ms | 0 | 3% | 9.5 GB |
-| 300,000 | 9.42ms | 2.67ms | 0 | 9% | 13.9 GB |
-| **400,000** | **12.46ms** | **4.07ms** | **0** | **24%** | **18.1 GB** |
+```console
+$ mix stampede.run loadtest/channels.exs --find-limit --start 100000 --step 100000 --up-to 800000 --hold 60s
+```
 
-At 500,000 the machine running Stampede ran out of CPU before Phoenix did,
-and the summary said so instead of blaming the server. Everything you need to
-run it yourself, and every number it measured, is in
-[`bench/million`](https://github.com/mandar1045/stampede/tree/main/bench/million). The goal is still a million, once I have
-more load machines.
+```
+ 159.6s  vus: 100000  iterations: 0  errors: 0  load test busy: 16%
+   step  100,000 VUs: held
+ 319.4s  vus: 200000  iterations: 0  errors: 0  load test busy: 29%
+   step  200,000 VUs: held
+ 479.1s  vus: 300000  iterations: 0  errors: 0  load test busy: 42%
+   step  300,000 VUs: held
+ 639.0s  vus: 400000  iterations: 0  errors: 0  load test busy: 55%
+   step  400,000 VUs: held
+ 799.0s  vus: 500000  iterations: 0  errors: 53663  load test busy: 100%
+   step  500,000 VUs: over the limit
+
+  warning
+    The load test was 100% busy at most, and 90% or more for 116s, so
+    timings from then include its own delays. Spread the load over more
+    machines to measure the server alone.
+
+  limit
+    Held 400,000 VUs. At 500,000 VUs, channel.join p95 was 23.45s, over
+    1.00s and channel.push p95 was 28.65s, over 1.00s and iteration.errors
+    count was 53696, over 0. The load test was 100% busy at that step, so
+    the limit may be its own rather than the server's
+
+  VUs      channel.join p95  channel.push p95  iteration.errors count  status
+  100,000            5.71ms             573µs                       0    pass
+  200,000            6.84ms            1.35ms                       0    pass
+  300,000            9.42ms            2.67ms                       0    pass
+  400,000           12.46ms            4.07ms                       0    pass
+  500,000            23.45s            28.65s                   53696    FAIL
+```
+
+400,000 users, no errors, joins in 12ms and messages in 4ms at p95. While it
+held them, the Phoenix server used 24% of its CPU and 18 GB of memory, and
+didn't log a single warning. At 500,000 it was the machine running Stampede
+that ran out of CPU, and the summary says so rather than blaming the server.
+Here's the HTML report from the same run:
+
+![The HTML report of the 400,000-user run](assets/benchmark-400k.png)
+
+Everything you need to run it yourself, and every number it measured, is in
+[`bench/million`](https://github.com/mandar1045/stampede/tree/main/bench/million).
+The goal is still a million, once I have more load machines.
 
 Each step ramps for 5 seconds and holds for 30 by default. `--start`,
 `--step`, `--up-to` and `--hold` change that, and `find_limit: [by: :rate]`
@@ -175,7 +211,7 @@ in a scenario's options steps up the arrival rate instead of users.
 It's new in 1.2, so the options and the report may still change a little.
 `--badge badge.svg` writes a badge with the result, for your README:
 
-![load tested: 12,000+ VUs](assets/badge-example.svg)
+![load tested: 400,000 VUs](assets/badge-400k.svg)
 
 ## Scenarios
 
