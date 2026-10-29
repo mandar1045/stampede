@@ -23,6 +23,8 @@ defmodule Mix.Tasks.Stampede.Gen.Scenario do
     * `--websocket` - talks to a plain WebSocket with `Stampede.WebSocket`
     * `--url` - the URL to start from, `http://localhost:4000/` by default,
       or the socket's URL for `--channels` and `--websocket`
+    * `--rate` - starts iterations at a fixed rate, instead of keeping a
+      number of VUs busy
     * `--force` - overwrites the file without asking
   """
 
@@ -34,6 +36,7 @@ defmodule Mix.Tasks.Stampede.Gen.Scenario do
     live: :boolean,
     websocket: :boolean,
     url: :string,
+    rate: :boolean,
     force: :boolean
   ]
 
@@ -73,9 +76,9 @@ defmodule Mix.Tasks.Stampede.Gen.Scenario do
     module = Enum.join([namespace(), Macro.camelize(name)], ".")
     path = Path.join("loadtest", Macro.underscore(name) <> ".exs")
 
-    if Mix.Generator.create_file(path, scenario(kind, module, path, opts[:url]),
-         force: opts[:force]
-       ) do
+    contents = scenario(kind, module, path, opts[:url], opts[:rate] == true)
+
+    if Mix.Generator.create_file(path, contents, force: opts[:force]) do
       Mix.shell().info("\nRun it with:\n\n    $ mix stampede.run #{path}\n")
     end
   end
@@ -89,28 +92,58 @@ defmodule Mix.Tasks.Stampede.Gen.Scenario do
 
   # Shared with mix stampede.install.
   @doc false
-  def scenario(kind, module, path, url \\ nil) do
+  def scenario(kind, module, path, url \\ nil, rate? \\ false) do
     url = url || @default_urls[kind]
 
     """
     defmodule #{module} do
       use Stampede.Scenario
 
-      # Ramps up to 50 VUs over 30 seconds, holds them for a minute and ramps
-      # down. Run it with:
-      #
-      #     $ mix stampede.run #{path}
-      #
+    #{load(rate?, path)}
       @impl true
       def options do
         [
-          stages: [{[second: 30], 50}, {[minute: 1], 50}, {[second: 10], 0}],
+    #{load_options(rate?)}
           thresholds: [{#{inspect(metric(kind))}, p95: 500}, {"iteration.errors", count: 0}]
         ]
       end
 
       @impl true
     #{run(kind, url)}end
+    """
+  end
+
+  defp load(false, path) do
+    """
+      # Ramps up to 50 VUs over 30 seconds, holds them for a minute and ramps
+      # down. Run it with:
+      #
+      #     $ mix stampede.run #{path}
+      #\
+    """
+  end
+
+  defp load(true, path) do
+    """
+      # Starts 20 iterations a second for a minute, however long each one
+      # takes, with up to 200 in progress at once. Run it with:
+      #
+      #     $ mix stampede.run #{path}
+      #\
+    """
+  end
+
+  defp load_options(false) do
+    """
+          stages: [{[second: 30], 50}, {[minute: 1], 50}, {[second: 10], 0}],\
+    """
+  end
+
+  defp load_options(true) do
+    """
+          rate: 20,
+          duration: [minute: 1],
+          max_vus: 200,\
     """
   end
 

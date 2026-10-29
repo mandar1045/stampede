@@ -1,5 +1,52 @@
 # Changelog
 
+## v1.2.0 (2026-10-29)
+
+This one answers the question I get asked most: how many users can my app
+handle? It also comes out of a real test on AWS, where stock Phoenix on one
+4-core server held 400,000 Channels users with no errors. That run found
+the problems with Stampede itself fixed below, and everything needed to run
+it again is in `bench/million`.
+
+  * `--find-limit`, or `find_limit:` from code, answers "how many users can
+    it handle?": the load goes up a step at a time until a threshold fails,
+    and the result says the most users, or the highest rate, that passed.
+    It's new, so its options and report may still change
+  * `--badge`, and `Stampede.Reporter.to_badge/1`, write a README badge with
+    the limit found
+  * `mix stampede.gen.scenario --rate` generates a scenario that starts
+    iterations at a rate
+  * `mix stampede.compare --format markdown`, to post a comparison on a pull
+    request
+  * Finished runs on the dashboard can be downloaded as the HTML report or
+    the JSON
+  * Channels and WebSocket connections hibernate after 5 seconds without
+    traffic. A VU holding a Channels connection went from about 37 KB of
+    memory to 23 KB, which matters once you're holding hundreds of thousands
+  * WebSocket connections use a 64 KB socket buffer instead of the few
+    megabytes Mint sets. With 60,000 connections, that cut the load test's
+    CPU by about a fifth
+  * Runs measure how busy the load test itself is, every second. When it's
+    90% busy or more, its own delays end up in its timings, so the summary
+    and the HTML report say so, and a `--find-limit` verdict says the limit
+    may be the load test's rather than the server's
+  * A run ends on time and prints its summary even when its VUs keep the
+    machine 100% busy. Its own processes run at high priority, and progress
+    is printed without holding the run up
+  * A VU whose iterations keep failing waits longer between tries: 100 ms,
+    then 150, 200, 250, 500 ms, 1 s, 2 s and at most 5 s, much like Phoenix's
+    JavaScript client before it reconnects. It was 100 ms every time, which
+    piled more load onto a server, or a load test, that was already in
+    trouble
+  * Connections no longer go through Erlang's host lookup for every
+    connect. IP addresses are used as they are, and host names are looked
+    up once and kept for 5 minutes. Under heavy load, lookups queued behind
+    each other and timed out as `nxdomain` errors that looked like the
+    server failing
+  * A run warns before it starts when a node may not allow enough processes
+    or open files for its VUs, instead of failing halfway with errors that
+    don't say why. It checks `ulimit -n` too, which the BEAM doesn't report
+
 ## v1.1.0 (2026-10-24)
 
 This release is mostly about seeing what a load test is doing while it runs,

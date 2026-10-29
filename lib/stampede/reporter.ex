@@ -19,6 +19,8 @@ defmodule Stampede.Reporter do
       "#{inspect(result.scenario)} ran for #{seconds(result.duration)}\n",
       metrics(metrics, checks),
       checks(checks),
+      busy(busy_warning(result)),
+      limit(result.limit),
       thresholds(result.thresholds),
       errors(result.errors)
     ])
@@ -48,6 +50,33 @@ defmodule Stampede.Reporter do
   @spec to_html(Result.t() | [Result.t()]) :: String.t()
   def to_html(%Result{} = result), do: to_html([result])
   def to_html(results) when is_list(results), do: Stampede.Reporter.HTML.render(results)
+
+  @doc """
+  Returns a badge for a run with `:find_limit`, as an SVG image in the
+  style of shields.io, saying how much load it held, such as "load tested |
+  1,200 VUs".
+
+      File.write!("loadtest/badge.svg", Stampede.Reporter.to_badge(result))
+
+  Raises `ArgumentError` for a run without `:find_limit`.
+  """
+  @spec to_badge(Result.t()) :: String.t()
+  def to_badge(%Result{limit: %{} = limit}) do
+    value =
+      case limit do
+        %{value: nil, steps: [step | _]} -> "under " <> amount(step.target, limit.by)
+        %{value: value, up_to?: true} -> amount(value, limit.by) <> "+"
+        %{value: value} -> amount(value, limit.by)
+      end
+
+    right = value <> if(limit.by == :vus, do: " VUs", else: "/s")
+    color = if limit.value, do: "#6b46a8", else: "#9f9f9f"
+    Stampede.Reporter.Badge.render("load tested", right, color)
+  end
+
+  def to_badge(%Result{}) do
+    raise ArgumentError, "expected the result of a run with :find_limit"
+  end
 
   defp metrics([], []), do: "\n  no metrics were recorded\n"
   defp metrics([], _checks), do: []
@@ -79,6 +108,120 @@ defmodule Stampede.Reporter do
       end
 
     ["\n  checks\n" | lines]
+  end
+
+  defp busy(nil), do: []
+  defp busy(warning), do: ["\n  warning\n    ", warning, "\n"]
+
+  # Past this, the load test's own delays show up in its timings.
+  @busy 0.9
+
+  # Shared with the HTML report.
+  @doc false
+  def busy_warning(%Result{timeline: timeline}) do
+    case for %{busy: busy} <- timeline, busy >= @busy, do: busy do
+      [] ->
+        nil
+
+      busy ->
+        "The load test was #{percent(Enum.max(busy))} busy at most, and 90% or more " <>
+          "for #{length(busy)}s, so timings from then include its own delays. " <>
+          "Spread the load over more machines to measure the server alone."
+    end
+  end
+
+  defp percent(fraction), do: "#{round(fraction * 100)}%"
+
+  defp limit(nil), do: []
+
+  defp limit(limit) do
+    columns =
+      case limit.steps do
+        [step | _] -> Enum.map(step.thresholds, &{&1.metric, &1.stat})
+        [] -> []
+      end
+
+    header = [unit(limit.by) | Enum.map(columns, fn {metric, stat} -> "#{metric} #{stat}" end)]
+
+    rows =
+      for step <- limit.steps do
+        values =
+          for threshold <- step.thresholds do
+            if threshold.value == nil,
+              do: "no samples",
+              else: stat(threshold.stat, threshold.value)
+          end
+
+        [amount(step.target, limit.by) | values] ++ [if(step.passed?, do: "pass", else: "FAIL")]
+      end
+
+    ["\n  limit\n    ", limit_headline(limit), "\n\n" | table([header ++ ["status"] | rows])]
+  end
+
+  # Shared with the HTML report.
+  @doc false
+  def limit_headline(limit) do
+    unit = unit(limit.by)
+
+    headline =
+      cond do
+        limit.value == nil ->
+          step = limit.failed
+          "Didn't hold the first step, #{amount(step.target, limit.by)} #{unit}: #{why(step)}"
+
+        limit.up_to? ->
+          "Held #{amount(limit.value, limit.by)} #{unit}, the most it was asked to try"
+
+        true ->
+          step = limit.failed
+
+          "Held #{amount(limit.value, limit.by)} #{unit}. " <>
+            "At #{amount(step.target, limit.by)} #{unit}, #{why(step)}"
+      end
+
+    headline =
+      if limit.min && limit.value && limit.value < limit.min,
+        do: headline <> ", under the minimum of #{amount(limit.min, limit.by)} #{unit}",
+        else: headline
+
+    case limit.failed do
+      %{busy: busy} when busy >= @busy ->
+        headline <>
+          ". The load test was #{percent(busy)} busy at that step, so the limit may be " <>
+          "its own rather than the server's"
+
+      _passed_or_not_busy ->
+        headline
+    end
+  end
+
+  defp why(step) do
+    step.thresholds
+    |> Enum.reject(& &1.passed?)
+    |> Enum.map_join(" and ", fn threshold ->
+      value =
+        if threshold.value == nil,
+          do: "had no samples",
+          else: "was #{stat(threshold.stat, threshold.value)}"
+
+      "#{threshold.metric} #{threshold.stat} #{value}, over #{stat(threshold.stat, threshold.limit)}"
+    end)
+  end
+
+  defp unit(:vus), do: "VUs"
+  defp unit(:rate), do: "iterations/s"
+
+  @doc false
+  def amount(value, :vus), do: integer(value)
+  def amount(value, :rate) when value == trunc(value), do: integer(trunc(value))
+  def amount(value, :rate), do: decimal(value)
+
+  defp integer(number) do
+    number
+    |> Integer.to_string()
+    |> String.reverse()
+    |> String.replace(~r/\d{3}(?=\d)/, "\\0,")
+    |> String.reverse()
   end
 
   defp thresholds([]), do: []

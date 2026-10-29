@@ -76,6 +76,30 @@ defmodule Mix.Tasks.Stampede.CompareTest do
     assert output =~ "No percentile got more than 25.0% slower"
   end
 
+  test "prints Markdown for pull request comments with --format markdown", %{tmp_dir: tmp_dir} do
+    base = write!(tmp_dir, "base.json", [result(Lobby, %{"iteration" => timing(10.0)})])
+    head = write!(tmp_dir, "head.json", [result(Lobby, %{"iteration" => timing(12.0)})])
+
+    {status, output, _errors} =
+      compare([base, head, "--format", "markdown", "--max-regression", "10"])
+
+    assert status == 1
+
+    assert output =~
+             "### Lobby\n\n| metric | stat | base | head | change |\n|---|---|---:|---:|---:|\n"
+
+    assert output =~ "| iteration | p50 | 10.00ms | 12.00ms | **+20.0% FAIL** |\n"
+
+    empty = Path.join(tmp_dir, "empty.json")
+    File.write!(empty, Reporter.to_json(result(Lobby, %{})))
+    {_status, output, _errors} = compare([empty, empty, "--format", "markdown"])
+    assert output =~ "No timings to compare."
+
+    assert_raise Mix.Error, ~r/Expected --format to be text or markdown, got: html/, fn ->
+      Compare.run([base, head, "--format", "html"])
+    end
+  end
+
   test "reads single results and raises on invalid files", %{tmp_dir: tmp_dir} do
     base = Path.join(tmp_dir, "base.json")
     File.write!(base, Reporter.to_json(result(Lobby, %{})))

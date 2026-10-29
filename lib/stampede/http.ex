@@ -144,12 +144,14 @@ defmodule Stampede.HTTP do
     timeout = max(deadline - System.monotonic_time(:millisecond), 0)
     transport_opts = Keyword.put_new(opts[:transport_opts], :timeout, timeout)
 
-    case Mint.HTTP.connect(scheme, request.uri.host, request.uri.port,
-           protocols: [:http1],
-           transport_opts: transport_opts
-         ) do
-      {:ok, conn} -> finish(key, exchange(conn, request, deadline))
-      {:error, reason} -> {:error, reason}
+    with {:ok, address} <- Stampede.Address.resolve(request.uri.host),
+         {:ok, conn} <-
+           Mint.HTTP.connect(scheme, address, request.uri.port,
+             hostname: request.uri.host,
+             protocols: [:http1],
+             transport_opts: transport_opts
+           ) do
+      finish(key, exchange(conn, request, deadline))
     end
   end
 

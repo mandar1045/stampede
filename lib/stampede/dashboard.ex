@@ -101,6 +101,16 @@ defmodule Stampede.Dashboard do
   @impl true
   def handle_call(:url, _from, state), do: {:reply, state.url, state}
 
+  def handle_call({:result, id}, _from, state) do
+    result =
+      case state.runs do
+        %{^id => %{result: %Result{} = result}} -> result
+        _runs -> nil
+      end
+
+    {:reply, result, state}
+  end
+
   def handle_call(:runs, _from, state) do
     runs = state.runs |> Map.values() |> Enum.sort_by(& &1.id, :desc)
     {:reply, {runs, state.version}, state}
@@ -288,7 +298,31 @@ defmodule Stampede.Dashboard do
     end
   end
 
+  defp respond("/runs/" <> file, _params, dashboard) do
+    with [id, name] <- String.split(file, "/"),
+         {id, ""} <- Integer.parse(id),
+         {:ok, type, render} <- download(name),
+         %Result{} = result <- GenServer.call(dashboard, {:result, id}) do
+      filename = "stampede-#{id}-#{name}"
+
+      headers = [
+        {"content-type", type},
+        {"content-disposition", ~s(attachment; filename="#{filename}")}
+      ]
+
+      {200, headers, render.(result)}
+    else
+      _other -> {404, [], "Not found"}
+    end
+  end
+
   defp respond(_path, _params, _dashboard), do: {404, [], "Not found"}
+
+  defp download("report.html"),
+    do: {:ok, "text/html; charset=utf-8", &Reporter.to_html/1}
+
+  defp download("results.json"), do: {:ok, "application/json", &Reporter.to_json/1}
+  defp download(_name), do: :error
 
   defp http_response(status, headers, body) do
     reason = %{200 => "OK", 204 => "No Content", 404 => "Not Found"}

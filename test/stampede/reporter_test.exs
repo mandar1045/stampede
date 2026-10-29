@@ -83,6 +83,7 @@ defmodule Stampede.ReporterTest do
              "scenario" => "MyApp.Load.Lobby",
              "duration" => 1_000,
              "passed?" => false,
+             "limit" => nil,
              "metrics" => %{
                "status is 200" => %{
                  "type" => "check",
@@ -160,6 +161,40 @@ defmodule Stampede.ReporterTest do
     assert html =~ "** (RuntimeError) &lt;script&gt;"
     refute html =~ "<b> &"
     assert length(String.split(html, "<script")) == 2
+  end
+
+  test "warns when the load test was too busy to trust its timings" do
+    point = fn busy -> %{at: 1_000, vus: 1, busy: busy, metrics: %{}} end
+
+    step = %{
+      target: 500,
+      busy: 0.97,
+      passed?: false,
+      thresholds: [%{metric: "x", stat: :p95, value: 2_000.0, limit: 1_000, passed?: false}]
+    }
+
+    result = %Result{
+      scenario: Lobby,
+      duration: 3_000,
+      timeline: [point.(0.5), point.(0.95), point.(0.99)],
+      limit: %{by: :vus, value: 400, failed: step, up_to?: false, min: nil, steps: [step]}
+    }
+
+    summary = Reporter.format(result)
+
+    assert summary =~
+             "\n  warning\n    The load test was 99% busy at most, and 90% or more for 2s, " <>
+               "so timings from then include its own delays."
+
+    assert summary =~
+             "At 500 VUs, x p95 was 2.00s, over 1.00s. The load test was 97% busy at that " <>
+               "step, so the limit may be its own rather than the server's"
+
+    assert Reporter.to_html(result) =~ "<strong>Warning:</strong> The load test was 99% busy"
+
+    calm = %{result | timeline: [point.(0.5)], limit: nil}
+    refute Reporter.format(calm) =~ "warning"
+    refute Reporter.to_html(calm) =~ "Warning:"
   end
 
   test "to_html/1 renders several results, with or without a timeline" do

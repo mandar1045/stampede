@@ -5,7 +5,16 @@ defmodule Stampede.Reporter.HTML do
   # tooltips a short script, so the file opens anywhere and can be shared.
   # Stampede.Dashboard renders its page with the same parts.
 
-  import Stampede.Reporter, only: [decimal: 1, milliseconds: 1, seconds: 1, stat: 2]
+  import Stampede.Reporter,
+    only: [
+      amount: 2,
+      busy_warning: 1,
+      decimal: 1,
+      limit_headline: 1,
+      milliseconds: 1,
+      seconds: 1,
+      stat: 2
+    ]
 
   alias Stampede.Result
 
@@ -350,8 +359,11 @@ defmodule Stampede.Reporter.HTML do
       section_start(id, result.scenario, status(result)),
       "Ran for ",
       seconds(result.duration),
+      downloads(id),
       "</p></header>\n",
       result_tiles(result),
+      busy(busy_warning(result)),
+      limit(result.limit),
       charts(result),
       metrics(metrics),
       checks(checks),
@@ -370,19 +382,86 @@ defmodule Stampede.Reporter.HTML do
     metrics = result.metrics
     iteration = metrics["iteration"]
 
+    limit =
+      case result.limit do
+        %{value: nil} -> [{"Limit", "none"}]
+        %{value: value, by: by, up_to?: up_to?} -> [{"Limit", limit_tile(value, by, up_to?)}]
+        nil -> []
+      end
+
     tiles =
-      [
-        {"Iterations", integer(count(metrics, "iteration"))},
-        {"Iterations per second", decimal(if iteration, do: iteration.rate, else: 0)},
-        {"Iteration p95", if(iteration, do: milliseconds(iteration.p95), else: "–")},
-        {"Errors", integer(count(metrics, "iteration.errors"))},
-        {"Peak VUs", integer(result.timeline |> Enum.map(& &1.vus) |> Enum.max(fn -> 0 end))}
-      ] ++
+      limit ++
+        [
+          {"Iterations", integer(count(metrics, "iteration"))},
+          {"Iterations per second", decimal(if iteration, do: iteration.rate, else: 0)},
+          {"Iteration p95", if(iteration, do: milliseconds(iteration.p95), else: "–")},
+          {"Errors", integer(count(metrics, "iteration.errors"))},
+          {"Peak VUs", integer(result.timeline |> Enum.map(& &1.vus) |> Enum.max(fn -> 0 end))}
+        ] ++
         if metrics["iterations.dropped"],
           do: [{"Dropped", integer(count(metrics, "iterations.dropped"))}],
           else: []
 
     tile_grid(tiles)
+  end
+
+  # On the dashboard, finished runs can be saved as the report and the JSON.
+  defp downloads(nil), do: []
+
+  defp downloads(id) do
+    [
+      ~s( · <a href="runs/#{id}/report.html" download>HTML report</a>),
+      ~s( · <a href="runs/#{id}/results.json" download>JSON</a>)
+    ]
+  end
+
+  defp limit_tile(value, by, up_to?) do
+    plus = if up_to?, do: "+", else: ""
+    unit = if by == :vus, do: " VUs", else: "/s"
+    amount(value, by) <> plus <> unit
+  end
+
+  defp busy(nil), do: []
+
+  defp busy(warning),
+    do: [~s(<p class="meta"><strong>Warning:</strong> ), escape(warning), "</p>\n"]
+
+  defp limit(nil), do: []
+
+  defp limit(limit) do
+    thresholds =
+      case limit.steps do
+        [step | _] -> step.thresholds
+        [] -> []
+      end
+
+    header =
+      [if(limit.by == :vus, do: "VUs", else: "iterations/s")] ++
+        Enum.map(thresholds, &escape("#{&1.metric} #{&1.stat}")) ++ ["status"]
+
+    rows =
+      for step <- limit.steps do
+        values =
+          for threshold <- step.thresholds do
+            if threshold.value == nil,
+              do: "no samples",
+              else: stat(threshold.stat, threshold.value)
+          end
+
+        status =
+          if step.passed?,
+            do: ~s(<span class="status passed">held</span>),
+            else: ~s(<span class="status failed">over</span>)
+
+        [amount(step.target, limit.by) | values] ++ [status]
+      end
+
+    [
+      ~s(<h3>Limit</h3>\n<p class="meta">),
+      escape(limit_headline(limit)),
+      ".</p>\n",
+      table(header, rows)
+    ]
   end
 
   defp tile_grid(tiles) do

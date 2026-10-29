@@ -3,6 +3,14 @@ defmodule Stampede.WebSocket.Connection do
 
   # The Mint side of a WebSocket, shared by the Channels and plain clients.
 
+  alias Stampede.Address
+
+  # Mint sizes the socket's buffer to the kernel's send buffer, often a few
+  # megabytes, and the driver keeps a buffer that big for every connection.
+  # With 60,000 connections, 64 KB instead cut the load test's CPU by a fifth
+  # and its address space from about 175 GB to 7 GB.
+  @buffer 65_536
+
   # Also returns the frames that came with the upgrade response, since a
   # server may send some right away.
   def connect(uri, path, opts) do
@@ -11,11 +19,14 @@ defmodule Stampede.WebSocket.Connection do
     deadline = System.monotonic_time(:millisecond) + timeout
     transport_opts = Keyword.put_new(opts[:transport_opts], :timeout, timeout)
 
-    with {:ok, conn} <-
-           Mint.HTTP.connect(http_scheme, uri.host, uri.port,
+    with {:ok, address} <- Address.resolve(uri.host),
+         {:ok, conn} <-
+           Mint.HTTP.connect(http_scheme, address, uri.port,
+             hostname: uri.host,
              protocols: [:http1],
              transport_opts: transport_opts
            ),
+         :ok <- set_buffer(conn, http_scheme, opts[:transport_opts][:buffer] || @buffer),
          {:ok, conn, ref} <- Mint.WebSocket.upgrade(ws_scheme, conn, path, opts[:headers]),
          {:ok, conn, status, headers, data} <- await_upgrade(conn, ref, deadline, {nil, [], []}),
          {:ok, conn, websocket} <- Mint.WebSocket.new(conn, ref, status, headers),
@@ -28,6 +39,15 @@ defmodule Stampede.WebSocket.Connection do
 
       {:error, reason} ->
         {:error, reason}
+    end
+  end
+
+  defp set_buffer(conn, scheme, buffer) do
+    transport = if scheme == :https, do: :ssl, else: :inet
+
+    case transport.setopts(Mint.HTTP.get_socket(conn), buffer: buffer) do
+      :ok -> :ok
+      {:error, reason} -> {:error, conn, reason}
     end
   end
 

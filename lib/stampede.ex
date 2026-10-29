@@ -123,6 +123,27 @@ defmodule Stampede do
       `:count` and `:rate`, per second. Thresholds on a timing with no samples
       fail, while counters and checks with no samples are zero.
 
+    * `:find_limit` - instead of a fixed load, finds the most load the
+      `:thresholds` allow. The load goes up a step at a time, ramping then
+      holding each step, and the thresholds are checked over each whole step,
+      ramp included, so VUs that connect once and stay count where they
+      joined. The run ends at the first step that fails, and the result's `:limit` holds
+      the highest load that passed. Takes `true`, or a keyword list of:
+      * `:by` - `:vus` (the default) or `:rate`, in iterations per second
+      * `:start` - the first step's load, `:step` by default
+      * `:step` - how much each step adds, `50` by default
+      * `:up_to` - the most load to try, `10_000` by default
+      * `:ramp` - how long each step takes to reach its load, 5 seconds by
+        default
+      * `:hold` - how long each step holds its load, 30 seconds by default,
+        and at least 2
+      * `:min` - the lowest limit that counts as passing, for CI
+
+      The next step can start in the moment before the step that failed is
+      checked, so the load briefly goes past the limit before the run ends.
+      This option is new in v1.2, and its options and report may still
+      change.
+
     * `:nodes` - the nodes to run the VUs on, `[node()]` by default. VUs and
       rates are split evenly between them, and their metrics are merged.
       Every node must be connected and able to run Stampede and the

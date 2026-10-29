@@ -1,7 +1,7 @@
 defmodule Stampede.MixProject do
   use Mix.Project
 
-  @version "1.1.0"
+  @version "1.2.0"
   @source_url "https://github.com/mandar1045/stampede"
 
   def project do
@@ -21,6 +21,7 @@ defmodule Stampede.MixProject do
 
   def application do
     [
+      mod: {Stampede.Application, []},
       extra_applications: [:logger]
     ]
   end

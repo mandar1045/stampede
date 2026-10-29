@@ -1,0 +1,6 @@
+%{
+  "hpax": {:hex, :hpax, "1.1.0", "782931867cc23217c68fb5f68fe1a11f5e7544c7fda82c8a7019a5df5a4a1cdf", [:mix], [], "hexpm", "0b8d0f05832f55571d65ac720f79bf8994138ffbb133209dc4685eae0ad456a8"},
+  "mint": {:hex, :mint, "1.11.0", "a713551624815c0435237b93d90ea8b9b14254690c66f732d0ef8930f76ff1d9", [:mix], [{:castore, "~> 0.1.0 or ~> 1.0", [hex: :castore, repo: "hexpm", optional: true]}, {:hpax, "~> 1.1", [hex: :hpax, repo: "hexpm", optional: false]}], "hexpm", "c6279ba2d6aa3a383a1d4cfbe7b59f42e6efd400f58d8e2acfeac48a438693ab"},
+  "mint_web_socket": {:hex, :mint_web_socket, "1.0.6", "5ffcf350df5b90f2d7a04adf877165228804993714592512374218d4679e325a", [:mix], [{:mint, ">= 1.4.1 and < 2.0.0-0", [hex: :mint, repo: "hexpm", optional: false]}], "hexpm", "0c360e9012413f1c115a63532601eb5d63731aab7010949178769760686c1698"},
+  "telemetry": {:hex, :telemetry, "1.4.2", "a0cb522801dffb1c49fe6e30561badffc7b6d0e180db1300df759faa22062855", [:rebar3], [], "hexpm", "928f6495066506077862c0d1646609eed891a4326bee3126ba54b60af61febb1"},
+}

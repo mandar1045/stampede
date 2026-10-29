@@ -8,6 +8,9 @@ defmodule Stampede.WebSocket.Client do
 
   @inbox_limit 1_000
 
+  # Hibernates while idle, like `Stampede.Channels.Socket`.
+  @hibernate_after 5_000
+
   # Once the connection closes, `closed` holds why, and the process stays
   # around so that frames received before the close can still be read.
   defstruct [
@@ -22,7 +25,9 @@ defmodule Stampede.WebSocket.Client do
   ]
 
   def start_link(uri, path, opts) do
-    GenServer.start_link(__MODULE__, {uri, path, opts, Metrics.current()})
+    GenServer.start_link(__MODULE__, {uri, path, opts, Metrics.current()},
+      hibernate_after: @hibernate_after
+    )
   end
 
   def request(client, request) do

@@ -9,6 +9,7 @@ defmodule Mix.Tasks.Stampede.Run do
       $ mix stampede.run loadtest/api.exs --rate 200 --duration 5m --out results.json
       $ mix stampede.run loadtest/api.exs --html report.html
       $ mix stampede.run loadtest/lobby.exs --dashboard
+      $ mix stampede.run loadtest/lobby.exs --find-limit --step 100 --badge badge.svg
 
   Every module in the file that implements `Stampede.Scenario` runs, one
   after the other, with a progress line every second and a summary at the
@@ -37,6 +38,13 @@ defmodule Mix.Tasks.Stampede.Run do
     * `--dashboard` - serves a page that shows the runs as they happen, see
       `Stampede.Dashboard`
     * `--dashboard-port` - the port of the dashboard, `4040` by default
+    * `--find-limit` - finds the most load the scenario's thresholds allow,
+      instead of running a fixed load, see `:find_limit` in `Stampede.run/2`
+    * `--start`, `--step`, `--up-to` and `--hold` - the first step's load,
+      how much each step adds, the most load to try, and how long each step
+      holds, for `--find-limit`
+    * `--badge` - a file to write a badge with the limit found to, as an SVG
+      image for a README, see `Stampede.Reporter.to_badge/1`
 
   `--vus` and `--rate` replace the scenario's own VUs, rate and stages, and
   `--duration` replaces its stages. With `--parallel`, they apply to each
@@ -66,7 +74,13 @@ defmodule Mix.Tasks.Stampede.Run do
     nodes: :string,
     parallel: :boolean,
     dashboard: :boolean,
-    dashboard_port: :integer
+    dashboard_port: :integer,
+    find_limit: :boolean,
+    start: :string,
+    step: :string,
+    up_to: :string,
+    hold: :string,
+    badge: :string
   ]
 
   @impl true
@@ -115,6 +129,10 @@ defmodule Mix.Tasks.Stampede.Run do
       File.write!(html, Stampede.Reporter.to_html(results))
     end
 
+    if badge = opts[:badge] do
+      write_badge!(badge, results)
+    end
+
     if not Enum.all?(results, & &1.passed?) do
       exit({:shutdown, 1})
     end
@@ -136,9 +154,36 @@ defmodule Mix.Tasks.Stampede.Run do
 
   defp print(result), do: Mix.shell().info(["\n", Stampede.Reporter.format(result)])
 
+  defp write_badge!(path, results) do
+    case Enum.find(results, & &1.limit) do
+      nil ->
+        Mix.raise("Expected --find-limit along with --badge, since the badge shows the limit")
+
+      result ->
+        File.write!(path, Stampede.Reporter.to_badge(result))
+
+        Mix.shell().info("""
+
+        Wrote the badge to #{path}. Show it in your README with:
+
+            [![Load tested with Stampede](#{path})](https://github.com/mandar1045/stampede)
+        """)
+    end
+  end
+
   defp overrides(opts) do
     if opts[:vus] && opts[:rate] do
       Mix.raise("Expected either --vus or --rate, not both")
+    end
+
+    if opts[:find_limit] && (opts[:vus] || opts[:rate] || opts[:duration]) do
+      Mix.raise(
+        "Expected --find-limit without --vus, --rate or --duration, since it sets the load"
+      )
+    end
+
+    if !opts[:find_limit] && Enum.any?([:start, :step, :up_to, :hold], &opts[&1]) do
+      Mix.raise("Expected --start, --step, --up-to and --hold only along with --find-limit")
     end
 
     Enum.reduce(opts, [], fn
@@ -158,9 +203,36 @@ defmodule Mix.Tasks.Stampede.Run do
       {:max_vus, max_vus}, overrides ->
         Keyword.put(overrides, :max_vus, max_vus)
 
+      {:find_limit, true}, overrides ->
+        limit =
+          for key <- [:start, :step, :up_to],
+              value = opts[key],
+              do: {key, parse_number!(key, value)}
+
+        limit = if opts[:hold], do: [{:hold, parse_duration!(opts[:hold])} | limit], else: limit
+        Keyword.put(overrides, :find_limit, if(limit == [], do: true, else: limit))
+
       {_option, _value}, overrides ->
         overrides
     end)
+  end
+
+  defp parse_number!(key, value) do
+    case Integer.parse(value) do
+      {integer, ""} ->
+        integer
+
+      _other ->
+        case Float.parse(value) do
+          {float, ""} ->
+            float
+
+          _other ->
+            Mix.raise(
+              "Expected --#{String.replace("#{key}", "_", "-")} to be a number, got: #{value}"
+            )
+        end
+    end
   end
 
   defp parse_duration!(duration) do

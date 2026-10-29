@@ -46,6 +46,11 @@ jobs:
   load:
     runs-on: ubuntu-24.04
 
+    # To comment on the pull request with the comparison.
+    permissions:
+      contents: read
+      pull-requests: write
+
     services:
       postgres:
         image: postgres:17
@@ -80,8 +85,15 @@ jobs:
           git checkout ${{ github.event.pull_request.head.sha }}
           sh loadtest/ci.sh head.json --html report.html
 
-      - run: mix stampede.compare base.json head.json --max-regression 20
+      - name: Compare with the base branch
         if: hashFiles('base.json') != ''
+        run: mix stampede.compare base.json head.json --max-regression 20 --format markdown > comparison.md
+
+      - name: Comment on the pull request
+        if: always() && hashFiles('comparison.md') != ''
+        run: gh pr comment ${{ github.event.pull_request.number }} --body-file comparison.md
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -91,8 +103,11 @@ jobs:
 ```
 
 The job fails when a threshold fails on the branch, or when a p50, p95 or
-p99 got more than 20% slower than on the base branch. Either way, the report
-is kept with the run, to see where the time went.
+p99 got more than 20% slower than on the base branch. Either way, the
+comparison shows up as a comment on the pull request, with the slower
+percentiles in bold, and the report is kept with the run, to see where the
+time went. Pull requests from forks get a read-only token, so there the
+comment step fails and the comparison is only in the job's log.
 
 ## Keeping the numbers steady
 

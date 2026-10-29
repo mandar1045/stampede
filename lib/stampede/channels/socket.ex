@@ -9,6 +9,10 @@ defmodule Stampede.Channels.Socket do
 
   @inbox_limit 1_000
 
+  # A socket that only sends heartbeats spends most of its time waiting, so
+  # it hibernates to keep the memory of many idle connections down.
+  @hibernate_after 5_000
+
   defstruct [
     :conn,
     :ref,
@@ -26,7 +30,9 @@ defmodule Stampede.Channels.Socket do
   ]
 
   def start_link(uri, path, serializer, opts) do
-    GenServer.start_link(__MODULE__, {uri, path, serializer, opts, Metrics.current()})
+    GenServer.start_link(__MODULE__, {uri, path, serializer, opts, Metrics.current()},
+      hibernate_after: @hibernate_after
+    )
   end
 
   def request(socket, request) do

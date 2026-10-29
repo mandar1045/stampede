@@ -75,6 +75,32 @@ defmodule Mix.Tasks.Stampede.RunTest do
     assert catch_exit(capture_io(fn -> Mix.Tasks.Stampede.Run.run([path]) end)) == {:shutdown, 1}
   end
 
+  test "finds the limit with --find-limit and writes a badge", %{tmp_dir: tmp_dir} do
+    path =
+      write_scenario!(tmp_dir, "Limited", """
+        @impl true
+        def options, do: [thresholds: [{"latency", p95: 25}]]
+
+        @impl true
+        def run(vu) do
+          Stampede.record("latency", vu.id * 10)
+          Process.sleep(20)
+        end
+      """)
+
+    badge = Path.join(tmp_dir, "badge.svg")
+
+    args =
+      ~w(--find-limit --start 1 --step 1 --up-to 2 --hold 2s --badge) ++ [badge, path]
+
+    output = capture_io(fn -> Mix.Tasks.Stampede.Run.run(args) end)
+
+    assert output =~ "step  1 VUs: held"
+    assert output =~ "Held 2 VUs, the most it was asked to try"
+    assert output =~ "Wrote the badge to #{badge}"
+    assert File.read!(badge) =~ ~s(aria-label="load tested: 2+ VUs")
+  end
+
   test "raises on invalid arguments", %{tmp_dir: tmp_dir} do
     assert_raise Mix.Error, ~r/Expected a scenario file/, fn -> Mix.Tasks.Stampede.Run.run([]) end
 
@@ -91,6 +117,18 @@ defmodule Mix.Tasks.Stampede.RunTest do
 
     assert_raise Mix.Error, ~r/No module in .* implements Stampede.Scenario/, fn ->
       Mix.Tasks.Stampede.Run.run([path])
+    end
+
+    assert_raise Mix.Error, ~r/--find-limit without --vus, --rate or --duration/, fn ->
+      Mix.Tasks.Stampede.Run.run([path, "--find-limit", "--vus", "1"])
+    end
+
+    assert_raise Mix.Error, ~r/--start, --step, --up-to and --hold only along with/, fn ->
+      Mix.Tasks.Stampede.Run.run([path, "--step", "10"])
+    end
+
+    assert_raise Mix.Error, ~r/Expected --step to be a number, got: lots/, fn ->
+      Mix.Tasks.Stampede.Run.run([path, "--find-limit", "--step", "lots"])
     end
 
     assert_raise Mix.Error, ~r/Expected either --vus or --rate/, fn ->

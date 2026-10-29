@@ -1,7 +1,7 @@
 defmodule Stampede.Runner do
   @moduledoc false
 
-  alias Stampede.{Metrics, Plan, Result, Thresholds}
+  alias Stampede.{Limit, Metrics, Plan, Reporter, Result, Thresholds}
   alias Stampede.Runner.Driver
 
   @options [
@@ -13,6 +13,7 @@ defmodule Stampede.Runner do
     max_vus: 1_000,
     graceful_stop: 0,
     thresholds: [],
+    find_limit: nil,
     nodes: nil,
     progress: false
   ]
@@ -44,13 +45,18 @@ defmodule Stampede.Runner do
     opts =
       scenario
       |> default_options()
-      |> Keyword.merge(opts)
+      |> Keyword.merge(opts, &merge_option/3)
       |> Keyword.validate!(@options)
 
-    plan = Plan.from_options(opts)
     thresholds = Thresholds.normalize(opts[:thresholds])
+    limit = if opts[:find_limit], do: Limit.new!(opts[:find_limit], thresholds)
+
+    plan =
+      Plan.from_options(if limit, do: Keyword.merge(opts, Limit.plan_options(limit)), else: opts)
+
     nodes = nodes!(opts[:nodes])
     Enum.each(nodes, &prepare!(&1, scenario))
+    warn_limits(scenario, plan, nodes)
     graceful_stop = Plan.milliseconds!(opts[:graceful_stop])
     data = if function_exported?(scenario, :setup, 1), do: scenario.setup(opts)
 
@@ -59,6 +65,7 @@ defmodule Stampede.Runner do
       opts: opts,
       plan: plan,
       thresholds: thresholds,
+      limit: limit,
       nodes: nodes,
       graceful_stop: graceful_stop,
       data: data
@@ -81,26 +88,39 @@ defmodule Stampede.Runner do
       count: length(nodes)
     }
 
-    drivers = start_drivers(nodes, config)
-    Enum.each(drivers, fn {pid, _driver} -> send(pid, :go) end)
+    # The run's own processes run at high priority, so that a node busy with
+    # hundreds of thousands of VUs still collects reports and ends the run on
+    # time, instead of stalling with them.
+    priority = Process.flag(:priority, :high)
+    printer = if opts[:progress], do: start_printer()
 
     state =
-      collect(%{
-        scenario: scenario,
-        progress?: opts[:progress],
-        named?: named?,
-        running: drivers,
-        count: map_size(drivers),
-        pending: %{},
-        next_index: 0,
-        timeline: [],
-        last_at: 0,
-        iterations: 0,
-        errors: 0,
-        finals: []
-      })
+      try do
+        drivers = start_drivers(nodes, config)
+        Enum.each(drivers, fn {pid, _driver} -> send(pid, :go) end)
 
-    state = flush(state, true)
+        %{
+          scenario: scenario,
+          printer: printer,
+          named?: named?,
+          limit: run.limit,
+          running: drivers,
+          count: map_size(drivers),
+          pending: %{},
+          next_index: 0,
+          timeline: [],
+          last_at: 0,
+          iterations: 0,
+          errors: 0,
+          finals: []
+        }
+        |> collect()
+        |> flush(true)
+      after
+        stop_printer(printer)
+        Process.flag(:priority, priority)
+      end
+
     duration = state.finals |> Enum.map(& &1.duration) |> Enum.max()
     summary = state.finals |> Enum.map(& &1.rows) |> Metrics.merge() |> Metrics.summary(duration)
 
@@ -112,6 +132,7 @@ defmodule Stampede.Runner do
         Thresholds.evaluate(thresholds, summary.metrics),
         Enum.reverse(state.timeline)
       )
+      |> with_limit(state.limit)
 
     measurements = %{duration: System.monotonic_time() - started_at}
 
@@ -122,6 +143,24 @@ defmodule Stampede.Runner do
 
     result
   end
+
+  # A run that looked for its limit passes when it found one. Its thresholds
+  # were checked step by step, so the steps tell how it went.
+  defp with_limit(result, nil), do: result
+
+  defp with_limit(result, limit) do
+    limit = Limit.summary(limit)
+    %{result | limit: limit, thresholds: [], passed?: Limit.passed?(limit)}
+  end
+
+  # `:find_limit` options given to a run add to the scenario's own, so that
+  # `--find-limit --up-to 500` keeps the scenario's other settings.
+  defp merge_option(:find_limit, defaults, true) when is_list(defaults), do: defaults
+
+  defp merge_option(:find_limit, defaults, given) when is_list(defaults) and is_list(given),
+    do: Keyword.merge(defaults, given)
+
+  defp merge_option(_key, _default, given), do: given
 
   defp default_options(scenario) do
     if function_exported?(scenario, :options, 0), do: scenario.options(), else: []
@@ -153,6 +192,47 @@ defmodule Stampede.Runner do
 
   # Every node runs Stampede and the scenario. A scenario compiled to a .beam
   # file is loaded on the nodes that do not have it yet.
+  # A VU that holds a connection takes about two processes and an open file
+  # or two, so a big run can hit the limits of a node long before running out
+  # of memory or CPU, and fail halfway with errors that don't say why.
+  defp warn_limits(scenario, plan, nodes) do
+    vus = ceil(Plan.peak_vus(plan) / length(nodes))
+
+    for node <- nodes do
+      %{processes: processes, files: files} =
+        if node == node(), do: limits(), else: :erpc.call(node, __MODULE__, :limits, [])
+
+      if vus * 2 > processes or vus * 2 > files do
+        IO.warn(
+          "#{inspect(scenario)} can run up to #{Reporter.amount(vus, :vus)} VUs on #{node}, " <>
+            "which allows #{Reporter.amount(processes, :vus)} processes and " <>
+            "#{Reporter.amount(files, :vus)} open files. A VU that holds a connection takes " <>
+            "about two of each, so the run may fail. Raise them with " <>
+            ~s(--erl "+P 4000000" and ulimit -n),
+          []
+        )
+      end
+    end
+  end
+
+  # The open files are the BEAM's port limit, or what the OS allows if that's
+  # lower. The BEAM doesn't report the OS limit, but a shell it starts shares
+  # it.
+  @doc false
+  def limits do
+    ports = :erlang.system_info(:port_limit)
+
+    files =
+      with {:unix, _name} <- :os.type(),
+           {limit, _rest} <- Integer.parse(to_string(:os.cmd(~c"ulimit -n"))) do
+        min(limit, ports)
+      else
+        _other -> ports
+      end
+
+    %{processes: :erlang.system_info(:process_limit), files: files}
+  end
+
   defp prepare!(node, _scenario) when node == node(), do: :ok
 
   defp prepare!(node, scenario) do
@@ -214,12 +294,15 @@ defmodule Stampede.Runner do
   end
 
   defp add_interval(state, interval) do
-    entry = Map.get(state.pending, interval.index, %{reports: 0, at: 0, vus: 0, rows: %{}})
+    entry =
+      Map.get(state.pending, interval.index, %{reports: 0, at: 0, vus: 0, busy: 0.0, rows: %{}})
 
+    # A second is as busy as the busiest node was.
     entry = %{
       reports: entry.reports + 1,
       at: max(entry.at, interval.at),
       vus: entry.vus + interval.vus,
+      busy: max(entry.busy, interval.busy),
       rows: Map.merge(entry.rows, interval.delta, fn _key, left, right -> left + right end)
     }
 
@@ -242,8 +325,9 @@ defmodule Stampede.Runner do
   end
 
   defp add_point(state, entry) do
+    state = check_limit(state, entry)
     summary = Metrics.summary(entry.rows, entry.at - state.last_at)
-    point = %{at: entry.at, vus: entry.vus, metrics: summary.metrics}
+    point = %{at: entry.at, vus: entry.vus, busy: entry.busy, metrics: summary.metrics}
     iterations = state.iterations + Metrics.count(entry.rows, "iteration")
     errors = state.errors + Metrics.count(entry.rows, "iteration.errors")
 
@@ -252,12 +336,13 @@ defmodule Stampede.Runner do
       interval: point
     })
 
-    if state.progress? do
+    if state.printer do
       name = if state.named?, do: "  #{inspect(state.scenario)}", else: ""
 
-      IO.puts(
+      print(
+        state,
         "#{seconds(entry.at)}#{name}  vus: #{entry.vus}  iterations: #{iterations}  " <>
-          "errors: #{errors}"
+          "errors: #{errors}  load test busy: #{round(entry.busy * 100)}%"
       )
     end
 
@@ -268,6 +353,61 @@ defmodule Stampede.Runner do
         iterations: iterations,
         errors: errors
     }
+  end
+
+  # Once a step fails, the drivers wrap up, and later seconds are not checked.
+  defp check_limit(%{limit: %Limit{} = limit} = state, entry)
+       when not is_map_key(state, :wrapped) do
+    case Limit.add_second(limit, entry.at, entry.rows, entry.busy) do
+      {:continue, new_limit} ->
+        print_step(state, limit, new_limit)
+        %{state | limit: new_limit}
+
+      {:stop, new_limit} ->
+        print_step(state, limit, new_limit)
+        for {pid, _driver} <- state.running, do: send(pid, :wrap_up)
+        state |> Map.put(:limit, new_limit) |> Map.put(:wrapped, true)
+    end
+  end
+
+  defp check_limit(state, _entry), do: state
+
+  defp print_step(%{printer: printer} = state, old, %Limit{steps: [step | _]} = new)
+       when printer != nil and length(new.steps) > length(old.steps) do
+    name = if state.named?, do: "  #{inspect(state.scenario)}", else: ""
+    status = if step.passed?, do: "held", else: "over the limit"
+    amount = Reporter.amount(step.target, new.by)
+    unit = if new.by == :vus, do: "VUs", else: "iterations/s"
+    print(state, "   step#{name}  #{amount} #{unit}: #{status}")
+  end
+
+  defp print_step(_state, _old, _new), do: :ok
+
+  # Progress is printed by a process of its own, since a console slowed down
+  # by a busy node would otherwise hold up the run with it.
+  defp start_printer, do: spawn_link(&printer/0)
+
+  defp printer do
+    receive do
+      {:print, line} ->
+        IO.puts(line)
+        printer()
+
+      {:stop, from} ->
+        send(from, {:printed, self()})
+    end
+  end
+
+  defp print(state, line), do: send(state.printer, {:print, line})
+
+  defp stop_printer(nil), do: :ok
+
+  defp stop_printer(printer) do
+    send(printer, {:stop, self()})
+
+    receive do
+      {:printed, ^printer} -> :ok
+    end
   end
 
   defp seconds(milliseconds) do

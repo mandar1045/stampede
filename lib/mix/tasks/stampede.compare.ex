@@ -16,6 +16,9 @@ defmodule Mix.Tasks.Stampede.Compare do
     * `--max-regression` - how many percent slower a percentile may get. The
       task exits with status 1 when one gets slower than that, so it can gate
       CI.
+    * `--format` - `text`, the default, or `markdown`, to post the comparison
+      as a comment on a pull request, such as with
+      `gh pr comment --body-file`
 
   Keep in mind that timings vary from one run to the next, even with no
   change to the code, so leave some room. Runs of a minute or more on the
@@ -30,7 +33,14 @@ defmodule Mix.Tasks.Stampede.Compare do
 
   @impl true
   def run(args) do
-    {opts, files} = OptionParser.parse!(args, strict: [max_regression: :float])
+    {opts, files} = OptionParser.parse!(args, strict: [max_regression: :float, format: :string])
+
+    format =
+      case opts[:format] || "text" do
+        "text" -> :text
+        "markdown" -> :markdown
+        other -> Mix.raise("Expected --format to be text or markdown, got: #{other}")
+      end
 
     {base_file, head_file} =
       case files do
@@ -51,9 +61,10 @@ defmodule Mix.Tasks.Stampede.Compare do
         regressions ->
           case Map.fetch(base, scenario) do
             {:ok, base_run} ->
-              {lines, count} = compare(base_run, head_run, limit)
+              {lines, count} = compare(base_run, head_run, limit, format)
               lines = lines |> IO.iodata_to_binary() |> String.trim_trailing()
-              Mix.shell().info(["\n", scenario, "\n", lines])
+              title = if format == :markdown, do: "### #{scenario}\n", else: scenario
+              Mix.shell().info(["\n", title, "\n", lines])
               regressions + count
 
             :error ->
@@ -75,7 +86,7 @@ defmodule Mix.Tasks.Stampede.Compare do
     end
   end
 
-  defp compare(base, head, limit) do
+  defp compare(base, head, limit, format) do
     rows =
       for {name, %{"type" => "timing"} = new} <- Enum.sort(head["metrics"]),
           %{"type" => "timing"} = old <- [base["metrics"][name]],
@@ -94,15 +105,38 @@ defmodule Mix.Tasks.Stampede.Compare do
         {if(regressed?, do: row ++ ["FAIL"], else: row), regressed?}
       end
 
-    case rows do
-      [] ->
+    header = ["metric", "stat", "base", "head", "change"]
+    count = Enum.count(rows, &elem(&1, 1))
+
+    case {rows, format} do
+      {[], :text} ->
         {["  no timings to compare\n"], 0}
 
-      rows ->
-        header = ["metric", "stat", "base", "head", "change"]
-        table = Reporter.table([header | Enum.map(rows, &elem(&1, 0))])
-        {table, Enum.count(rows, &elem(&1, 1))}
+      {[], :markdown} ->
+        {["No timings to compare.\n"], 0}
+
+      {rows, :text} ->
+        {Reporter.table([header | Enum.map(rows, &elem(&1, 0))]), count}
+
+      {rows, :markdown} ->
+        {markdown_table(header, Enum.map(rows, &elem(&1, 0))), count}
     end
+  end
+
+  # A regression is marked in bold in its change column.
+  defp markdown_table(header, rows) do
+    lines =
+      for row <- rows do
+        cells =
+          case row do
+            [name, stat, old, new, change, "FAIL"] -> [name, stat, old, new, "**#{change} FAIL**"]
+            cells -> cells
+          end
+
+        ["| ", Enum.join(cells, " | "), " |\n"]
+      end
+
+    ["| ", Enum.join(header, " | "), " |\n", "|---|---|---:|---:|---:|\n" | lines]
   end
 
   defp change(old, _new) when old == 0, do: 0.0

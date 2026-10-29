@@ -40,7 +40,7 @@ Without Igniter, add it to your dependencies:
 ```elixir
 def deps do
   [
-    {:stampede, "~> 1.1", only: [:dev, :test]}
+    {:stampede, "~> 1.2", only: [:dev, :test]}
   ]
 end
 ```
@@ -115,6 +115,67 @@ $ mix stampede.run loadtest/lobby.exs --dashboard
 
 That's the page in the animation at the top. It updates every second while
 the test runs, and shows the full results when it's done.
+
+## How many users can it handle?
+
+That's usually the real question, so Stampede can answer it directly:
+
+```console
+$ mix stampede.run loadtest/lobby.exs --find-limit
+```
+
+Instead of a fixed load, it adds users a step at a time and checks your
+thresholds over each step. The first step that breaks one ends the run, and
+the summary tells you the most users that passed.
+
+I tried it on a fresh Phoenix app, running in production mode, with a
+LiveView page where every user loads the page, joins, clicks and stays for
+about 20 seconds. The limit was a p95 under 500ms for joins and under 100ms
+for clicks, with no errors:
+
+```console
+$ mix stampede.run loadtest/counter.exs --find-limit --start 1000 --step 1000 --up-to 12000 --hold 20s
+```
+
+```
+  limit
+    Held 12,000 VUs, the most it was asked to try
+
+  VUs     live.join p95  live.event p95  iteration.errors count  status
+  1,000          2.67ms          1.41ms                       0    pass
+  4,000          3.46ms          1.83ms                       0    pass
+  8,000          6.57ms          5.60ms                       0    pass
+  12,000        11.97ms         11.05ms                       0    pass
+```
+
+So with the app and the load test sharing my laptop, Phoenix held 12,000
+LiveView users with joins under 12ms at p95 and not a single error, and
+Stampede never found where it breaks.
+
+Then I moved it to AWS: stock Phoenix on one 4-core, 32 GB server, and
+Stampede on a second machine, with Channels users that behave like Phoenix's
+JavaScript client (a heartbeat every 30 seconds, a message every 30 to 60):
+
+| Users | Join p95 | Message p95 | Errors | Server CPU | Server memory |
+|---:|---:|---:|---:|---:|---:|
+| 100,000 | 5.71ms | 0.57ms | 0 | 1% | 4.9 GB |
+| 200,000 | 6.84ms | 1.35ms | 0 | 3% | 9.5 GB |
+| 300,000 | 9.42ms | 2.67ms | 0 | 9% | 13.9 GB |
+| **400,000** | **12.46ms** | **4.07ms** | **0** | **24%** | **18.1 GB** |
+
+At 500,000 the machine running Stampede ran out of CPU before Phoenix did,
+and the summary said so instead of blaming the server. Everything you need to
+run it yourself, and every number it measured, is in
+[`bench/million`](https://github.com/mandar1045/stampede/tree/main/bench/million). The goal is still a million, once I have
+more load machines.
+
+Each step ramps for 5 seconds and holds for 30 by default. `--start`,
+`--step`, `--up-to` and `--hold` change that, and `find_limit: [by: :rate]`
+in a scenario's options steps up the arrival rate instead of users.
+It's new in 1.2, so the options and the report may still change a little.
+`--badge badge.svg` writes a badge with the result, for your README:
+
+![load tested: 12,000+ VUs](assets/badge-example.svg)
 
 ## Scenarios
 
@@ -379,7 +440,7 @@ running across a network.
 A load test can also be a plain script:
 
 ```elixir
-Mix.install([{:stampede, "~> 1.1"}])
+Mix.install([{:stampede, "~> 1.2"}])
 
 defmodule Lobby do
   use Stampede.Scenario
@@ -426,6 +487,8 @@ and please tell me when you hit one.
 
 What I'm working on next:
 
+  * Much bigger tests, spread over several machines, aiming for a million
+    connections to one Phoenix server
   * Metrics from inside the app shown next to the load test's own: BEAM
     schedulers and memory, Ecto queue times, LiveView event durations
   * Recording a session in the browser and turning it into a scenario

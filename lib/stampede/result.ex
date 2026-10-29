@@ -11,13 +11,23 @@ defmodule Stampede.Result do
       * checks have `type: :check`, `:count`, `:rate`, `:passed`, `:failed`
         and `:failed_rate`, the share of checks that failed
     * `:timeline` - one point per second of the run, each with the time it
-      ends at (`:at`, in milliseconds), the number of busy `:vus`, and the
-      `:metrics` of that second alone
+      ends at (`:at`, in milliseconds), the number of busy `:vus`, the
+      `:metrics` of that second alone, and how `:busy` the load test's
+      schedulers were, from 0 to 1, on its busiest node. Above 0.9, the load
+      test's own delays show up in its timings, and the summary says so.
     * `:thresholds` - one map per limit, with `:metric`, `:stat`, `:limit`,
       the `:value` it had and whether it `:passed?`
     * `:errors` - the iterations that failed, grouped by kind of error, with a
       `:message` and a `:count`, most frequent first
-    * `:passed?` - whether every threshold passed
+    * `:passed?` - whether every threshold passed, or for a run with
+      `:find_limit`, whether it found a limit, at least `:min` if given
+    * `:limit` - for a run with `:find_limit`, what it found: the highest
+      load that passed as `:value`, `:by` (`:vus` or `:rate`), the step that
+      failed as `:failed`, whether it got `:up_to?` the most it was asked to
+      try without failing, and every step checked as `:steps`. Each step has
+      its `:target`, the `:from` and `:to` of its hold, in milliseconds, and
+      the `:metrics` and `:thresholds` of that hold, and whether it
+      `:passed?`. `nil` for other runs.
 
   Rates are per second.
   """
@@ -29,17 +39,21 @@ defmodule Stampede.Result do
     timeline: [],
     thresholds: [],
     errors: [],
-    passed?: true
+    passed?: true,
+    limit: nil
   ]
 
   @type t :: %__MODULE__{
           scenario: module(),
           duration: non_neg_integer(),
           metrics: %{optional(String.t()) => map()},
-          timeline: [%{at: non_neg_integer(), vus: non_neg_integer(), metrics: map()}],
+          timeline: [
+            %{at: non_neg_integer(), vus: non_neg_integer(), busy: float(), metrics: map()}
+          ],
           thresholds: [map()],
           errors: [%{message: String.t(), count: pos_integer()}],
-          passed?: boolean()
+          passed?: boolean(),
+          limit: map() | nil
         }
 
   @doc false

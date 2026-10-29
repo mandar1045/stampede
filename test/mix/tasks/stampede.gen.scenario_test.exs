@@ -59,6 +59,21 @@ defmodule Mix.Tasks.Stampede.Gen.ScenarioTest do
     assert result.metrics["live.join"].count > 0
   end
 
+  test "generates a scenario that starts iterations at a rate", %{tmp_dir: tmp_dir} do
+    url = Stampede.TestEndpoint.page_url("/api/hello")
+    generate!(tmp_dir, ["Api", "--rate", "--url", url])
+
+    path = Path.join(tmp_dir, "loadtest/api.exs")
+    contents = File.read!(path)
+    assert contents =~ "rate: 20,"
+    assert contents =~ "max_vus: 200,"
+    refute contents =~ "stages:"
+
+    result = run!(path)
+    assert result.errors == []
+    assert result.metrics["status is 200"].passed > 0
+  end
+
   test "generates a WebSocket scenario", %{tmp_dir: tmp_dir} do
     generate!(tmp_dir, ["Feed", "--websocket", "--url", Stampede.TestEndpoint.echo_url()])
 

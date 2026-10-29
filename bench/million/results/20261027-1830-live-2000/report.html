@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stampede report</title>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface: #fcfcfb;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #898781;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.1);
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --good: #0ca30c;
+  --critical: #d03b3b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface: #1a1a19;
+    --ink: #f0efec;
+    --ink-2: #c3c2b7;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255, 255, 255, 0.1);
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+main { max-width: 72rem; margin: 0 auto; padding: 24px 16px 48px; }
+h1 { font-size: 20px; margin: 0 0 8px; }
+h2 { font-size: 18px; margin: 0; overflow-wrap: anywhere; }
+h3 { font-size: 14px; margin: 24px 0 8px; }
+section { margin-top: 32px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.meta, figcaption, summary { color: var(--ink-2); }
+.meta { margin: 0; }
+.status { font-weight: 600; }
+.status::before { margin-right: 4px; }
+.passed::before { content: "\2713"; color: var(--good); }
+.failed::before { content: "\2717"; color: var(--critical); }
+.running::before { content: "\25CF"; color: var(--series-1); }
+.notice {
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.tiles, .charts { display: grid; gap: 12px; margin-top: 16px; }
+.tiles { grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); }
+.charts { grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); }
+.tile, .chart, .table {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.tile { padding: 12px; }
+.tile span { display: block; color: var(--ink-2); font-size: 12px; }
+.tile strong { font-size: 22px; font-weight: 600; }
+.chart { position: relative; margin: 0; padding: 12px; outline-offset: 2px; }
+figcaption { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13px; }
+figcaption b { color: var(--ink); font-weight: 600; margin-right: auto; overflow-wrap: anywhere; }
+.key { display: inline-block; width: 12px; height: 2px; margin-right: 4px; vertical-align: middle; }
+.k1 { background: var(--series-1); }
+.k2 { background: var(--series-2); }
+.k3 { background: var(--series-3); }
+svg { display: block; width: 100%; height: auto; margin-top: 8px; overflow: visible; }
+svg text { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+svg line, svg path, svg circle { vector-effect: non-scaling-stroke; }
+.grid { stroke: var(--grid); }
+.axis { stroke: var(--axis); }
+.cross { stroke: var(--muted); display: none; }
+.line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.line.s1 { stroke: var(--series-1); }
+.line.s2 { stroke: var(--series-2); }
+.line.s3 { stroke: var(--series-3); }
+.dot { stroke: var(--surface); stroke-width: 2; }
+.dot.s1 { fill: var(--series-1); }
+.dot.s2 { fill: var(--series-2); }
+.dot.s3 { fill: var(--series-3); }
+.tip {
+  position: absolute;
+  top: 40px;
+  min-width: 8rem;
+  padding: 8px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  font-size: 12px;
+  pointer-events: none;
+}
+.tip div { white-space: nowrap; }
+.tip .at { color: var(--ink-2); margin-bottom: 2px; }
+.tip strong { font-variant-numeric: tabular-nums; margin-right: 6px; }
+.tip span:last-child { color: var(--ink-2); }
+.table { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { padding: 6px 12px; text-align: right; white-space: nowrap; }
+th { color: var(--ink-2); font-weight: 500; }
+th:first-child, td:first-child { text-align: left; }
+td:first-child { white-space: normal; overflow-wrap: anywhere; }
+tr + tr td, thead + tbody td { border-top: 1px solid var(--grid); }
+details { margin-top: 16px; }
+summary { cursor: pointer; }
+details .table { margin-top: 8px; max-height: 24rem; overflow-y: auto; }
+pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; }
+.errors td { vertical-align: top; text-align: left; }
+</style>
+</head>
+<body>
+<main>
+<h1>Stampede report</h1>
+<section>
+<header><h2>Load.Live</h2><span class="status passed">Passed</span><p class="meta">Ran for 75.0s</p></header>
+<div class="tiles">
+<div class="tile"><span>Iterations</span><strong>0</strong></div>
+<div class="tile"><span>Iterations per second</span><strong>0.00</strong></div>
+<div class="tile"><span>Iteration p95</span><strong>–</strong></div>
+<div class="tile"><span>Errors</span><strong>0</strong></div>
+<div class="tile"><span>Peak VUs</span><strong>2,000</strong></div>
+</div>
+<div class="charts">
+<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[48.1,52.2,56.3,60.4,64.5,68.6,72.7,76.8,80.8,84.9,89.0,93.1,97.2,101.3,105.4,109.5,113.6,117.7,121.8,125.9,130.0,134.1,138.2,142.3,146.4,150.5,154.6,158.6,162.7,166.8,171.0,175.0,179.1,183.2,187.3,191.4,195.5,199.6,203.7,207.8,211.9,216.0,220.1,224.2,228.3,232.4,236.5,240.5,244.6,248.7,252.8,256.9,261.0,265.1,269.2,273.3,277.4,281.5,285.6,289.7,293.8,297.9,302.0,306.0,310.1,314.2,318.3,322.4,326.5,330.6,334.7,338.8,342.9,347.0,348.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.0s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.4s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.5s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.6s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.6s&quot;,&quot;61.6s&quot;,&quot;62.6s&quot;,&quot;63.6s&quot;,&quot;64.7s&quot;,&quot;65.7s&quot;,&quot;66.7s&quot;,&quot;67.7s&quot;,&quot;68.7s&quot;,&quot;69.7s&quot;,&quot;70.7s&quot;,&quot;71.7s&quot;,&quot;72.7s&quot;,&quot;73.7s&quot;,&quot;74.8s&quot;,&quot;75.0s&quot;],&quot;width&quot;:360,&quot;series&quot;:[{&quot;name&quot;:&quot;VUs&quot;,&quot;slot&quot;:1,&quot;values&quot;:[&quot;67&quot;,&quot;135&quot;,&quot;202&quot;,&quot;269&quot;,&quot;337&quot;,&quot;404&quot;,&quot;471&quot;,&quot;539&quot;,&quot;606&quot;,&quot;673&quot;,&quot;741&quot;,&quot;808&quot;,&quot;875&quot;,&quot;943&quot;,&quot;1,010&quot;,&quot;1,077&quot;,&quot;1,145&quot;,&quot;1,212&quot;,&quot;1,280&quot;,&quot;1,347&quot;,&quot;1,414&quot;,&quot;1,482&quot;,&quot;1,549&quot;,&quot;1,616&quot;,&quot;1,684&quot;,&quot;1,751&quot;,&quot;1,818&quot;,&quot;1,886&quot;,&quot;1,953&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;,&quot;2,000&quot;]}]}">
+<figcaption><b>VUs</b></figcaption>
+<svg viewBox="0 0 360 180" role="img" aria-label="VUs">
+<line class="axis" x1="44" x2="348" y1="156.0" y2="156.0"/><text x="38" y="156.0" dy="0.32em" text-anchor="end">0</text>
+<line class="grid" x1="44" x2="348" y1="120.0" y2="120.0"/><text x="38" y="120.0" dy="0.32em" text-anchor="end">500</text>
+<line class="grid" x1="44" x2="348" y1="84.0" y2="84.0"/><text x="38" y="84.0" dy="0.32em" text-anchor="end">1K</text>
+<line class="grid" x1="44" x2="348" y1="48.0" y2="48.0"/><text x="38" y="48.0" dy="0.32em" text-anchor="end">1.5K</text>
+<line class="grid" x1="44" x2="348" y1="12.0" y2="12.0"/><text x="38" y="12.0" dy="0.32em" text-anchor="end">2K</text>
+<text x="44.0" y="174" text-anchor="middle">0s</text>
+<text x="104.8" y="174" text-anchor="middle">15s</text>
+<text x="165.6" y="174" text-anchor="middle">30s</text>
+<text x="226.4" y="174" text-anchor="middle">45s</text>
+<text x="287.2" y="174" text-anchor="middle">1m</text>
+<text x="348.0" y="174" text-anchor="middle">1m15s</text>
+<path class="line s1" d="M48.1,151.2 L52.2,146.3 L56.3,141.5 L60.4,136.6 L64.5,131.7 L68.6,126.9 L72.7,122.1 L76.8,117.2 L80.8,112.4 L84.9,107.5 L89.0,102.6 L93.1,97.8 L97.2,93.0 L101.3,88.1 L105.4,83.3 L109.5,78.5 L113.6,73.6 L117.7,68.7 L121.8,63.8 L125.9,59.0 L130.0,54.2 L134.1,49.3 L138.2,44.5 L142.3,39.6 L146.4,34.8 L150.5,29.9 L154.6,25.1 L158.6,20.2 L162.7,15.4 L166.8,12.0 L171.0,12.0 L175.0,12.0 L179.1,12.0 L183.2,12.0 L187.3,12.0 L191.4,12.0 L195.5,12.0 L199.6,12.0 L203.7,12.0 L207.8,12.0 L211.9,12.0 L216.0,12.0 L220.1,12.0 L224.2,12.0 L228.3,12.0 L232.4,12.0 L236.5,12.0 L240.5,12.0 L244.6,12.0 L248.7,12.0 L252.8,12.0 L256.9,12.0 L261.0,12.0 L265.1,12.0 L269.2,12.0 L273.3,12.0 L277.4,12.0 L281.5,12.0 L285.6,12.0 L289.7,12.0 L293.8,12.0 L297.9,12.0 L302.0,12.0 L306.0,12.0 L310.1,12.0 L314.2,12.0 L318.3,12.0 L322.4,12.0 L326.5,12.0 L330.6,12.0 L334.7,12.0 L338.8,12.0 L342.9,12.0 L347.0,12.0 L348.0,12.0"/>
+<line class="cross" y1="12" y2="156"/>
+</svg>
+<div class="tip" hidden></div>
+</figure>
+<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[48.1,52.2,56.3,60.4,64.5,68.6,72.7,76.8,80.8,84.9,89.0,93.1,97.2,101.3,105.4,109.5,113.6,117.7,121.8,125.9,130.0,134.1,138.2,142.3,146.4,150.5,154.6,158.6,162.7,166.8,171.0,175.0,179.1,183.2,187.3,191.4,195.5,199.6,203.7,207.8,211.9,216.0,220.1,224.2,228.3,232.4,236.5,240.5,244.6,248.7,252.8,256.9,261.0,265.1,269.2,273.3,277.4,281.5,285.6,289.7,293.8,297.9,302.0,306.0,310.1,314.2,318.3,322.4,326.5,330.6,334.7,338.8,342.9,347.0,348.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.0s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.4s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.5s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.6s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.6s&quot;,&quot;61.6s&quot;,&quot;62.6s&quot;,&quot;63.6s&quot;,&quot;64.7s&quot;,&quot;65.7s&quot;,&quot;66.7s&quot;,&quot;67.7s&quot;,&quot;68.7s&quot;,&quot;69.7s&quot;,&quot;70.7s&quot;,&quot;71.7s&quot;,&quot;72.7s&quot;,&quot;73.7s&quot;,&quot;74.8s&quot;,&quot;75.0s&quot;],&quot;width&quot;:360,&quot;series&quot;:[{&quot;name&quot;:&quot;iterations&quot;,&quot;slot&quot;:1,&quot;values&quot;:[&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;]}]}">
+<figcaption><b>Iterations per second</b></figcaption>
+<svg viewBox="0 0 360 180" role="img" aria-label="Iterations per second">
+<line class="axis" x1="44" x2="348" y1="156.0" y2="156.0"/><text x="38" y="156.0" dy="0.32em" text-anchor="end">0</text>
+<line class="grid" x1="44" x2="348" y1="12.0" y2="12.0"/><text x="38" y="12.0" dy="0.32em" text-anchor="end">0.25</text>
+<text x="44.0" y="174" text-anchor="middle">0s</text>
+<text x="104.8" y="174" text-anchor="middle">15s</text>
+<text x="165.6" y="174" text-anchor="middle">30s</text>
+<text x="226.4" y="174" text-anchor="middle">45s</text>
+<text x="287.2" y="174" text-anchor="middle">1m</text>
+<text x="348.0" y="174" text-anchor="middle">1m15s</text>
+<path class="line s1" d="M48.1,156.0 L52.2,156.0 L56.3,156.0 L60.4,156.0 L64.5,156.0 L68.6,156.0 L72.7,156.0 L76.8,156.0 L80.8,156.0 L84.9,156.0 L89.0,156.0 L93.1,156.0 L97.2,156.0 L101.3,156.0 L105.4,156.0 L109.5,156.0 L113.6,156.0 L117.7,156.0 L121.8,156.0 L125.9,156.0 L130.0,156.0 L134.1,156.0 L138.2,156.0 L142.3,156.0 L146.4,156.0 L150.5,156.0 L154.6,156.0 L158.6,156.0 L162.7,156.0 L166.8,156.0 L171.0,156.0 L175.0,156.0 L179.1,156.0 L183.2,156.0 L187.3,156.0 L191.4,156.0 L195.5,156.0 L199.6,156.0 L203.7,156.0 L207.8,156.0 L211.9,156.0 L216.0,156.0 L220.1,156.0 L224.2,156.0 L228.3,156.0 L232.4,156.0 L236.5,156.0 L240.5,156.0 L244.6,156.0 L248.7,156.0 L252.8,156.0 L256.9,156.0 L261.0,156.0 L265.1,156.0 L269.2,156.0 L273.3,156.0 L277.4,156.0 L281.5,156.0 L285.6,156.0 L289.7,156.0 L293.8,156.0 L297.9,156.0 L302.0,156.0 L306.0,156.0 L310.1,156.0 L314.2,156.0 L318.3,156.0 L322.4,156.0 L326.5,156.0 L330.6,156.0 L334.7,156.0 L338.8,156.0 L342.9,156.0 L347.0,156.0 L348.0,156.0"/>
+<line class="cross" y1="12" y2="156"/>
+</svg>
+<div class="tip" hidden></div>
+</figure>
+<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[48.1,52.2,56.3,60.4,64.5,68.6,72.7,76.8,80.8,84.9,89.0,93.1,97.2,101.3,105.4,109.5,113.6,117.7,121.8,125.9,130.0,134.1,138.2,142.3,146.4,150.5,154.6,158.6,162.7,166.8,171.0,175.0,179.1,183.2,187.3,191.4,195.5,199.6,203.7,207.8,211.9,216.0,220.1,224.2,228.3,232.4,236.5,240.5,244.6,248.7,252.8,256.9,261.0,265.1,269.2,273.3,277.4,281.5,285.6,289.7,293.8,297.9,302.0,306.0,310.1,314.2,318.3,322.4,326.5,330.6,334.7,338.8,342.9,347.0,348.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.0s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.4s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.5s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.6s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.6s&quot;,&quot;61.6s&quot;,&quot;62.6s&quot;,&quot;63.6s&quot;,&quot;64.7s&quot;,&quot;65.7s&quot;,&quot;66.7s&quot;,&quot;67.7s&quot;,&quot;68.7s&quot;,&quot;69.7s&quot;,&quot;70.7s&quot;,&quot;71.7s&quot;,&quot;72.7s&quot;,&quot;73.7s&quot;,&quot;74.8s&quot;,&quot;75.0s&quot;],&quot;width&quot;:360,&quot;series&quot;:[{&quot;name&quot;:&quot;p50&quot;,&quot;slot&quot;:1,&quot;values&quot;:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,&quot;889µs&quot;,&quot;773µs&quot;,&quot;713µs&quot;,&quot;672µs&quot;,&quot;596µs&quot;,&quot;713µs&quot;,&quot;633µs&quot;,&quot;659µs&quot;,&quot;659µs&quot;,&quot;672µs&quot;,&quot;699µs&quot;,&quot;633µs&quot;,&quot;620µs&quot;,&quot;672µs&quot;,&quot;646µs&quot;,&quot;659µs&quot;,&quot;620µs&quot;,&quot;596µs&quot;,&quot;596µs&quot;,&quot;633µs&quot;,&quot;573µs&quot;,&quot;620µs&quot;,&quot;633µs&quot;,&quot;633µs&quot;,&quot;620µs&quot;,&quot;596µs&quot;,&quot;608µs&quot;,&quot;633µs&quot;,&quot;596µs&quot;,&quot;596µs&quot;,&quot;573µs&quot;,&quot;573µs&quot;,&quot;573µs&quot;,&quot;608µs&quot;,&quot;573µs&quot;,&quot;596µs&quot;,&quot;646µs&quot;,&quot;620µs&quot;,&quot;608µs&quot;,&quot;633µs&quot;,&quot;620µs&quot;,&quot;584µs&quot;,&quot;659µs&quot;,&quot;620µs&quot;,&quot;608µs&quot;]},{&quot;name&quot;:&quot;p95&quot;,&quot;slot&quot;:2,&quot;values&quot;:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,&quot;2.78ms&quot;,&quot;889µs&quot;,&quot;854µs&quot;,&quot;743µs&quot;,&quot;672µs&quot;,&quot;773µs&quot;,&quot;1.18ms&quot;,&quot;789µs&quot;,&quot;854µs&quot;,&quot;758µs&quot;,&quot;728µs&quot;,&quot;728µs&quot;,&quot;686µs&quot;,&quot;773µs&quot;,&quot;758µs&quot;,&quot;773µs&quot;,&quot;713µs&quot;,&quot;686µs&quot;,&quot;699µs&quot;,&quot;713µs&quot;,&quot;699µs&quot;,&quot;743µs&quot;,&quot;773µs&quot;,&quot;758µs&quot;,&quot;804µs&quot;,&quot;728µs&quot;,&quot;758µs&quot;,&quot;758µs&quot;,&quot;686µs&quot;,&quot;728µs&quot;,&quot;2.14ms&quot;,&quot;686µs&quot;,&quot;728µs&quot;,&quot;758µs&quot;,&quot;686µs&quot;,&quot;728µs&quot;,&quot;758µs&quot;,&quot;743µs&quot;,&quot;728µs&quot;,&quot;728µs&quot;,&quot;713µs&quot;,&quot;699µs&quot;,&quot;1.20ms&quot;,&quot;789µs&quot;,&quot;743µs&quot;]},{&quot;name&quot;:&quot;p99&quot;,&quot;slot&quot;:3,&quot;values&quot;:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,&quot;2.78ms&quot;,&quot;889µs&quot;,&quot;854µs&quot;,&quot;743µs&quot;,&quot;672µs&quot;,&quot;773µs&quot;,&quot;1.18ms&quot;,&quot;837µs&quot;,&quot;854µs&quot;,&quot;758µs&quot;,&quot;743µs&quot;,&quot;743µs&quot;,&quot;699µs&quot;,&quot;804µs&quot;,&quot;773µs&quot;,&quot;837µs&quot;,&quot;743µs&quot;,&quot;728µs&quot;,&quot;925µs&quot;,&quot;743µs&quot;,&quot;713µs&quot;,&quot;789µs&quot;,&quot;804µs&quot;,&quot;854µs&quot;,&quot;854µs&quot;,&quot;789µs&quot;,&quot;758µs&quot;,&quot;789µs&quot;,&quot;758µs&quot;,&quot;758µs&quot;,&quot;6.70ms&quot;,&quot;773µs&quot;,&quot;789µs&quot;,&quot;1.35ms&quot;,&quot;728µs&quot;,&quot;758µs&quot;,&quot;3.46ms&quot;,&quot;889µs&quot;,&quot;743µs&quot;,&quot;789µs&quot;,&quot;837µs&quot;,&quot;699µs&quot;,&quot;1.90ms&quot;,&quot;983µs&quot;,&quot;743µs&quot;]}]}">
+<figcaption><b>live.event</b><span><i class="key k1"></i>p50</span><span><i class="key k2"></i>p95</span><span><i class="key k3"></i>p99</span></figcaption>
+<svg viewBox="0 0 360 180" role="img" aria-label="live.event">
+<line class="axis" x1="44" x2="348" y1="156.0" y2="156.0"/><text x="38" y="156.0" dy="0.32em" text-anchor="end">0</text>
+<line class="grid" x1="44" x2="348" y1="120.0" y2="120.0"/><text x="38" y="120.0" dy="0.32em" text-anchor="end">2ms</text>
+<line class="grid" x1="44" x2="348" y1="84.0" y2="84.0"/><text x="38" y="84.0" dy="0.32em" text-anchor="end">4ms</text>
+<line class="grid" x1="44" x2="348" y1="48.0" y2="48.0"/><text x="38" y="48.0" dy="0.32em" text-anchor="end">6ms</text>
+<line class="grid" x1="44" x2="348" y1="12.0" y2="12.0"/><text x="38" y="12.0" dy="0.32em" text-anchor="end">8ms</text>
+<text x="44.0" y="174" text-anchor="middle">0s</text>
+<text x="104.8" y="174" text-anchor="middle">15s</text>
+<text x="165.6" y="174" text-anchor="middle">30s</text>
+<text x="226.4" y="174" text-anchor="middle">45s</text>
+<text x="287.2" y="174" text-anchor="middle">1m</text>
+<text x="348.0" y="174" text-anchor="middle">1m15s</text>
+<path class="line s1" d="M171.0,140.0 L175.0,142.1 L179.1,143.2 L183.2,143.9 L187.3,145.3 L191.4,143.2 L195.5,144.6 L199.6,144.1 L203.7,144.1 L207.8,143.9 L211.9,143.4 L216.0,144.6 L220.1,144.8 L224.2,143.9 L228.3,144.4 L232.4,144.1 L236.5,144.8 L240.5,145.3 L244.6,145.3 L248.7,144.6 L252.8,145.7 L256.9,144.8 L261.0,144.6 L265.1,144.6 L269.2,144.8 L273.3,145.3 L277.4,145.1 L281.5,144.6 L285.6,145.3 L289.7,145.3 L293.8,145.7 L297.9,145.7 L302.0,145.7 L306.0,145.1 L310.1,145.7 L314.2,145.3 L318.3,144.4 L322.4,144.8 L326.5,145.1 L330.6,144.6 L334.7,144.8 L338.8,145.5 L342.9,144.1 L347.0,144.8 L348.0,145.1"/>
+<path class="line s2" d="M171.0,106.0 L175.0,140.0 L179.1,140.6 L183.2,142.6 L187.3,143.9 L191.4,142.1 L195.5,134.8 L199.6,141.8 L203.7,140.6 L207.8,142.4 L211.9,142.9 L216.0,142.9 L220.1,143.7 L224.2,142.1 L228.3,142.4 L232.4,142.1 L236.5,143.2 L240.5,143.7 L244.6,143.4 L248.7,143.2 L252.8,143.4 L256.9,142.6 L261.0,142.1 L265.1,142.4 L269.2,141.5 L273.3,142.9 L277.4,142.4 L281.5,142.4 L285.6,143.7 L289.7,142.9 L293.8,117.4 L297.9,143.7 L302.0,142.9 L306.0,142.4 L310.1,143.7 L314.2,142.9 L318.3,142.4 L322.4,142.6 L326.5,142.9 L330.6,142.9 L334.7,143.2 L338.8,143.4 L342.9,134.4 L347.0,141.8 L348.0,142.6"/>
+<path class="line s3" d="M171.0,106.0 L175.0,140.0 L179.1,140.6 L183.2,142.6 L187.3,143.9 L191.4,142.1 L195.5,134.8 L199.6,140.9 L203.7,140.6 L207.8,142.4 L211.9,142.6 L216.0,142.6 L220.1,143.4 L224.2,141.5 L228.3,142.1 L232.4,140.9 L236.5,142.6 L240.5,142.9 L244.6,139.3 L248.7,142.6 L252.8,143.2 L256.9,141.8 L261.0,141.5 L265.1,140.6 L269.2,140.6 L273.3,141.8 L277.4,142.4 L281.5,141.8 L285.6,142.4 L289.7,142.4 L293.8,35.4 L297.9,142.1 L302.0,141.8 L306.0,131.6 L310.1,142.9 L314.2,142.4 L318.3,93.6 L322.4,140.0 L326.5,142.6 L330.6,141.8 L334.7,140.9 L338.8,143.4 L342.9,121.8 L347.0,138.3 L348.0,142.6"/>
+<line class="cross" y1="12" y2="156"/>
+</svg>
+<div class="tip" hidden></div>
+</figure>
+<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[48.1,52.2,56.3,60.4,64.5,68.6,72.7,76.8,80.8,84.9,89.0,93.1,97.2,101.3,105.4,109.5,113.6,117.7,121.8,125.9,130.0,134.1,138.2,142.3,146.4,150.5,154.6,158.6,162.7,166.8,171.0,175.0,179.1,183.2,187.3,191.4,195.5,199.6,203.7,207.8,211.9,216.0,220.1,224.2,228.3,232.4,236.5,240.5,244.6,248.7,252.8,256.9,261.0,265.1,269.2,273.3,277.4,281.5,285.6,289.7,293.8,297.9,302.0,306.0,310.1,314.2,318.3,322.4,326.5,330.6,334.7,338.8,342.9,347.0,348.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.0s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.4s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.5s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.6s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.6s&quot;,&quot;61.6s&quot;,&quot;62.6s&quot;,&quot;63.6s&quot;,&quot;64.7s&quot;,&quot;65.7s&quot;,&quot;66.7s&quot;,&quot;67.7s&quot;,&quot;68.7s&quot;,&quot;69.7s&quot;,&quot;70.7s&quot;,&quot;71.7s&quot;,&quot;72.7s&quot;,&quot;73.7s&quot;,&quot;74.8s&quot;,&quot;75.0s&quot;],&quot;width&quot;:360,&quot;series&quot;:[{&quot;name&quot;:&quot;p50&quot;,&quot;slot&quot;:1,&quot;values&quot;:[&quot;1.33ms&quot;,&quot;1.15ms&quot;,&quot;1.15ms&quot;,&quot;1.33ms&quot;,&quot;1.15ms&quot;,&quot;1.15ms&quot;,&quot;1.18ms&quot;,&quot;1.13ms&quot;,&quot;1.25ms&quot;,&quot;1.22ms&quot;,&quot;1.18ms&quot;,&quot;1.22ms&quot;,&quot;1.25ms&quot;,&quot;1.18ms&quot;,&quot;1.13ms&quot;,&quot;1.15ms&quot;,&quot;1.27ms&quot;,&quot;1.30ms&quot;,&quot;1.20ms&quot;,&quot;1.15ms&quot;,&quot;1.13ms&quot;,&quot;1.30ms&quot;,&quot;1.20ms&quot;,&quot;1.30ms&quot;,&quot;1.38ms&quot;,&quot;1.22ms&quot;,&quot;1.27ms&quot;,&quot;1.27ms&quot;,&quot;1.27ms&quot;,&quot;1.25ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},{&quot;name&quot;:&quot;p95&quot;,&quot;slot&quot;:2,&quot;values&quot;:[&quot;43.06ms&quot;,&quot;1.65ms&quot;,&quot;1.72ms&quot;,&quot;2.06ms&quot;,&quot;1.90ms&quot;,&quot;2.06ms&quot;,&quot;2.14ms&quot;,&quot;1.65ms&quot;,&quot;1.83ms&quot;,&quot;1.98ms&quot;,&quot;1.79ms&quot;,&quot;1.79ms&quot;,&quot;2.10ms&quot;,&quot;2.02ms&quot;,&quot;1.86ms&quot;,&quot;4.87ms&quot;,&quot;1.94ms&quot;,&quot;1.98ms&quot;,&quot;1.83ms&quot;,&quot;1.83ms&quot;,&quot;1.79ms&quot;,&quot;1.94ms&quot;,&quot;1.79ms&quot;,&quot;1.90ms&quot;,&quot;1.83ms&quot;,&quot;1.65ms&quot;,&quot;1.86ms&quot;,&quot;1.94ms&quot;,&quot;1.83ms&quot;,&quot;1.90ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},{&quot;name&quot;:&quot;p99&quot;,&quot;slot&quot;:3,&quot;values&quot;:[&quot;43.06ms&quot;,&quot;6.44ms&quot;,&quot;1.79ms&quot;,&quot;2.62ms&quot;,&quot;2.06ms&quot;,&quot;3.20ms&quot;,&quot;2.57ms&quot;,&quot;1.79ms&quot;,&quot;2.89ms&quot;,&quot;2.28ms&quot;,&quot;2.19ms&quot;,&quot;2.28ms&quot;,&quot;2.37ms&quot;,&quot;2.95ms&quot;,&quot;2.37ms&quot;,&quot;7.71ms&quot;,&quot;2.32ms&quot;,&quot;2.32ms&quot;,&quot;2.32ms&quot;,&quot;2.32ms&quot;,&quot;2.37ms&quot;,&quot;3.20ms&quot;,&quot;2.10ms&quot;,&quot;2.32ms&quot;,&quot;2.37ms&quot;,&quot;1.86ms&quot;,&quot;1.90ms&quot;,&quot;2.32ms&quot;,&quot;2.23ms&quot;,&quot;2.14ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]}]}">
+<figcaption><b>live.join</b><span><i class="key k1"></i>p50</span><span><i class="key k2"></i>p95</span><span><i class="key k3"></i>p99</span></figcaption>
+<svg viewBox="0 0 360 180" role="img" aria-label="live.join">
+<line class="axis" x1="44" x2="348" y1="156.0" y2="156.0"/><text x="38" y="156.0" dy="0.32em" text-anchor="end">0</text>
+<line class="grid" x1="44" x2="348" y1="108.0" y2="108.0"/><text x="38" y="108.0" dy="0.32em" text-anchor="end">20ms</text>
+<line class="grid" x1="44" x2="348" y1="60.0" y2="60.0"/><text x="38" y="60.0" dy="0.32em" text-anchor="end">40ms</text>
+<line class="grid" x1="44" x2="348" y1="12.0" y2="12.0"/><text x="38" y="12.0" dy="0.32em" text-anchor="end">60ms</text>
+<text x="44.0" y="174" text-anchor="middle">0s</text>
+<text x="104.8" y="174" text-anchor="middle">15s</text>
+<text x="165.6" y="174" text-anchor="middle">30s</text>
+<text x="226.4" y="174" text-anchor="middle">45s</text>
+<text x="287.2" y="174" text-anchor="middle">1m</text>
+<text x="348.0" y="174" text-anchor="middle">1m15s</text>
+<path class="line s1" d="M48.1,152.8 L52.2,153.2 L56.3,153.2 L60.4,152.8 L64.5,153.2 L68.6,153.2 L72.7,153.2 L76.8,153.3 L80.8,153.0 L84.9,153.1 L89.0,153.2 L93.1,153.1 L97.2,153.0 L101.3,153.2 L105.4,153.3 L109.5,153.2 L113.6,152.9 L117.7,152.9 L121.8,153.1 L125.9,153.2 L130.0,153.3 L134.1,152.9 L138.2,153.1 L142.3,152.9 L146.4,152.7 L150.5,153.1 L154.6,152.9 L158.6,152.9 L162.7,152.9 L166.8,153.0"/>
+<path class="line s2" d="M48.1,52.7 L52.2,152.0 L56.3,151.9 L60.4,151.1 L64.5,151.4 L68.6,151.1 L72.7,150.9 L76.8,152.0 L80.8,151.6 L84.9,151.3 L89.0,151.7 L93.1,151.7 L97.2,151.0 L101.3,151.2 L105.4,151.5 L109.5,144.3 L113.6,151.3 L117.7,151.3 L121.8,151.6 L125.9,151.6 L130.0,151.7 L134.1,151.3 L138.2,151.7 L142.3,151.4 L146.4,151.6 L150.5,152.0 L154.6,151.5 L158.6,151.3 L162.7,151.6 L166.8,151.4"/>
+<path class="line s3" d="M48.1,52.7 L52.2,140.5 L56.3,151.7 L60.4,149.7 L64.5,151.1 L68.6,148.3 L72.7,149.8 L76.8,151.7 L80.8,149.1 L84.9,150.5 L89.0,150.8 L93.1,150.5 L97.2,150.3 L101.3,148.9 L105.4,150.3 L109.5,137.5 L113.6,150.4 L117.7,150.4 L121.8,150.4 L125.9,150.4 L130.0,150.3 L134.1,148.3 L138.2,151.0 L142.3,150.4 L146.4,150.3 L150.5,151.5 L154.6,151.4 L158.6,150.4 L162.7,150.6 L166.8,150.9"/>
+<line class="cross" y1="12" y2="156"/>
+</svg>
+<div class="tip" hidden></div>
+</figure>
+<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[48.1,52.2,56.3,60.4,64.5,68.6,72.7,76.8,80.8,84.9,89.0,93.1,97.2,101.3,105.4,109.5,113.6,117.7,121.8,125.9,130.0,134.1,138.2,142.3,146.4,150.5,154.6,158.6,162.7,166.8,171.0,175.0,179.1,183.2,187.3,191.4,195.5,199.6,203.7,207.8,211.9,216.0,220.1,224.2,228.3,232.4,236.5,240.5,244.6,248.7,252.8,256.9,261.0,265.1,269.2,273.3,277.4,281.5,285.6,289.7,293.8,297.9,302.0,306.0,310.1,314.2,318.3,322.4,326.5,330.6,334.7,338.8,342.9,347.0,348.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.0s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.4s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.5s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.6s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.6s&quot;,&quot;61.6s&quot;,&quot;62.6s&quot;,&quot;63.6s&quot;,&quot;64.7s&quot;,&quot;65.7s&quot;,&quot;66.7s&quot;,&quot;67.7s&quot;,&quot;68.7s&quot;,&quot;69.7s&quot;,&quot;70.7s&quot;,&quot;71.7s&quot;,&quot;72.7s&quot;,&quot;73.7s&quot;,&quot;74.8s&quot;,&quot;75.0s&quot;],&quot;width&quot;:360,&quot;series&quot;:[{&quot;name&quot;:&quot;p50&quot;,&quot;slot&quot;:1,&quot;values&quot;:[&quot;5.60ms&quot;,&quot;3.20ms&quot;,&quot;3.01ms&quot;,&quot;3.13ms&quot;,&quot;3.07ms&quot;,&quot;3.13ms&quot;,&quot;3.20ms&quot;,&quot;3.20ms&quot;,&quot;3.20ms&quot;,&quot;3.01ms&quot;,&quot;3.07ms&quot;,&quot;3.07ms&quot;,&quot;3.20ms&quot;,&quot;3.20ms&quot;,&quot;3.13ms&quot;,&quot;3.40ms&quot;,&quot;3.20ms&quot;,&quot;3.26ms&quot;,&quot;3.26ms&quot;,&quot;3.33ms&quot;,&quot;3.40ms&quot;,&quot;3.20ms&quot;,&quot;3.07ms&quot;,&quot;3.20ms&quot;,&quot;3.26ms&quot;,&quot;3.01ms&quot;,&quot;3.13ms&quot;,&quot;3.26ms&quot;,&quot;3.33ms&quot;,&quot;3.13ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},{&quot;name&quot;:&quot;p95&quot;,&quot;slot&quot;:2,&quot;values&quot;:[&quot;131.97ms&quot;,&quot;7.26ms&quot;,&quot;4.32ms&quot;,&quot;4.07ms&quot;,&quot;3.91ms&quot;,&quot;3.83ms&quot;,&quot;3.91ms&quot;,&quot;3.98ms&quot;,&quot;3.83ms&quot;,&quot;4.23ms&quot;,&quot;3.98ms&quot;,&quot;3.83ms&quot;,&quot;4.87ms&quot;,&quot;5.83ms&quot;,&quot;3.98ms&quot;,&quot;9.23ms&quot;,&quot;3.83ms&quot;,&quot;4.23ms&quot;,&quot;4.49ms&quot;,&quot;5.07ms&quot;,&quot;4.23ms&quot;,&quot;3.83ms&quot;,&quot;4.07ms&quot;,&quot;4.23ms&quot;,&quot;3.91ms&quot;,&quot;4.07ms&quot;,&quot;3.83ms&quot;,&quot;4.15ms&quot;,&quot;5.27ms&quot;,&quot;3.83ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},{&quot;name&quot;:&quot;p99&quot;,&quot;slot&quot;:3,&quot;values&quot;:[&quot;131.97ms&quot;,&quot;7.87ms&quot;,&quot;4.97ms&quot;,&quot;5.27ms&quot;,&quot;4.07ms&quot;,&quot;4.15ms&quot;,&quot;4.49ms&quot;,&quot;5.38ms&quot;,&quot;3.98ms&quot;,&quot;4.49ms&quot;,&quot;4.87ms&quot;,&quot;4.07ms&quot;,&quot;5.60ms&quot;,&quot;6.19ms&quot;,&quot;4.49ms&quot;,&quot;12.97ms&quot;,&quot;4.23ms&quot;,&quot;4.77ms&quot;,&quot;5.83ms&quot;,&quot;5.83ms&quot;,&quot;4.49ms&quot;,&quot;4.15ms&quot;,&quot;5.07ms&quot;,&quot;4.97ms&quot;,&quot;4.49ms&quot;,&quot;5.07ms&quot;,&quot;4.40ms&quot;,&quot;4.58ms&quot;,&quot;5.49ms&quot;,&quot;4.15ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]}]}">
+<figcaption><b>live.page</b><span><i class="key k1"></i>p50</span><span><i class="key k2"></i>p95</span><span><i class="key k3"></i>p99</span></figcaption>
+<svg viewBox="0 0 360 180" role="img" aria-label="live.page">
+<line class="axis" x1="44" x2="348" y1="156.0" y2="156.0"/><text x="38" y="156.0" dy="0.32em" text-anchor="end">0</text>
+<line class="grid" x1="44" x2="348" y1="108.0" y2="108.0"/><text x="38" y="108.0" dy="0.32em" text-anchor="end">50ms</text>
+<line class="grid" x1="44" x2="348" y1="60.0" y2="60.0"/><text x="38" y="60.0" dy="0.32em" text-anchor="end">100ms</text>
+<line class="grid" x1="44" x2="348" y1="12.0" y2="12.0"/><text x="38" y="12.0" dy="0.32em" text-anchor="end">150ms</text>
+<text x="44.0" y="174" text-anchor="middle">0s</text>
+<text x="104.8" y="174" text-anchor="middle">15s</text>
+<text x="165.6" y="174" text-anchor="middle">30s</text>
+<text x="226.4" y="174" text-anchor="middle">45s</text>
+<text x="287.2" y="174" text-anchor="middle">1m</text>
+<text x="348.0" y="174" text-anchor="middle">1m15s</text>
+<path class="line s1" d="M48.1,150.6 L52.2,152.9 L56.3,153.1 L60.4,153.0 L64.5,153.1 L68.6,153.0 L72.7,152.9 L76.8,152.9 L80.8,152.9 L84.9,153.1 L89.0,153.1 L93.1,153.1 L97.2,152.9 L101.3,152.9 L105.4,153.0 L109.5,152.7 L113.6,152.9 L117.7,152.9 L121.8,152.9 L125.9,152.8 L130.0,152.7 L134.1,152.9 L138.2,153.1 L142.3,152.9 L146.4,152.9 L150.5,153.1 L154.6,153.0 L158.6,152.9 L162.7,152.8 L166.8,153.0"/>
+<path class="line s2" d="M48.1,29.3 L52.2,149.0 L56.3,151.9 L60.4,152.1 L64.5,152.3 L68.6,152.3 L72.7,152.3 L76.8,152.2 L80.8,152.3 L84.9,151.9 L89.0,152.2 L93.1,152.3 L97.2,151.3 L101.3,150.4 L105.4,152.2 L109.5,147.1 L113.6,152.3 L117.7,151.9 L121.8,151.7 L125.9,151.1 L130.0,151.9 L134.1,152.3 L138.2,152.1 L142.3,151.9 L146.4,152.3 L150.5,152.1 L154.6,152.3 L158.6,152.0 L162.7,150.9 L166.8,152.3"/>
+<path class="line s3" d="M48.1,29.3 L52.2,148.4 L56.3,151.2 L60.4,150.9 L64.5,152.1 L68.6,152.0 L72.7,151.7 L76.8,150.8 L80.8,152.2 L84.9,151.7 L89.0,151.3 L93.1,152.1 L97.2,150.6 L101.3,150.1 L105.4,151.7 L109.5,143.6 L113.6,151.9 L117.7,151.4 L121.8,150.4 L125.9,150.4 L130.0,151.7 L134.1,152.0 L138.2,151.1 L142.3,151.2 L146.4,151.7 L150.5,151.1 L154.6,151.8 L158.6,151.6 L162.7,150.7 L166.8,152.0"/>
+<line class="cross" y1="12" y2="156"/>
+</svg>
+<div class="tip" hidden></div>
+</figure>
+<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[48.1,52.2,56.3,60.4,64.5,68.6,72.7,76.8,80.8,84.9,89.0,93.1,97.2,101.3,105.4,109.5,113.6,117.7,121.8,125.9,130.0,134.1,138.2,142.3,146.4,150.5,154.6,158.6,162.7,166.8,171.0,175.0,179.1,183.2,187.3,191.4,195.5,199.6,203.7,207.8,211.9,216.0,220.1,224.2,228.3,232.4,236.5,240.5,244.6,248.7,252.8,256.9,261.0,265.1,269.2,273.3,277.4,281.5,285.6,289.7,293.8,297.9,302.0,306.0,310.1,314.2,318.3,322.4,326.5,330.6,334.7,338.8,342.9,347.0,348.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.0s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.4s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.5s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.6s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.6s&quot;,&quot;61.6s&quot;,&quot;62.6s&quot;,&quot;63.6s&quot;,&quot;64.7s&quot;,&quot;65.7s&quot;,&quot;66.7s&quot;,&quot;67.7s&quot;,&quot;68.7s&quot;,&quot;69.7s&quot;,&quot;70.7s&quot;,&quot;71.7s&quot;,&quot;72.7s&quot;,&quot;73.7s&quot;,&quot;74.8s&quot;,&quot;75.0s&quot;],&quot;width&quot;:360,&quot;series&quot;:[{&quot;name&quot;:&quot;p50&quot;,&quot;slot&quot;:1,&quot;values&quot;:[&quot;2.57ms&quot;,&quot;2.42ms&quot;,&quot;2.14ms&quot;,&quot;2.23ms&quot;,&quot;2.28ms&quot;,&quot;2.19ms&quot;,&quot;2.28ms&quot;,&quot;2.28ms&quot;,&quot;2.37ms&quot;,&quot;2.23ms&quot;,&quot;2.23ms&quot;,&quot;2.52ms&quot;,&quot;2.47ms&quot;,&quot;2.32ms&quot;,&quot;2.28ms&quot;,&quot;2.42ms&quot;,&quot;2.23ms&quot;,&quot;2.28ms&quot;,&quot;2.19ms&quot;,&quot;2.62ms&quot;,&quot;2.42ms&quot;,&quot;2.28ms&quot;,&quot;2.14ms&quot;,&quot;2.28ms&quot;,&quot;2.23ms&quot;,&quot;2.28ms&quot;,&quot;2.37ms&quot;,&quot;2.28ms&quot;,&quot;2.28ms&quot;,&quot;2.23ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},{&quot;name&quot;:&quot;p95&quot;,&quot;slot&quot;:2,&quot;values&quot;:[&quot;20.96ms&quot;,&quot;6.98ms&quot;,&quot;3.13ms&quot;,&quot;9.61ms&quot;,&quot;3.01ms&quot;,&quot;3.83ms&quot;,&quot;3.26ms&quot;,&quot;6.98ms&quot;,&quot;3.26ms&quot;,&quot;3.20ms&quot;,&quot;3.07ms&quot;,&quot;3.40ms&quot;,&quot;4.15ms&quot;,&quot;3.83ms&quot;,&quot;3.68ms&quot;,&quot;11.27ms&quot;,&quot;3.01ms&quot;,&quot;3.75ms&quot;,&quot;3.91ms&quot;,&quot;4.32ms&quot;,&quot;3.20ms&quot;,&quot;3.07ms&quot;,&quot;3.01ms&quot;,&quot;3.07ms&quot;,&quot;3.33ms&quot;,&quot;3.07ms&quot;,&quot;3.46ms&quot;,&quot;2.84ms&quot;,&quot;3.40ms&quot;,&quot;3.53ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},{&quot;name&quot;:&quot;p99&quot;,&quot;slot&quot;:3,&quot;values&quot;:[&quot;20.96ms&quot;,&quot;7.56ms&quot;,&quot;4.49ms&quot;,&quot;10.41ms&quot;,&quot;3.53ms&quot;,&quot;4.68ms&quot;,&quot;3.68ms&quot;,&quot;7.87ms&quot;,&quot;3.83ms&quot;,&quot;3.46ms&quot;,&quot;3.33ms&quot;,&quot;4.23ms&quot;,&quot;4.97ms&quot;,&quot;5.83ms&quot;,&quot;5.07ms&quot;,&quot;18.59ms&quot;,&quot;3.01ms&quot;,&quot;4.87ms&quot;,&quot;4.58ms&quot;,&quot;5.07ms&quot;,&quot;3.53ms&quot;,&quot;4.07ms&quot;,&quot;3.26ms&quot;,&quot;3.75ms&quot;,&quot;3.68ms&quot;,&quot;3.83ms&quot;,&quot;4.07ms&quot;,&quot;3.01ms&quot;,&quot;3.83ms&quot;,&quot;3.68ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]}]}">
+<figcaption><b>ws.connect</b><span><i class="key k1"></i>p50</span><span><i class="key k2"></i>p95</span><span><i class="key k3"></i>p99</span></figcaption>
+<svg viewBox="0 0 360 180" role="img" aria-label="ws.connect">
+<line class="axis" x1="44" x2="348" y1="156.0" y2="156.0"/><text x="38" y="156.0" dy="0.32em" text-anchor="end">0</text>
+<line class="grid" x1="44" x2="348" y1="108.0" y2="108.0"/><text x="38" y="108.0" dy="0.32em" text-anchor="end">10ms</text>
+<line class="grid" x1="44" x2="348" y1="60.0" y2="60.0"/><text x="38" y="60.0" dy="0.32em" text-anchor="end">20ms</text>
+<line class="grid" x1="44" x2="348" y1="12.0" y2="12.0"/><text x="38" y="12.0" dy="0.32em" text-anchor="end">30ms</text>
+<text x="44.0" y="174" text-anchor="middle">0s</text>
+<text x="104.8" y="174" text-anchor="middle">15s</text>
+<text x="165.6" y="174" text-anchor="middle">30s</text>
+<text x="226.4" y="174" text-anchor="middle">45s</text>
+<text x="287.2" y="174" text-anchor="middle">1m</text>
+<text x="348.0" y="174" text-anchor="middle">1m15s</text>
+<path class="line s1" d="M48.1,143.7 L52.2,144.4 L56.3,145.7 L60.4,145.3 L64.5,145.1 L68.6,145.5 L72.7,145.1 L76.8,145.1 L80.8,144.6 L84.9,145.3 L89.0,145.3 L93.1,143.9 L97.2,144.2 L101.3,144.9 L105.4,145.1 L109.5,144.4 L113.6,145.3 L117.7,145.1 L121.8,145.5 L125.9,143.4 L130.0,144.4 L134.1,145.1 L138.2,145.7 L142.3,145.1 L146.4,145.3 L150.5,145.1 L154.6,144.6 L158.6,145.1 L162.7,145.1 L166.8,145.3"/>
+<path class="line s2" d="M48.1,55.4 L52.2,122.5 L56.3,141.0 L60.4,109.9 L64.5,141.5 L68.6,137.6 L72.7,140.3 L76.8,122.5 L80.8,140.3 L84.9,140.7 L89.0,141.3 L93.1,139.7 L97.2,136.1 L101.3,137.6 L105.4,138.3 L109.5,101.9 L113.6,141.5 L117.7,138.0 L121.8,137.3 L125.9,135.3 L130.0,140.7 L134.1,141.3 L138.2,141.5 L142.3,141.3 L146.4,140.0 L150.5,141.3 L154.6,139.4 L158.6,142.4 L162.7,139.7 L166.8,139.0"/>
+<path class="line s3" d="M48.1,55.4 L52.2,119.7 L56.3,134.4 L60.4,106.0 L64.5,139.0 L68.6,133.6 L72.7,138.3 L76.8,118.2 L80.8,137.6 L84.9,139.4 L89.0,140.0 L93.1,135.7 L97.2,132.2 L101.3,128.0 L105.4,131.7 L109.5,66.8 L113.6,141.5 L117.7,132.6 L121.8,134.0 L125.9,131.7 L130.0,139.0 L134.1,136.5 L138.2,140.3 L142.3,138.0 L146.4,138.3 L150.5,137.6 L154.6,136.5 L158.6,141.5 L162.7,137.6 L166.8,138.3"/>
+<line class="cross" y1="12" y2="156"/>
+</svg>
+<div class="tip" hidden></div>
+</figure>
+</div>
+<h3>Metrics</h3>
+<div class="table"><table>
+<thead><tr><th>metric</th><th>count</th><th>rate/s</th><th>mean</th><th>p50</th><th>p90</th><th>p95</th><th>p99</th><th>max</th></tr></thead>
+<tbody>
+<tr><td>live.event</td><td>1,760</td><td>23.47</td><td>626µs</td><td>620µs</td><td>728µs</td><td>758µs</td><td>889µs</td><td>6.70ms</td></tr>
+<tr><td>live.join</td><td>2,000</td><td>26.67</td><td>1.56ms</td><td>1.22ms</td><td>1.79ms</td><td>2.02ms</td><td>7.26ms</td><td>43.06ms</td></tr>
+<tr><td>live.page</td><td>2,000</td><td>26.67</td><td>3.88ms</td><td>3.20ms</td><td>4.07ms</td><td>4.77ms</td><td>10.62ms</td><td>131.97ms</td></tr>
+<tr><td>ws.connect</td><td>2,000</td><td>26.67</td><td>2.61ms</td><td>2.28ms</td><td>3.20ms</td><td>3.83ms</td><td>10.41ms</td><td>20.96ms</td></tr>
+</tbody></table></div>
+<h3>Thresholds</h3>
+<div class="table"><table>
+<thead><tr><th>metric</th><th>stat</th><th>limit</th><th>value</th><th>status</th></tr></thead>
+<tbody>
+<tr><td>live.join</td><td>p95</td><td>1.00s</td><td>2.02ms</td><td><span class="status passed">pass</span></td></tr>
+<tr><td>live.event</td><td>p95</td><td>1.00s</td><td>758µs</td><td><span class="status passed">pass</span></td></tr>
+<tr><td>iteration.errors</td><td>count</td><td>0</td><td>0</td><td><span class="status passed">pass</span></td></tr>
+</tbody></table></div>
+<details><summary>Timeline</summary>
+<div class="table"><table>
+<thead><tr><th>time</th><th>VUs</th><th>iterations/s</th><th>errors/s</th><th>live.event p95</th><th>live.join p95</th><th>live.page p95</th><th>ws.connect p95</th></tr></thead>
+<tbody>
+<tr><td>1.0s</td><td>67</td><td>0.00</td><td>0.00</td><td>–</td><td>43.06ms</td><td>131.97ms</td><td>20.96ms</td></tr>
+<tr><td>2.0s</td><td>135</td><td>0.00</td><td>0.00</td><td>–</td><td>1.65ms</td><td>7.26ms</td><td>6.98ms</td></tr>
+<tr><td>3.0s</td><td>202</td><td>0.00</td><td>0.00</td><td>–</td><td>1.72ms</td><td>4.32ms</td><td>3.13ms</td></tr>
+<tr><td>4.0s</td><td>269</td><td>0.00</td><td>0.00</td><td>–</td><td>2.06ms</td><td>4.07ms</td><td>9.61ms</td></tr>
+<tr><td>5.0s</td><td>337</td><td>0.00</td><td>0.00</td><td>–</td><td>1.90ms</td><td>3.91ms</td><td>3.01ms</td></tr>
+<tr><td>6.1s</td><td>404</td><td>0.00</td><td>0.00</td><td>–</td><td>2.06ms</td><td>3.83ms</td><td>3.83ms</td></tr>
+<tr><td>7.1s</td><td>471</td><td>0.00</td><td>0.00</td><td>–</td><td>2.14ms</td><td>3.91ms</td><td>3.26ms</td></tr>
+<tr><td>8.1s</td><td>539</td><td>0.00</td><td>0.00</td><td>–</td><td>1.65ms</td><td>3.98ms</td><td>6.98ms</td></tr>
+<tr><td>9.1s</td><td>606</td><td>0.00</td><td>0.00</td><td>–</td><td>1.83ms</td><td>3.83ms</td><td>3.26ms</td></tr>
+<tr><td>10.1s</td><td>673</td><td>0.00</td><td>0.00</td><td>–</td><td>1.98ms</td><td>4.23ms</td><td>3.20ms</td></tr>
+<tr><td>11.1s</td><td>741</td><td>0.00</td><td>0.00</td><td>–</td><td>1.79ms</td><td>3.98ms</td><td>3.07ms</td></tr>
+<tr><td>12.1s</td><td>808</td><td>0.00</td><td>0.00</td><td>–</td><td>1.79ms</td><td>3.83ms</td><td>3.40ms</td></tr>
+<tr><td>13.1s</td><td>875</td><td>0.00</td><td>0.00</td><td>–</td><td>2.10ms</td><td>4.87ms</td><td>4.15ms</td></tr>
+<tr><td>14.1s</td><td>943</td><td>0.00</td><td>0.00</td><td>–</td><td>2.02ms</td><td>5.83ms</td><td>3.83ms</td></tr>
+<tr><td>15.2s</td><td>1,010</td><td>0.00</td><td>0.00</td><td>–</td><td>1.86ms</td><td>3.98ms</td><td>3.68ms</td></tr>
+<tr><td>16.2s</td><td>1,077</td><td>0.00</td><td>0.00</td><td>–</td><td>4.87ms</td><td>9.23ms</td><td>11.27ms</td></tr>
+<tr><td>17.2s</td><td>1,145</td><td>0.00</td><td>0.00</td><td>–</td><td>1.94ms</td><td>3.83ms</td><td>3.01ms</td></tr>
+<tr><td>18.2s</td><td>1,212</td><td>0.00</td><td>0.00</td><td>–</td><td>1.98ms</td><td>4.23ms</td><td>3.75ms</td></tr>
+<tr><td>19.2s</td><td>1,280</td><td>0.00</td><td>0.00</td><td>–</td><td>1.83ms</td><td>4.49ms</td><td>3.91ms</td></tr>
+<tr><td>20.2s</td><td>1,347</td><td>0.00</td><td>0.00</td><td>–</td><td>1.83ms</td><td>5.07ms</td><td>4.32ms</td></tr>
+<tr><td>21.2s</td><td>1,414</td><td>0.00</td><td>0.00</td><td>–</td><td>1.79ms</td><td>4.23ms</td><td>3.20ms</td></tr>
+<tr><td>22.2s</td><td>1,482</td><td>0.00</td><td>0.00</td><td>–</td><td>1.94ms</td><td>3.83ms</td><td>3.07ms</td></tr>
+<tr><td>23.2s</td><td>1,549</td><td>0.00</td><td>0.00</td><td>–</td><td>1.79ms</td><td>4.07ms</td><td>3.01ms</td></tr>
+<tr><td>24.2s</td><td>1,616</td><td>0.00</td><td>0.00</td><td>–</td><td>1.90ms</td><td>4.23ms</td><td>3.07ms</td></tr>
+<tr><td>25.3s</td><td>1,684</td><td>0.00</td><td>0.00</td><td>–</td><td>1.83ms</td><td>3.91ms</td><td>3.33ms</td></tr>
+<tr><td>26.3s</td><td>1,751</td><td>0.00</td><td>0.00</td><td>–</td><td>1.65ms</td><td>4.07ms</td><td>3.07ms</td></tr>
+<tr><td>27.3s</td><td>1,818</td><td>0.00</td><td>0.00</td><td>–</td><td>1.86ms</td><td>3.83ms</td><td>3.46ms</td></tr>
+<tr><td>28.3s</td><td>1,886</td><td>0.00</td><td>0.00</td><td>–</td><td>1.94ms</td><td>4.15ms</td><td>2.84ms</td></tr>
+<tr><td>29.3s</td><td>1,953</td><td>0.00</td><td>0.00</td><td>–</td><td>1.83ms</td><td>5.27ms</td><td>3.40ms</td></tr>
+<tr><td>30.3s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>–</td><td>1.90ms</td><td>3.83ms</td><td>3.53ms</td></tr>
+<tr><td>31.3s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>2.78ms</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>32.3s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>889µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>33.3s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>854µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>34.4s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>743µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>35.4s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>672µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>36.4s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>773µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>37.4s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>1.18ms</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>38.4s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>789µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>39.4s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>854µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>40.4s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>758µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>41.4s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>728µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>42.4s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>728µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>43.4s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>686µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>44.5s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>773µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>45.5s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>758µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>46.5s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>773µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>47.5s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>713µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>48.5s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>686µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>49.5s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>699µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>50.5s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>713µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>51.5s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>699µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>52.5s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>743µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>53.5s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>773µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>54.6s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>758µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>55.6s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>804µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>56.6s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>728µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>57.6s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>758µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>58.6s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>758µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>59.6s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>686µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>60.6s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>728µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>61.6s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>2.14ms</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>62.6s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>686µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>63.6s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>728µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>64.7s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>758µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>65.7s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>686µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>66.7s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>728µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>67.7s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>758µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>68.7s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>743µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>69.7s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>728µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>70.7s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>728µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>71.7s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>713µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>72.7s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>699µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>73.7s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>1.20ms</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>74.8s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>789µs</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>75.0s</td><td>2,000</td><td>0.00</td><td>0.00</td><td>743µs</td><td>–</td><td>–</td><td>–</td></tr>
+</tbody></table></div>
+</details>
+</section>
+</main>
+<script>
+const setupCharts = (root) => {
+for (const chart of root.querySelectorAll(".chart")) {
+  const data = JSON.parse(chart.dataset.points);
+  const svg = chart.querySelector("svg");
+  const cross = chart.querySelector(".cross");
+  const tip = chart.querySelector(".tip");
+  let index = null;
+
+  const show = (i) => {
+    index = i;
+    cross.setAttribute("x1", data.x[i]);
+    cross.setAttribute("x2", data.x[i]);
+    cross.style.display = "block";
+
+    const at = document.createElement("div");
+    at.className = "at";
+    at.textContent = data.at[i];
+    tip.replaceChildren(at);
+
+    for (const series of data.series) {
+      const row = document.createElement("div");
+      const key = document.createElement("span");
+      const value = document.createElement("strong");
+      const name = document.createElement("span");
+      key.className = "key k" + series.slot;
+      value.textContent = series.values[i] ?? "\u2013";
+      name.textContent = series.name;
+      row.append(key, value, name);
+      tip.append(row);
+    }
+
+    tip.hidden = false;
+    const x = svg.offsetLeft + (data.x[i] / data.width) * svg.clientWidth;
+    const right = x + 12 + tip.offsetWidth <= chart.clientWidth;
+    tip.style.left = Math.max(right ? x + 12 : x - 12 - tip.offsetWidth, 0) + "px";
+  };
+
+  const hide = () => {
+    index = null;
+    cross.style.display = "none";
+    tip.hidden = true;
+  };
+
+  svg.addEventListener("pointermove", (event) => {
+    const box = svg.getBoundingClientRect();
+    const x = ((event.clientX - box.left) / box.width) * data.width;
+    let nearest = 0;
+    data.x.forEach((point, i) => {
+      if (Math.abs(point - x) < Math.abs(data.x[nearest] - x)) nearest = i;
+    });
+    show(nearest);
+  });
+
+  svg.addEventListener("pointerleave", hide);
+  chart.addEventListener("blur", hide);
+  chart.addEventListener("keydown", (event) => {
+    const last = data.x.length - 1;
+    if (event.key === "ArrowLeft") show(index === null ? last : Math.max(index - 1, 0));
+    else if (event.key === "ArrowRight") show(index === null ? 0 : Math.min(index + 1, last));
+    else if (event.key === "Escape") hide();
+    else return;
+    event.preventDefault();
+  });
+}
+};
+
+setupCharts(document);
+</script>
+</body>
+</html>

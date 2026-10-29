@@ -86,6 +86,39 @@ defmodule Stampede.RunnerTest do
     assert_raise ArgumentError, ~r/to implement Stampede.Scenario/, fn -> Stampede.run(String) end
   end
 
+  test "warns when a node can't hold as many VUs as the plan may need" do
+    %{processes: processes, files: files} = Stampede.Runner.limits()
+    assert processes > 0 and files > 0
+
+    # A rate plan only starts the VUs it needs, so this runs a single one.
+    vus = max(processes, files)
+    opts = [rate: 1, duration: 100, max_vus: vus]
+    warning = ExUnit.CaptureIO.capture_io(:stderr, fn -> Stampede.run(Observed, opts) end)
+
+    assert warning =~ "Stampede.Test.Observed can run up to #{format(vus)} VUs on #{node()}"
+    assert warning =~ "#{format(processes)} processes and #{format(files)} open files"
+    assert warning =~ ~s(--erl "+P 4000000" and ulimit -n)
+
+    assert ExUnit.CaptureIO.capture_io(:stderr, fn -> Stampede.run(Observed, duration: 100) end) ==
+             ""
+  end
+
+  defp format(number), do: Stampede.Reporter.amount(number, :vus)
+
+  defmodule AlwaysFailing do
+    use Stampede.Scenario
+
+    @impl true
+    def run(_vu), do: raise("down")
+  end
+
+  test "waits longer after each failure in a row before trying again" do
+    result = Stampede.run(AlwaysFailing, vus: 1, duration: 2_000)
+
+    # Tries at 0, 100, 250, 450, 700 and 1,200ms, then waits a second.
+    assert result.metrics["iteration.errors"].count in 5..7
+  end
+
   defmodule Short do
     use Stampede.Scenario
 

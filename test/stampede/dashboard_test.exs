@@ -93,6 +93,26 @@ defmodule Stampede.DashboardTest do
     assert {:error, _reason} = Stampede.HTTP.get(ctx.url <> "/")
   end
 
+  test "serves finished runs as the HTML report and the JSON", %{url: url} do
+    Stampede.run(Observed, vus: 1, duration: 200)
+    runs = await_runs!(url, "Ran for")
+
+    [_match, id] = Regex.run(~r{href="runs/(\d+)/report\.html" download}, runs)
+    assert runs =~ ~s(href="runs/#{id}/results.json" download)
+
+    report = get!(url <> "/runs/#{id}/report.html")
+    assert report.status == 200
+    assert report.body =~ "<title>Stampede report</title>"
+
+    assert {"content-disposition", ~s(attachment; filename="stampede-#{id}-report.html")} in report.headers
+
+    json = get!(url <> "/runs/#{id}/results.json")
+    assert %{"scenario" => "Stampede.Test.Observed"} = JSON.decode!(json.body)
+
+    assert get!(url <> "/runs/999/report.html").status == 404
+    assert get!(url <> "/runs/#{id}/other.txt").status == 404
+  end
+
   test "stop/1 returns at once when no page is open", %{dashboard: dashboard} do
     Stampede.run(Observed, vus: 1, duration: 100)
 

@@ -11,13 +11,20 @@ defmodule Stampede.Runner.Driver do
   @rate_tick 10
   @finish_tick 10
   @interval 1_000
-  @error_pause 100
+  # After an iteration fails, a VU waits before the next one, longer each time
+  # it fails in a row, much like Phoenix's JavaScript client before it
+  # reconnects. A server in trouble then isn't hammered by every VU at once.
+  @backoff [100, 150, 200, 250, 500, 1_000, 2_000]
+  @max_backoff 5_000
 
   def start(config) do
     {:ok, spawn(fn -> init(config) end)}
   end
 
   defp init(config) do
+    # Like the controller, so that the run goes on while VUs keep the node
+    # busy.
+    Process.flag(:priority, :high)
     Process.flag(:trap_exit, true)
     monitor = Process.monitor(config.controller)
 
@@ -30,6 +37,7 @@ defmodule Stampede.Runner.Driver do
 
   defp run(config) do
     metrics = Metrics.new()
+    :erlang.system_flag(:scheduler_wall_time, true)
 
     state =
       Map.merge(config, %{
@@ -42,6 +50,8 @@ defmodule Stampede.Runner.Driver do
         interval: 0,
         snapshot: %{},
         reported_at: 0,
+        scheduler_time: scheduler_time(),
+        wrapped: false,
         started_at: now()
       })
 
@@ -58,7 +68,7 @@ defmodule Stampede.Runner.Driver do
   defp loop(state, total) do
     elapsed = now() - state.started_at
 
-    if elapsed < total do
+    if elapsed < total and not state.wrapped do
       tick = if state.plan.mode == :vus, do: @vus_tick, else: @rate_tick
 
       state
@@ -171,6 +181,11 @@ defmodule Stampede.Runner.Driver do
       {:EXIT, pid, reason} ->
         state |> exited(pid, reason) |> continue(deadline)
 
+      # The controller found what it was looking for, such as a limit, so the
+      # plan ends early, the same way it does at its end.
+      :wrap_up ->
+        %{state | wrapped: true}
+
       :stop ->
         stop(state)
         exit(:normal)
@@ -212,16 +227,48 @@ defmodule Stampede.Runner.Driver do
 
   defp report(state, elapsed) do
     snapshot = Metrics.snapshot(state.metrics)
+    scheduler_time = scheduler_time()
 
     interval = %{
       index: state.interval,
       at: elapsed,
       vus: map_size(state.vus) - length(state.idle) + map_size(state.stopping),
-      delta: Metrics.delta(snapshot, state.snapshot)
+      delta: Metrics.delta(snapshot, state.snapshot),
+      busy: busy(state.scheduler_time, scheduler_time)
     }
 
     send(state.controller, {:interval, self(), interval})
-    %{state | interval: state.interval + 1, snapshot: snapshot, reported_at: elapsed}
+
+    %{
+      state
+      | interval: state.interval + 1,
+        snapshot: snapshot,
+        reported_at: elapsed,
+        scheduler_time: scheduler_time
+    }
+  end
+
+  # How busy this node's schedulers were between two samples, from 0 to 1.
+  # A load test that's too busy measures its own delays as well as the
+  # server's, so the run reports it. Schedulers spinning while they wait
+  # don't count as busy.
+  defp scheduler_time do
+    count = :erlang.system_info(:schedulers)
+
+    :erlang.statistics(:scheduler_wall_time)
+    |> Enum.filter(fn {id, _active, _total} -> id <= count end)
+    |> Enum.sort()
+  end
+
+  defp busy(before, now) do
+    {active, total} =
+      Enum.zip_reduce(before, now, {0, 0}, fn {_, active1, total1},
+                                              {_, active2, total2},
+                                              {a, t} ->
+        {a + active2 - active1, t + total2 - total1}
+      end)
+
+    if total > 0, do: active / total, else: 0.0
   end
 
   defp stop(state) do
@@ -242,19 +289,23 @@ defmodule Stampede.Runner.Driver do
     Metrics.put_current(metrics)
 
     case kind do
-      :closed -> closed_loop(scenario, vu, metrics)
+      :closed -> closed_loop(scenario, vu, metrics, 0)
       :open -> open_loop(driver, scenario, vu, metrics)
     end
   end
 
   # A VU of a :vus plan iterates until the driver asks it to finish.
-  defp closed_loop(scenario, vu, metrics) do
-    if iterate(scenario, vu, metrics) == :error, do: Process.sleep(@error_pause)
+  defp closed_loop(scenario, vu, metrics, failures) do
+    {failures, pause} =
+      case iterate(scenario, vu, metrics) do
+        :ok -> {0, 0}
+        :error -> {failures + 1, Enum.at(@backoff, failures, @max_backoff)}
+      end
 
     receive do
       :finish -> :ok
     after
-      0 -> closed_loop(scenario, %{vu | iteration: vu.iteration + 1}, metrics)
+      pause -> closed_loop(scenario, %{vu | iteration: vu.iteration + 1}, metrics, failures)
     end
   end
 

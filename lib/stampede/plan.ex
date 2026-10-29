@@ -62,6 +62,13 @@ defmodule Stampede.Plan do
 
   defp area([], _elapsed, _from, acc), do: acc
 
+  # The most VUs the plan can have running at once.
+  def peak_vus(%__MODULE__{mode: :vus, stages: stages}) do
+    stages |> Enum.map(&elem(&1, 1)) |> Enum.max()
+  end
+
+  def peak_vus(%__MODULE__{mode: :rate, max_vus: max_vus}), do: max_vus
+
   # The part of `total` that falls to the node at `index` out of `count`.
   def share(total, index, count) do
     div(total, count) + if(index < rem(total, count), do: 1, else: 0)

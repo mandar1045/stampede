@@ -59,6 +59,13 @@ defmodule Stampede.Runner.ReportingTest do
   test "prints progress" do
     output = capture_io(fn -> Stampede.run(Custom, vus: 1, duration: 1_100, progress: true) end)
 
-    assert output =~ ~r/1\.\ds  vus: 1  iterations: \d+  errors: 0/
+    assert output =~ ~r/1\.\ds  vus: 1  iterations: \d+  errors: 0  load test busy: \d+%/
+  end
+
+  test "records how busy the load test was each second" do
+    result = Stampede.run(Custom, vus: 1, duration: 2_100)
+
+    assert [_ | _] = result.timeline
+    assert Enum.all?(result.timeline, &(&1.busy >= 0 and &1.busy <= 1))
   end
 end
