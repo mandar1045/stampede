@@ -6,10 +6,115 @@ Channels. It extends the Channels protocol with binary broadcasts of its
 own, which makes it a good example of load testing a real Phoenix system
 that goes beyond the defaults.
 
-I ran these load tests against a local Realtime, started from a checkout
-of its repository, with a tenant of their own. Realtime limits how many
-users, joins and events each tenant may have, to protect production
-servers, so I raised that tenant's limits first.
+I've tested it twice: on my laptop first, to get the protocol right, and then
+on AWS, to see how far one machine can go.
+
+## 50,000 users on one machine
+
+I wanted to try a real product and not just a test app, so I ran Realtime's open
+source release on AWS and load tested it with Stampede. One 4-core machine held
+**50,000 users for 10 minutes with no errors**, and delivered 80.9 million
+messages, with a round trip of 5.71ms at p95.
+
+This is the open source server on my own machines. None of it ran on Supabase's
+hosted service, and it isn't a measure of that service.
+
+| | |
+|---|---|
+| Server | One `r7g.xlarge`: 4 Graviton cores, 32 GB |
+| Load | Three more `r7g.xlarge` in the same zone |
+| Realtime | The official `supabase/realtime:v2.150.2` image |
+| Postgres | `supabase/postgres:17.11.0.007`, on the same machine |
+
+Each user does what `realtime-js` does: protocol 2.0.0, with a heartbeat every 25
+seconds. There are 100 users in each channel, which is the shape of
+[Supabase's own large-scale benchmark](https://supabase.com/docs/guides/realtime/benchmarks).
+Each one sends a broadcast every 30 to 60 seconds, which everyone in the channel
+receives, so each channel gets about 2 messages a second. They connect with
+`self: true` and `ack: true`, so they can time their own message coming back.
+
+I didn't tune anything. I only raised the limits that would stop a test from
+reaching the server's capacity: the per-tenant limits, which protect a shared
+service, and `MAX_CONNECTIONS`.
+
+First I went up 10,000 users at a time, ramping each step for 60 seconds and
+holding it for 60. A step passed if joins and round trips stayed under 1 second
+at p95, with no errors:
+
+| Users | Join p95 | Round trip p95 | Server CPU | Server memory |
+|---:|---:|---:|---:|---:|
+| 10,000 | 5.27ms | 1.72ms | 17% | 1.8 GB |
+| 20,000 | 5.94ms | 2.02ms | 33% | 2.6 GB |
+| 30,000 | 6.31ms | 2.52ms | 50% | 3.3 GB |
+| 40,000 | 8.69ms | 3.53ms | 67% | 4.0 GB |
+| **50,000** | **17.16ms** | **6.44ms** | **82%** | **4.7 GB** |
+
+At 60,000 the server ran out of CPU. Messages still came back in 75ms and nothing
+crashed, but joins went just over the limit, at 1.06s, so 50,000 is the number.
+The full record, with that step, is in
+[`bench/million`](https://github.com/mandar1045/stampede/tree/main/bench/million).
+
+A 60-second hold doesn't prove much, so I then ramped up to 50,000 over 5 minutes
+and held them for 10, the length of Supabase's broadcast benchmark:
+
+| | |
+|---|---|
+| Messages delivered | 80.9 million, about 111,000 a second while holding |
+| Round trip | p50 1.75ms, p95 5.71ms, p99 10.62ms, slowest 65.53ms |
+| Join p95 | 17.51ms |
+| Server | 79% CPU, 4.7 GB of memory |
+
+This is Realtime's own `/metrics` during that run, in Grafana:
+
+![Realtime's own metrics during the run: 50,000 connected users, about 112,000 events a second, CPU near 80% and memory at 15%](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/realtime-50k.png)
+
+### Why I trust it
+
+A load test saying it did well doesn't prove much, so I checked it against things
+that don't come from Stampede:
+
+  * **Realtime counted the users itself.** Its own metric peaked at 50,001, which
+    is the 50,000 users and one real browser. The Linux kernel showed 50,025
+    established connections.
+  * **A real client was in the room.** `realtime-js` in Firefox joined one of the
+    channels during the run. It received the load test's messages, and the load
+    test received its messages too.
+  * **Every message arrived.** Each broadcast should reach 100 people. That's
+    80,922,500 deliveries, counting the browser's, and 80,919,126 arrived, which
+    is 99.996%. The last few were probably still on their way when the run ended.
+  * **The server's log is clean.** Realtime logged no errors or warnings until the
+    run ended, when 50,000 users disconnected at once and it logged some warnings
+    about long message queues. In the find-limit run, the first error came in the
+    step that failed, at 60,000.
+  * **The load machines weren't the limit.** They peaked at 51% busy.
+
+Phoenix LiveDashboard, running inside Realtime, shows the 4 schedulers on Arm,
+about 50,000 ports and two processes for each user:
+
+![Phoenix LiveDashboard in Realtime during the run, with 50,020 ports and 100,749 processes on a 4-core Arm machine](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/realtime-50k-livedashboard.png)
+
+### What it doesn't show
+
+  * **This is broadcast on public channels.** There's no row level security and
+    no Postgres Changes, and both of those cost more.
+  * **There's no TLS.** It's plain `ws://` inside one AWS zone, so real users
+    would see their own network on top, and something has to terminate TLS.
+  * **It's one workload.** CPU went up steadily with users here because every
+    message goes to 100 people. A channel size of 10 or 1,000 would land somewhere
+    else, and memory wouldn't be the limit until far more users. It was only 15%
+    full.
+  * **It isn't comparable to Supabase's own numbers.** They publish 250,000 users
+    and over 800,000 messages a second on a cluster of 2 to 6 nodes. Mine is one
+    node, for a different question: how far does one machine go?
+
+To run it yourself, the scripts are in
+[`bench/million`](https://github.com/mandar1045/stampede/tree/main/bench/million).
+
+## On my laptop
+
+I started with a local Realtime, from a checkout of its repository, with a tenant
+of its own. Realtime limits how many users, joins and events each tenant may
+have, to protect production servers, so I raised that tenant's limits first.
 
 ## Speaking Realtime's protocol
 
@@ -135,6 +240,11 @@ end
 Every broadcast goes to everyone in the channel, so with `n` users, the
 server delivers `n` times as many messages as it receives.
 
+For the run on AWS, `realtime-js` sends a heartbeat every 25 seconds, so the
+scenario does too, with `heartbeat_interval: 25_000`. In a channel of 100, each
+user hears far more than it reads, so it passes `keep: &(&1["payload"]["from"] ==
+vu.id)` to `Stampede.Channels.connect/2`, and only holds on to its own messages.
+
 ## Presence and Postgres Changes
 
 The two other scenarios follow the same shape:
@@ -148,7 +258,7 @@ The two other scenarios follow the same shape:
     `c:Stampede.Scenario.setup/1` creates the table and adds it to Realtime's
     publication.
 
-## Results
+## Laptop results
 
 Realtime 2.146.0, in dev mode, with the load test on the same laptop
 (i5-13420H, 12 threads, 16 GB). At 400 users my laptop was 85% to 90% busy

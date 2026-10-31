@@ -1,0 +1,77 @@
+Dashboard at http://127.0.0.1:4040
+
+   1.0s  vus: 101  iterations: 0  errors: 0  load test busy: 1%
+   2.0s  vus: 202  iterations: 0  errors: 0  load test busy: 0%
+   3.0s  vus: 303  iterations: 0  errors: 0  load test busy: 0%
+   4.0s  vus: 404  iterations: 0  errors: 0  load test busy: 0%
+   5.1s  vus: 505  iterations: 0  errors: 0  load test busy: 0%
+   6.1s  vus: 606  iterations: 0  errors: 0  load test busy: 0%
+   7.1s  vus: 707  iterations: 0  errors: 0  load test busy: 0%
+   8.1s  vus: 808  iterations: 0  errors: 0  load test busy: 0%
+   9.1s  vus: 909  iterations: 0  errors: 0  load test busy: 0%
+  10.1s  vus: 1010  iterations: 0  errors: 0  load test busy: 0%
+  11.1s  vus: 1111  iterations: 0  errors: 0  load test busy: 0%
+  12.1s  vus: 1212  iterations: 0  errors: 0  load test busy: 0%
+  13.1s  vus: 1313  iterations: 0  errors: 0  load test busy: 0%
+  14.1s  vus: 1414  iterations: 0  errors: 0  load test busy: 0%
+  15.2s  vus: 1515  iterations: 0  errors: 0  load test busy: 1%
+  16.2s  vus: 1616  iterations: 0  errors: 0  load test busy: 0%
+  17.2s  vus: 1717  iterations: 0  errors: 0  load test busy: 0%
+  18.2s  vus: 1818  iterations: 0  errors: 0  load test busy: 0%
+  19.2s  vus: 1919  iterations: 0  errors: 0  load test busy: 0%
+  20.2s  vus: 2020  iterations: 0  errors: 0  load test busy: 0%
+  21.2s  vus: 2121  iterations: 0  errors: 0  load test busy: 0%
+  22.2s  vus: 2222  iterations: 0  errors: 0  load test busy: 0%
+  23.2s  vus: 2323  iterations: 0  errors: 0  load test busy: 0%
+  24.2s  vus: 2424  iterations: 0  errors: 0  load test busy: 1%
+  25.3s  vus: 2525  iterations: 0  errors: 0  load test busy: 0%
+  26.3s  vus: 2626  iterations: 0  errors: 0  load test busy: 0%
+  27.3s  vus: 2727  iterations: 0  errors: 0  load test busy: 0%
+  28.3s  vus: 2828  iterations: 0  errors: 0  load test busy: 0%
+  29.3s  vus: 2929  iterations: 0  errors: 0  load test busy: 0%
+  30.3s  vus: 3000  iterations: 0  errors: 0  load test busy: 1%
+  31.3s  vus: 3000  iterations: 0  errors: 0  load test busy: 0%
+  32.3s  vus: 3000  iterations: 0  errors: 0  load test busy: 0%
+  33.3s  vus: 3000  iterations: 0  errors: 0  load test busy: 0%
+  34.3s  vus: 3000  iterations: 0  errors: 0  load test busy: 0%
+  35.4s  vus: 3000  iterations: 0  errors: 0  load test busy: 1%
+  36.4s  vus: 3000  iterations: 0  errors: 0  load test busy: 1%
+  37.4s  vus: 3000  iterations: 0  errors: 0  load test busy: 1%
+  38.4s  vus: 3000  iterations: 0  errors: 0  load test busy: 1%
+  39.4s  vus: 3000  iterations: 0  errors: 0  load test busy: 1%
+  40.4s  vus: 3000  iterations: 0  errors: 0  load test busy: 1%
+  41.4s  vus: 3000  iterations: 0  errors: 0  load test busy: 1%
+  42.4s  vus: 3000  iterations: 0  errors: 0  load test busy: 1%
+  43.4s  vus: 3000  iterations: 0  errors: 0  load test busy: 1%
+  44.4s  vus: 3000  iterations: 0  errors: 0  load test busy: 1%
+  45.5s  vus: 3000  iterations: 0  errors: 0  load test busy: 1%
+  46.5s  vus: 3000  iterations: 0  errors: 0  load test busy: 1%
+  47.5s  vus: 3000  iterations: 0  errors: 0  load test busy: 1%
+  48.5s  vus: 3000  iterations: 0  errors: 0  load test busy: 2%
+  49.5s  vus: 3000  iterations: 0  errors: 0  load test busy: 1%
+  50.5s  vus: 3000  iterations: 0  errors: 0  load test busy: 2%
+  51.5s  vus: 3000  iterations: 0  errors: 0  load test busy: 2%
+  52.5s  vus: 3000  iterations: 0  errors: 0  load test busy: 2%
+  53.5s  vus: 3000  iterations: 0  errors: 0  load test busy: 2%
+  54.5s  vus: 3000  iterations: 0  errors: 0  load test busy: 2%
+  55.6s  vus: 3000  iterations: 0  errors: 0  load test busy: 2%
+  56.6s  vus: 3000  iterations: 0  errors: 0  load test busy: 2%
+  57.6s  vus: 3000  iterations: 0  errors: 0  load test busy: 2%
+  58.6s  vus: 3000  iterations: 0  errors: 0  load test busy: 2%
+  59.6s  vus: 3000  iterations: 0  errors: 0  load test busy: 3%
+  60.0s  vus: 3000  iterations: 0  errors: 0  load test busy: 3%
+
+Load.Realtime ran for 60.0s
+
+  metric                count   rate/s    mean     p50     p90     p95     p99      max
+  broadcast.ack          1479    24.65  1.09ms  1.04ms  1.38ms  1.53ms  1.90ms   4.15ms
+  broadcast.roundtrip    1479    24.65  1.14ms  1.09ms  1.44ms  1.59ms  1.98ms   4.23ms
+  channel.join           3000    50.00  1.96ms  1.75ms  2.72ms  3.13ms  4.58ms  16.16ms
+  channel.messages     148904  2481.69
+  ws.connect             3000    50.00  2.16ms  1.98ms  2.57ms  2.72ms  5.60ms  21.38ms
+
+  thresholds
+    pass  channel.join p95 <= 1.00s (3.13ms)
+    pass  broadcast.roundtrip p95 <= 1.00s (1.59ms)
+    pass  iteration.errors count <= 0 (0)
+

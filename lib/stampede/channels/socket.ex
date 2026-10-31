@@ -21,6 +21,7 @@ defmodule Stampede.Channels.Socket do
     :metrics,
     :heartbeat_interval,
     :heartbeat_ref,
+    :keep,
     next_ref: 0,
     joins: %{},
     pending: %{},
@@ -58,7 +59,8 @@ defmodule Stampede.Channels.Socket do
           websocket: websocket,
           serializer: serializer,
           metrics: metrics,
-          heartbeat_interval: opts[:heartbeat_interval]
+          heartbeat_interval: opts[:heartbeat_interval],
+          keep: opts[:keep]
         }
 
         case handle_frames(frames, state) do
@@ -353,12 +355,18 @@ defmodule Stampede.Channels.Socket do
     _error -> false
   end
 
-  defp enqueue(%{inbox_size: @inbox_limit} = state, message) do
+  defp enqueue(%{keep: keep} = state, message) when keep != nil do
+    if matches?(keep, message.payload), do: add_to_inbox(state, message), else: state
+  end
+
+  defp enqueue(state, message), do: add_to_inbox(state, message)
+
+  defp add_to_inbox(%{inbox_size: @inbox_limit} = state, message) do
     Metrics.increment(state.metrics, "channel.messages.dropped")
     %{state | inbox: :queue.in(message, :queue.drop(state.inbox))}
   end
 
-  defp enqueue(state, message) do
+  defp add_to_inbox(state, message) do
     %{state | inbox: :queue.in(message, state.inbox), inbox_size: state.inbox_size + 1}
   end
 

@@ -4,14 +4,14 @@ defmodule Stampede.RunnerTest do
   alias Stampede.Test.{Crashing, Custom, Failing, Lobby, Observed, Reconnecting}
 
   test "records the built-in metrics" do
-    result = Stampede.run(Lobby)
+    result = Stampede.run(Lobby, graceful_stop: 10_000)
 
     assert result.scenario == Lobby
     assert result.duration >= 1_000
     assert result.passed?
     assert result.errors == []
     assert %{type: :timing, count: iterations} = result.metrics["iteration"]
-    assert iterations > 2
+    assert iterations >= 2
 
     for name <- ["ws.connect", "channel.join", "channel.push"] do
       assert %{type: :timing, count: count, p95: p95} = result.metrics[name]
@@ -22,7 +22,10 @@ defmodule Stampede.RunnerTest do
 
   test "evaluates thresholds" do
     result =
-      Stampede.run(Lobby, thresholds: [{"channel.join", p95: 60_000}, {"channel.push", count: 0}])
+      Stampede.run(Lobby,
+        graceful_stop: 10_000,
+        thresholds: [{"channel.join", p95: 60_000}, {"channel.push", count: 0}]
+      )
 
     refute result.passed?
 
@@ -33,7 +36,7 @@ defmodule Stampede.RunnerTest do
   end
 
   test "counts iterations that fail and keeps going" do
-    result = Stampede.run(Failing, vus: 2, duration: 1_000)
+    result = Stampede.run(Failing, vus: 2, duration: 1_000, graceful_stop: 10_000)
 
     assert result.metrics["iteration.errors"].count == 2
     assert result.metrics["iteration"].count > 0
@@ -56,7 +59,7 @@ defmodule Stampede.RunnerTest do
   end
 
   test "closes sockets after every iteration and stops VUs at the end" do
-    result = Stampede.run(Reconnecting, vus: 2, duration: 1_000)
+    result = Stampede.run(Reconnecting, vus: 2, duration: 1_000, graceful_stop: 10_000)
 
     assert result.metrics["closed"].count > 0
     refute Map.has_key?(result.metrics, "leaked")

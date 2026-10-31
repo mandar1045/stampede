@@ -92,6 +92,54 @@ with the session cookie, and joins the LiveView with that cookie and the
 page's CSRF token, as a browser would. `"live.page"` times the whole page
 load, the sign-in included.
 
+## Signing in through the real form
+
+A sign-in route is the easy way, but sometimes you want the form your users
+really see, to load test the sign-in itself, say, or because you can't add a
+route. `Stampede.HTTP` can do what a browser does there: load the page, send the
+form with its CSRF token, and keep the session cookie.
+
+```elixir
+@impl true
+def run(vu) do
+  # A new visitor each time, or they'd still be signed in.
+  Stampede.HTTP.clear_cookies()
+  url = "http://localhost:4000/users/log-in"
+  password = System.fetch_env!("LOAD_TEST_PASSWORD")
+
+  {:ok, page} = Stampede.HTTP.get(url, cookies: true)
+
+  {:ok, %{status: 302}} =
+    Stampede.HTTP.post(url,
+      cookies: true,
+      form: %{
+        "_csrf_token" => Stampede.HTTP.csrf_token(page),
+        "user" => %{"email" => "load-#{vu.id}@example.com", "password" => password}
+      }
+    )
+
+  # connect/2 would follow a redirect back to the sign-in page, so check where it landed.
+  dashboard = "http://localhost:4000/dashboard"
+  {:ok, %{url: ^dashboard} = view} = Stampede.LiveView.connect(dashboard, cookies: true)
+
+  {:ok, _reply} = Stampede.LiveView.click(view, "refresh")
+  Process.sleep(5_000)
+end
+```
+
+`cookies: true` gives each VU its own cookies, one set per host, shared by
+`Stampede.HTTP`, `Stampede.LiveView.connect/2` and `Stampede.SSE`. They last
+between iterations, so call `Stampede.HTTP.clear_cookies/0` to start over. Only
+the host counts, not a cookie's `Path` or `Domain`, and a cookie goes away when
+the server deletes it with `Max-Age=0`.
+
+`mix stampede.record` writes all of this for you if you sign in while recording.
+See the [recording guide](recording.md#signing-in).
+
+Hashing a password takes a lot of CPU on purpose, so a VU that signs in on every
+iteration tests your password hashing more than your app. Sign in once and loop
+over the rest if you're after the pages.
+
 ## Tokens for sockets and APIs
 
 Channels and APIs often check a token rather than a cookie. When your socket

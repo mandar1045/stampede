@@ -11,12 +11,13 @@ defmodule Stampede.Recorder do
 
   It runs in the same VM as the app, and records from LiveView's and Phoenix's
   telemetry: pages opened, live navigation, patches, clicks, forms, file uploads
-  and Channels, with the time between them as pauses. Plain GET requests are
-  recorded too. See the [recording guide](recording.html).
+  and Channels, with the time between them as pauses. Requests to controllers
+  are recorded too, with the forms and JSON they send, so signing in through a
+  form works. See the [recording guide](recording.html).
 
   Fields that look sensitive, such as passwords and tokens, are replaced with
-  `"CHANGE_ME"`, in forms, in Channels messages and in URLs, so they don't end
-  up in a file you might commit. Other values are kept as they were typed.
+  `"CHANGE_ME"`, in forms, in JSON, in Channels messages and in URLs, so they
+  don't end up in a file you might commit. Other values are kept as they were typed.
   Uploaded files aren't kept, only their name, size and type.
   """
 
@@ -36,7 +37,7 @@ defmodule Stampede.Recorder do
   @internal_topics ["lv:", "lvu:", "phoenix:"]
 
   @sensitive ~r/pass|secret|token|card|cvv|ssn|api.?key/i
-  @dropped ~w(_csrf_token _target)
+  @dropped ~w(_csrf_token _target _method)
   @placeholder "CHANGE_ME"
 
   # Pauses shorter than this are the app's own speed, and longer ones are
@@ -47,6 +48,9 @@ defmodule Stampede.Recorder do
   @caused_by 1_500
   # Changes this close together are someone typing.
   @typing 2_000
+
+  # Requests that change something, which need the session they came from.
+  @changing ~w(POST PUT PATCH DELETE)
 
   @typedoc "One thing the person did, with `:at` in milliseconds."
   @type step :: map()
@@ -160,7 +164,15 @@ defmodule Stampede.Recorder do
   defp raw([:phoenix, :router_dispatch, :stop], %{plug: Phoenix.LiveView.Plug}), do: nil
 
   defp raw([:phoenix, :router_dispatch, :stop], %{conn: conn}) do
-    %{kind: :http, method: conn.method, url: request_url(conn)}
+    %{
+      kind: :http,
+      method: conn.method,
+      url: request_url(conn),
+      status: conn.status,
+      from: header(conn, "referer"),
+      csrf_header?: header(conn, "x-csrf-token") != nil,
+      sent: sent(conn)
+    }
   end
 
   defp raw([:phoenix, :channel_joined], %{socket: socket, params: params, result: :ok}) do
@@ -203,6 +215,22 @@ defmodule Stampede.Recorder do
         name: Atom.to_string(name),
         file: %{name: entry.client_name, size: entry.client_size, type: entry.client_type}
       }
+    end
+  end
+
+  defp header(conn, name) do
+    with {^name, value} <- List.keyfind(conn.req_headers, name, 0), do: value
+  end
+
+  # Without Plug.Parsers, or with a file in it, the body can't be replayed.
+  defp sent(%{body_params: %{__struct__: _unfetched}}), do: :unknown
+
+  defp sent(conn) do
+    case header(conn, "content-type") do
+      "application/x-www-form-urlencoded" <> _charset -> {:form, conn.body_params}
+      "application/json" <> _charset -> {:json, conn.body_params}
+      nil -> :nothing
+      _other -> :unknown
     end
   end
 
@@ -250,7 +278,16 @@ defmodule Stampede.Recorder do
   end
 
   defp step(%{kind: :http} = raw, state) do
-    add(state, %{kind: :http, method: raw.method, url: redact_url(raw.url), at: raw.at})
+    add(state, %{
+      kind: :http,
+      method: raw.method,
+      url: redact_url(raw.url),
+      status: raw.status,
+      from: (raw.from && redact_url(raw.from)) || last_page(state),
+      csrf: csrf(raw),
+      sent: clean_sent(raw.sent),
+      at: raw.at
+    })
   end
 
   defp step(%{kind: :join} = raw, state) do
@@ -273,6 +310,22 @@ defmodule Stampede.Recorder do
   defp step(_other_view, state), do: state
 
   defp add(state, step), do: %{state | steps: [step | state.steps]}
+
+  # Where a request came from, when the browser didn't say.
+  defp last_page(state) do
+    Enum.find_value(state.steps, fn
+      %{kind: kind, url: url} when kind in [:open, :navigate, :patch] -> url
+      %{kind: :http, method: "GET", url: url} -> url
+      _other -> nil
+    end)
+  end
+
+  defp csrf(%{sent: {_type, %{"_csrf_token" => _token}}}), do: :body
+  defp csrf(%{csrf_header?: true}), do: :header
+  defp csrf(_raw), do: nil
+
+  defp clean_sent({type, params}), do: {type, clean(params)}
+  defp clean_sent(nothing_or_unknown), do: nothing_or_unknown
 
   # A file shows up in the socket on the first event after it's picked, and
   # stays until it's used, so each one is only added once. It goes before that
@@ -325,16 +378,18 @@ defmodule Stampede.Recorder do
   defp clean(params) do
     params
     |> Enum.reject(fn {key, value} -> dropped?(key) or (key == "value" and value == "") end)
-    |> Map.new(fn
-      {key, value} when is_map(value) -> {key, clean(value)}
-      {key, value} -> {key, redact(key, value)}
-    end)
+    |> Map.new(fn {key, value} -> {key, redact(key, value)} end)
   end
 
   defp dropped?(key), do: key in @dropped or String.starts_with?(key, "_unused_")
 
   defp redact(key, value) do
-    if Regex.match?(@sensitive, key), do: @placeholder, else: value
+    cond do
+      Regex.match?(@sensitive, key) -> @placeholder
+      is_map(value) -> clean(value)
+      is_list(value) -> Enum.map(value, &redact(key, &1))
+      true -> value
+    end
   end
 
   defp redact_url(url) do
@@ -361,16 +416,37 @@ defmodule Stampede.Recorder do
   end
 
   defp body(steps) do
+    cookies? = Enum.any?(steps, &changes?/1)
+    start = %{open?: false, previous: nil, cast?: false, cookies?: cookies?}
+
     steps
     |> Enum.chunk_every(2, 1, [nil])
-    |> Enum.flat_map_reduce(%{open?: false, previous: nil, cast?: false}, fn [step, next],
-                                                                             state ->
+    |> Enum.flat_map_reduce(start, fn [step, next], state ->
       lines = lines(step, next, state)
       {lines, %{state | open?: open?(step, state), previous: step, cast?: cast?(step, state)}}
     end)
     |> then(fn {lines, state} -> lines ++ if(state.open?, do: [close()], else: []) end)
+    |> then(&if(cookies?, do: new_visitor() ++ &1, else: &1))
     |> Enum.join("\n")
   end
+
+  defp new_visitor do
+    ["# A new visitor each time, or they'd still be signed in.", "Stampede.HTTP.clear_cookies()"]
+  end
+
+  defp changes?(%{kind: :http, method: method, sent: sent}) do
+    method in @changing and sent != :unknown
+  end
+
+  defp changes?(_step), do: false
+
+  defp cookies(%{cookies?: true}), do: ", cookies: true"
+  defp cookies(_state), do: ""
+
+  # Apps answer a wrong password with a redirect too, and connect/2 would follow
+  # it to the sign-in page, so a failed sign-in only shows here.
+  defp opened(step, %{cookies?: true}), do: "{:ok, %{url: #{inspect(step.url)}} = view}"
+  defp opened(_step, _state), do: "{:ok, view}"
 
   defp open?(%{kind: :open}, _state), do: true
   defp open?(_step, state), do: state.open?
@@ -397,7 +473,11 @@ defmodule Stampede.Recorder do
 
   defp code(%{kind: :open} = step, _next, state) do
     close = if state.open?, do: [close()], else: []
-    close ++ ["{:ok, view} = Stampede.LiveView.connect(#{inspect(step.url)})"]
+
+    close ++
+      [
+        "#{opened(step, state)} = Stampede.LiveView.connect(#{inspect(step.url)}#{cookies(state)})"
+      ]
   end
 
   defp code(%{kind: :navigate} = step, _next, _state) do
@@ -408,12 +488,17 @@ defmodule Stampede.Recorder do
     ["{:ok, view} = Stampede.LiveView.patch(view, #{inspect(path(step.url))})"]
   end
 
-  defp code(%{kind: :http, method: "GET"} = step, _next, _state) do
-    ["{:ok, _response} = Stampede.HTTP.get(#{inspect(step.url)})"]
+  defp code(%{kind: :http, method: "GET"} = step, _next, state) do
+    response = if state.cookies?, do: "%{status: #{step.status}}", else: "_response"
+    ["{:ok, #{response}} = Stampede.HTTP.get(#{inspect(step.url)}#{cookies(state)})"]
   end
 
   defp code(%{kind: :http} = step, _next, _state) do
-    ["# #{step.method} #{step.url} happened here. Add it by hand, if the rest needs it."]
+    if changes?(step) do
+      page(step) ++ change_me(step) ++ ["{:ok, %{status: #{step.status}}} = #{request(step)}"]
+    else
+      ["# #{step.method} #{step.url} happened here. Add it by hand, if the rest needs it."]
+    end
   end
 
   defp code(%{kind: :channel} = step, _next, _state) do
@@ -421,7 +506,7 @@ defmodule Stampede.Recorder do
   end
 
   defp code(%{kind: :join} = step, _next, _state) do
-    params = Macro.to_string(Macro.escape(step.params))
+    params = literal(step.params)
     ["{:ok, _reply} = Stampede.Channels.join(socket, #{inspect(step.topic)}, #{params})"]
   end
 
@@ -431,7 +516,7 @@ defmodule Stampede.Recorder do
         do: [],
         else: ["# cast doesn't wait for a reply. If this event replies, push/5 times it."]
 
-    params = Macro.to_string(Macro.escape(step.params))
+    params = literal(step.params)
 
     note ++
       [
@@ -467,6 +552,46 @@ defmodule Stampede.Recorder do
     if state.open?, do: [result(step, next) <> " = " <> event_call(step)], else: []
   end
 
+  # The token has to come from this session, so the page it was on comes first.
+  defp page(%{csrf: nil}), do: []
+  defp page(%{from: nil}), do: []
+  defp page(step), do: ["{:ok, page} = Stampede.HTTP.get(#{inspect(step.from)}, cookies: true)"]
+
+  defp change_me(step) do
+    if inspect(step.sent) =~ @placeholder,
+      do: ["# Put real values where it says #{@placeholder}, or this will be turned down."],
+      else: []
+  end
+
+  defp request(step) do
+    options = ["cookies: true"] ++ csrf_header(step) ++ sent_option(step)
+    url = inspect(step.url)
+    "Stampede.HTTP.#{String.downcase(step.method)}(#{url}, #{Enum.join(options, ", ")})"
+  end
+
+  defp csrf_header(%{csrf: :header, from: from}) when from != nil do
+    [~s|headers: [{"x-csrf-token", Stampede.HTTP.csrf_token(page)}]|]
+  end
+
+  defp csrf_header(_step), do: []
+
+  defp sent_option(%{sent: :nothing}), do: []
+
+  # Plug puts JSON that isn't an object under "_json".
+  defp sent_option(%{sent: {:json, %{"_json" => term} = params}}) when map_size(params) == 1 do
+    ["json: #{literal(term)}"]
+  end
+
+  defp sent_option(%{sent: {type, params}, csrf: :body, from: from}) when from != nil do
+    {:%{}, meta, pairs} = Macro.escape(params)
+    token = quote(do: Stampede.HTTP.csrf_token(page))
+    ["#{type}: #{Macro.to_string({:%{}, meta, [{"_csrf_token", token} | pairs]})}"]
+  end
+
+  defp sent_option(%{sent: {type, params}}), do: ["#{type}: #{literal(params)}"]
+
+  defp literal(term), do: Macro.to_string(Macro.escape(term))
+
   defp event_call(step) do
     "Stampede.LiveView.#{step.kind}(view, #{Enum.join(event_arguments(step), ", ")})"
   end
@@ -475,7 +600,7 @@ defmodule Stampede.Recorder do
     params =
       if step.kind == :click and step.params == %{} and step.target == nil,
         do: [],
-        else: [Macro.to_string(Macro.escape(step.params))]
+        else: [literal(step.params)]
 
     target = if step.target, do: ["target: #{step.target}"], else: []
     [inspect(step.event)] ++ params ++ target

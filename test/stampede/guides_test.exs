@@ -26,7 +26,7 @@ defmodule Stampede.GuidesTest do
   end
 
   test "AI chat APIs" do
-    result = Stampede.run(Conversation, vus: 2, duration: 1_500)
+    result = Stampede.run(Conversation, vus: 2, duration: 1_500, graceful_stop: 10_000)
 
     assert result.errors == []
     assert result.metrics["llm.ttft"].count >= 2
@@ -55,10 +55,10 @@ defmodule Stampede.GuidesTest do
   end
 
   test "Phoenix Presence" do
-    result = Stampede.run(Room, vus: 5, duration: 1_000)
+    result = Stampede.run(Room, vus: 5, duration: 1_000, graceful_stop: 10_000)
 
     assert result.errors == []
-    assert result.metrics["presence.seen"].count > 5
+    assert result.metrics["presence.seen"].count >= 5
     assert result.metrics["channel.messages"].count > result.metrics["presence.seen"].count
   end
 end

@@ -70,6 +70,10 @@ defmodule Stampede.Channels do
       or `nil` to never send one. Defaults to `30_000`, like the JavaScript
       client. The connection is closed when a heartbeat is still unanswered
       by the time the next one is due.
+    * `:keep` - a function that gets each message's payload and returns
+      whether to keep it for `await/4`. Other messages are only counted, which
+      suits a VU in a busy channel that hears far more than it reads. By
+      default, the last 1,000 messages are kept, whatever they are.
     * `:transport_opts` - options for `:gen_tcp` or `:ssl`, given to
       `Mint.HTTP.connect/4`
 
@@ -88,6 +92,7 @@ defmodule Stampede.Channels do
         serializer: nil,
         connect_timeout: 10_000,
         heartbeat_interval: 30_000,
+        keep: nil,
         transport_opts: []
       )
 

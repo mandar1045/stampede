@@ -28,7 +28,7 @@ defmodule Stampede.ProbeTest do
   end
 
   test "times what the app does, as server metrics that merge with the rest" do
-    result = Stampede.run(Lobby, vus: 2, duration: 1_500, probe: node())
+    result = Stampede.run(Lobby, vus: 2, duration: 1_500, graceful_stop: 10_000, probe: node())
 
     assert result.metrics["server.channel.join"].count >= 2
     assert result.metrics["server.channel.event"].count >= 2

@@ -1,12 +1,28 @@
 # Changelog
 
-## Unreleased
+## v1.3.0 (2026-11-01)
+
+This one is about real apps. You can record yourself using your app and get a
+scenario, signing in included, and see inside the app during a run without
+changing it. Stampede can also load test AI chat APIs now, and it found new limits
+for me: stock Phoenix held 600,000 Channels users on one 4-core server, and a real
+open source Phoenix product held 50,000 users for 10 minutes on the same size of
+machine. Everything needed to run those again is in `bench/million`.
 
   * `mix stampede.record` starts your app and records what you do in the
     browser, then writes it as a scenario, with your clicks, forms, uploads,
-    channels, navigation and pauses. Passwords and other sensitive fields
-    become `"CHANGE_ME"`, in forms and in URLs. It's new, so it may still
-    change
+    channels, navigation and pauses, and signing in through a form. Passwords
+    and other sensitive fields become `"CHANGE_ME"`, in forms, in JSON and in
+    URLs. It's new, so it may still change
+  * `Stampede.HTTP` keeps cookies with `cookies: true`, one set per VU and per
+    host, and `Stampede.HTTP.clear_cookies/0` forgets them. `:cookies` on
+    `Stampede.LiveView.connect/2` and `Stampede.SSE` shares them, so a scenario
+    can sign in over HTTP and then open a LiveView as that user
+  * `Stampede.HTTP`'s `:form` option sends a form as a browser would, and
+    `Stampede.HTTP.csrf_token/1` reads the CSRF token out of a page
+  * A guide to watching a run in Prometheus and Grafana
+  * `Stampede.Channels.connect/2` takes a `:keep` function, for VUs in busy
+    channels that hear far more than they read
   * `--probe app@host`, or `probe:` from code, watches the app from the inside
     during a run, with no changes to it: scheduler use, memory, processes, run
     queue and the longest message queues, charted in the dashboard and the

@@ -21,7 +21,7 @@ defmodule Mix.Tasks.Stampede.Gen.ScenarioTest do
     assert IO.iodata_to_binary([Code.format_string!(contents), "\n"]) == contents
 
     [{module, _binary}] = Code.compile_string(contents, path)
-    Stampede.run(module, stages: nil, vus: 1, duration: duration)
+    Stampede.run(module, stages: nil, vus: 1, duration: duration, graceful_stop: 2_000)
   end
 
   test "generates an HTTP scenario named after the application", %{tmp_dir: tmp_dir} do

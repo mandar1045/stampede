@@ -66,7 +66,7 @@ defmodule Mix.Tasks.Stampede.RunTest do
     path =
       write_scenario!(tmp_dir, "Strict", """
         @impl true
-        def options, do: [duration: 100, thresholds: [{"iteration", count: 0}]]
+        def options, do: [duration: 100, graceful_stop: 10_000, thresholds: [{"iteration", count: 0}]]
 
         @impl true
         def run(_vu), do: Process.sleep(10)

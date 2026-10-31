@@ -1,0 +1,827 @@
+1048576
+Setting RLIMIT_NOFILE to 1000000
+Running migrations
++ ulimit -n
++ '[' -n 1000000 ']'
++ echo 'Setting RLIMIT_NOFILE to 1000000'
++ ulimit -Sn 1000000
++ [[ -n '' ]]
++ echo 'Running migrations'
++ /app/bin/migrate
+18:16:09.083 [info] == Running 20210706140551 Realtime.Repo.Migrations.CreateTenants.change/0 forward
+18:16:09.086 [info] create table tenants
+18:16:09.089 [info] create index tenants_external_id_index
+18:16:09.091 [info] == Migrated 20210706140551 in 0.0s
+18:16:09.115 [info] == Running 20220329161857 Realtime.Repo.Migrations.AddExtensionsTable.change/0 forward
+18:16:09.115 [info] create table extensions
+18:16:09.118 [info] create index extensions_tenant_external_id_type_index
+18:16:09.118 [info] == Migrated 20220329161857 in 0.0s
+18:16:09.121 [info] == Running 20220410212326 Realtime.Repo.Migrations.AddTenantMaxEps.up/0
+18:16:09.121 [info] alter table tenants
+18:16:09.122 [info] == Migrated 20220410212326 in 0.0s
+18:16:09.124 [info] == Running 20220506102948 Realtime.Repo.Migrations.RenamePollIntervalToPollIntervalMs.up/0
+18:16:09.131 [info] == Migrated 20220506102948 in 0.0s
+18:16:09.133 [info] == Running 20220527210857 Realtime.Repo.Migrations.AddExternalIdUniqIndex.change/0 forward
+18:16:09.134 [info] execute "alter table tenants add constraint uniq_external_id unique (external_id)"
+18:16:09.135 [info] == Migrated 20220527210857 in 0.0s
+18:16:09.137 [info] == Running 20220815211129 Realtime.Repo.Migrations.NewMaxEventsPerSecondDefault.change/0 forward
+18:16:09.137 [info] alter table tenants
+18:16:09.138 [info] == Migrated 20220815211129 in 0.0s
+18:16:09.140 [info] == Running 20220815215024 Realtime.Repo.Migrations.SetCurrentMaxEventsPerSecond.change/0 forward
+18:16:09.140 [info] execute "update tenants set max_events_per_second = 1000"
+18:16:09.141 [info] == Migrated 20220815215024 in 0.0s
+18:16:09.143 [info] == Running 20220818141501 Realtime.Repo.Migrations.ChangeLimitsDefaults.change/0 forward
+18:16:09.143 [info] alter table tenants
+18:16:09.144 [info] == Migrated 20220818141501 in 0.0s
+18:16:09.146 [info] == Running 20221018173709 Realtime.Repo.Migrations.AddCdcDefault.up/0
+18:16:09.146 [info] alter table tenants
+18:16:09.147 [info] == Migrated 20221018173709 in 0.0s
+18:16:09.149 [info] == Running 20221102172703 Realtime.Repo.Migrations.RenamePgType.up/0
+18:16:09.149 [info] execute "update extensions set type = 'postgres_cdc_rls'"
+18:16:09.150 [info] == Migrated 20221102172703 in 0.0s
+18:16:09.152 [info] == Running 20221223010058 Realtime.Repo.Migrations.DropTenantsUniqExternalIdIndex.change/0 forward
+18:16:09.152 [info] execute "ALTER TABLE IF EXISTS tenants DROP CONSTRAINT IF EXISTS uniq_external_id"
+18:16:09.153 [info] == Migrated 20221223010058 in 0.0s
+18:16:09.155 [info] == Running 20230110180046 Realtime.Repo.Migrations.AddLimitsFieldsToTenants.change/0 forward
+18:16:09.155 [info] alter table tenants
+18:16:09.156 [info] == Migrated 20230110180046 in 0.0s
+18:16:09.158 [info] == Running 20230810220907 Realtime.Repo.Migrations.AlterTenantsTableColumnsToText.change/0 forward
+18:16:09.159 [info] alter table tenants
+18:16:09.160 [info] == Migrated 20230810220907 in 0.0s
+18:16:09.163 [info] == Running 20230810220924 Realtime.Repo.Migrations.AlterExtensionsTableColumnsToText.change/0 forward
+18:16:09.163 [info] alter table extensions
+18:16:09.164 [info] == Migrated 20230810220924 in 0.0s
+18:16:09.166 [info] == Running 20231024094642 :"Elixir.Realtime.Repo.Migrations.Add-tenant-suspend-flag".change/0 forward
+18:16:09.166 [info] alter table tenants
+18:16:09.167 [info] == Migrated 20231024094642 in 0.0s
+18:16:09.169 [info] == Running 20240306114423 Realtime.Repo.Migrations.AdddTenantJwtJwksColumn.change/0 forward
+18:16:09.169 [info] alter table tenants
+18:16:09.170 [info] == Migrated 20240306114423 in 0.0s
+18:16:09.172 [info] == Running 20240418082835 Realtime.Repo.Migrations.AddAuthorizationFlag.change/0 forward
+18:16:09.172 [info] alter table tenants
+18:16:09.172 [info] == Migrated 20240418082835 in 0.0s
+18:16:09.174 [info] == Running 20240625211759 Realtime.Repo.Migrations.RemoveEnableAuthorizationFlag.change/0 forward
+18:16:09.175 [info] alter table tenants
+18:16:09.175 [info] == Migrated 20240625211759 in 0.0s
+18:16:09.177 [info] == Running 20240704172020 :"Elixir.Realtime.Repo.Migrations.Add-notify-private-alpha".change/0 forward
+18:16:09.178 [info] alter table tenants
+18:16:09.178 [info] == Migrated 20240704172020 in 0.0s
+18:16:09.180 [info] == Running 20240902173232 Realtime.Repo.Migrations.AddExtensionExternalIdIndex.change/0 forward
+18:16:09.180 [info] create index if not exists extensions_tenant_external_id_index
+18:16:09.181 [info] == Migrated 20240902173232 in 0.0s
+18:16:09.183 [info] == Running 20241106103258 Realtime.Repo.Migrations.AddPrivateOnlyFlagColumnToTenant.change/0 forward
+18:16:09.183 [info] alter table tenants
+18:16:09.184 [info] == Migrated 20241106103258 in 0.0s
+18:16:09.186 [info] == Running 20250424203323 Realtime.Repo.Migrations.AddMigrationsRanToTenant.change/0 forward
+18:16:09.186 [info] alter table tenants
+18:16:09.187 [info] == Migrated 20250424203323 in 0.0s
+18:16:09.189 [info] == Running 20250613072131 Realtime.Repo.Migrations.AddTenantBroadcastAdapter.change/0 forward
+18:16:09.189 [info] alter table tenants
+18:16:09.189 [info] == Migrated 20250613072131 in 0.0s
+18:16:09.192 [info] == Running 20250711044927 Realtime.Repo.Migrations.ChangeDefaultBroadcastAdapterToGenRpc.change/0 forward
+18:16:09.192 [info] alter table tenants
+18:16:09.193 [info] == Migrated 20250711044927 in 0.0s
+18:16:09.195 [info] == Running 20250811121559 Realtime.Repo.Migrations.AddMaxPresenceEventsPerSecond.change/0 forward
+18:16:09.195 [info] alter table tenants
+18:16:09.196 [info] == Migrated 20250811121559 in 0.0s
+18:16:09.197 [info] == Running 20250926223044 Realtime.Repo.Migrations.SetDefaultPresenceValue.change/0 forward
+18:16:09.197 [info] alter table tenants
+18:16:09.199 [info] == Migrated 20250926223044 in 0.0s
+18:16:09.201 [info] == Running 20251204170944 Realtime.Repo.Migrations.NullableJwtSecrets.change/0 forward
+18:16:09.201 [info] alter table tenants
+18:16:09.202 [info] create check constraint jwt_secret_or_jwt_jwks_required on table tenants
+18:16:09.202 [info] == Migrated 20251204170944 in 0.0s
+18:16:09.204 [info] == Running 20251218000543 Realtime.Repo.Migrations.EnsureJwtSecretIsText.change/0 forward
+18:16:09.204 [info] alter table tenants
+18:16:09.205 [info] == Migrated 20251218000543 in 0.0s
+18:16:09.207 [info] == Running 20260209232800 Realtime.Repo.Migrations.AddMaxClientPresenceEventsPerSecond.change/0 forward
+18:16:09.207 [info] alter table tenants
+18:16:09.208 [info] == Migrated 20260209232800 in 0.0s
+18:16:09.210 [info] == Running 20260304000000 Realtime.Repo.Migrations.AddPresenceEnabledToTenants.change/0 forward
+18:16:09.210 [info] alter table tenants
+18:16:09.211 [info] == Migrated 20260304000000 in 0.0s
+18:16:09.213 [info] == Running 20260422000000 Realtime.Repo.Migrations.CreateFeatureFlags.change/0 forward
+18:16:09.213 [info] create table feature_flags
+18:16:09.214 [info] create index feature_flags_name_index
+18:16:09.215 [info] alter table tenants
+18:16:09.219 [info] == Migrated 20260422000000 in 0.0s
+18:16:09.221 [info] == Running 20260709151810 Realtime.Repo.Migrations.AddFeatureFlagRolloutPercentage.change/0 forward
+18:16:09.221 [info] alter table feature_flags
+18:16:09.222 [info] create check constraint rollout_percentage_must_be_between_0_and_100 on table feature_flags
+18:16:09.223 [info] == Migrated 20260709151810 in 0.0s
+18:16:09.225 [info] == Running 20260805000000 Realtime.Repo.Migrations.AddGcmMigratedAtToTenants.change/0 forward
+18:16:09.225 [info] alter table tenants
+18:16:09.226 [info] == Migrated 20260805000000 in 0.0s
++ '[' true = true ']'
++ echo 'Seeding selfhosted Realtime'
++ /app/bin/realtime eval 'Realtime.Release.seeds(Realtime.Repo)'
+Seeding selfhosted Realtime
+18:16:09.639 [warning] Failed to load OTP-trusted CAs: :error::function_clause, falling back to hardcoded authorities
+18:16:09.672 [info] Loading 118 CA(s) from :hardcoded store
+18:16:09.741 [info] [driver: :tcp, port: 5369, socket: [~c"#Port<0.5>"], msg: ~c"server_setup_successfully"]
+18:16:09.743 [info] [domain: [:gen_rpc, :dispatcher], "$kind": :gen_rpc_dispatcher_start]
+18:16:09.873 [notice] [scope: RegionNodes, event: :tables_created]
+18:16:09.877 [notice] [scope: RegionNodes, handler: :registry, event: :discovering_cluster]
+18:16:09.878 [notice] [scope: RegionNodes, handler: :pg, event: :discovering_cluster]
+18:16:09.878 [notice] [scope: RegionNodes, event: :scope_added]
+18:16:09.879 [notice] [scope: Realtime.Tenants.Connect, event: :tables_created]
+18:16:09.879 [notice] [scope: Realtime.Tenants.Connect, handler: :registry, event: :discovering_cluster]
+18:16:09.879 [notice] [scope: Realtime.Tenants.Connect, event: :scope_added]
+18:16:09.879 [notice] [scope: Realtime.Tenants.Connect, handler: :pg, event: :discovering_cluster]
+18:16:10.177 [warning] MFA {Realtime.PromEx.Plugins.TenantGlobal, :execute_global_connection_metrics, []} encountered an error but has not been detached: %ArgumentError{message: "errors were found at the given arguments:\n\n  * 1st argument: the table identifier does not refer to an existing ETS table\n"}
+18:16:10.177 [warning] MFA {Realtime.PromEx.Plugins.Tenant, :execute_tenant_metrics, []} encountered an error but has not been detached: %ArgumentError{message: "errors were found at the given arguments:\n\n  * 1st argument: the table identifier does not refer to an existing ETS table\n"}
+18:16:10.193 [info] [libcluster:postgres] Connected to Postgres database
+18:16:10.195 [info] Muster[nonode@nohost|realtime_channels_us-east-1] Starting
+18:16:10.203 [info] Forum[nonode@nohost|users] Starting
+18:16:10.225 [info] Starting Reconnector
+18:16:10.253 [info] Running RealtimeWeb.Endpoint with cowboy 2.18.0 at :::4000 (http)
+18:16:10.253 [info] Access RealtimeWeb.Endpoint at http://realtime.supabase.co:443
+18:16:10.393 request_id=GOOv-0dMkEyobvEAABJh [info] GET /healthcheck
+18:16:10.396 [notice] [scope: :realtime_postgres_cdc_0, event: :tables_created]
+18:16:10.396 [notice] [scope: :realtime_postgres_cdc_0, handler: :registry, event: :discovering_cluster]
+18:16:10.396 [notice] [scope: :realtime_postgres_cdc_0, event: :scope_added]
+18:16:10.396 [notice] [scope: :realtime_postgres_cdc_0, handler: :pg, event: :discovering_cluster]
+18:16:10.397 [notice] [scope: :realtime_postgres_cdc_1, event: :tables_created]
+18:16:10.397 [notice] [scope: :realtime_postgres_cdc_1, handler: :registry, event: :discovering_cluster]
+18:16:10.397 [notice] [scope: :realtime_postgres_cdc_1, handler: :pg, event: :discovering_cluster]
+18:16:10.397 [notice] [scope: :realtime_postgres_cdc_1, event: :scope_added]
+18:16:10.397 [notice] [scope: :realtime_postgres_cdc_2, event: :tables_created]
+18:16:10.397 [notice] [scope: :realtime_postgres_cdc_2, handler: :registry, event: :discovering_cluster]
+18:16:10.397 [notice] [scope: :realtime_postgres_cdc_2, handler: :pg, event: :discovering_cluster]
+18:16:10.397 [notice] [scope: :realtime_postgres_cdc_2, event: :scope_added]
+18:16:10.397 [notice] [scope: :realtime_postgres_cdc_3, event: :tables_created]
+18:16:10.397 [notice] [scope: :realtime_postgres_cdc_3, handler: :registry, event: :discovering_cluster]
+18:16:10.397 [notice] [scope: :realtime_postgres_cdc_3, handler: :pg, event: :discovering_cluster]
+18:16:10.397 [notice] [scope: :realtime_postgres_cdc_3, event: :scope_added]
+18:16:10.398 [notice] [scope: :realtime_postgres_cdc_4, event: :tables_created]
+18:16:10.398 [notice] [scope: :realtime_postgres_cdc_4, handler: :registry, event: :discovering_cluster]
+18:16:10.398 [notice] [scope: :realtime_postgres_cdc_4, handler: :pg, event: :discovering_cluster]
+18:16:10.398 [notice] [scope: :realtime_postgres_cdc_4, event: :scope_added]
+18:16:10.398 [info] Janitor started
+18:16:10.398 [info] Starting MetricsCleaner
+18:16:10.431 request_id=GOOv-0dMkEyobvEAABJh [info] GET /healthcheck - Sent 200 in 38ms
+18:16:10.496 project=realtime-dev external_id=realtime-dev error_code=DatabaseIpVersionIsIpv4 [warning] DatabaseIpVersionIsIpv4: Tenant database host 127.0.0.1 resolved to an IPv4 address
+18:16:10.500 project=realtime-dev external_id=realtime-dev [info] Applying migrations to 127.0.0.1
+18:16:10.543 project=realtime-dev external_id=realtime-dev [info] Finished loading the dump of 95 migrations for tenant realtime-dev in 42ms
+18:16:10.559 error_code=DatabaseIpVersionIsIpv4 [warning] DatabaseIpVersionIsIpv4: Tenant database host 127.0.0.1 resolved to an IPv4 address
+18:16:10.563 [info] Creating partitions for realtime.messages
+18:16:10.593 [info] Tenant set-up successfully
+[os_mon] cpu supervisor port (cpu_sup): Erlang has closed
+[os_mon] memory supervisor port (memsup): Erlang has closed
++ echo 'Starting Realtime'
++ ulimit -n
++ exec /app/bin/server
+Starting Realtime
+1000000
+=WARNING REPORT==== 31-Oct-2026::18:16:12.105805 ===
+Failed to load OTP-trusted CAs: error:function_clause, falling back to hardcoded authorities
+18:16:12.139 [info] [driver: :tcp, port: 5369, socket: [~c"#Port<0.7>"], msg: ~c"server_setup_successfully"]
+18:16:12.139 [info] [domain: [:gen_rpc, :dispatcher], "$kind": :gen_rpc_dispatcher_start]
+18:16:12.162 [notice] [scope: RegionNodes, event: :tables_created]
+18:16:12.162 [notice] [scope: RegionNodes, handler: :registry, event: :discovering_cluster]
+18:16:12.162 [notice] [scope: RegionNodes, handler: :pg, event: :discovering_cluster]
+18:16:12.162 [notice] [scope: RegionNodes, event: :scope_added]
+18:16:12.162 [notice] [scope: Realtime.Tenants.Connect, event: :tables_created]
+18:16:12.162 [notice] [scope: Realtime.Tenants.Connect, handler: :registry, event: :discovering_cluster]
+18:16:12.162 [notice] [scope: Realtime.Tenants.Connect, handler: :pg, event: :discovering_cluster]
+18:16:12.162 [notice] [scope: Realtime.Tenants.Connect, event: :scope_added]
+18:16:12.200 [warning] MFA {Realtime.PromEx.Plugins.TenantGlobal, :execute_global_connection_metrics, []} encountered an error but has not been detached: %ArgumentError{message: "errors were found at the given arguments:\n\n  * 1st argument: the table identifier does not refer to an existing ETS table\n"}
+18:16:12.214 [warning] MFA {Realtime.PromEx.Plugins.Tenant, :execute_tenant_metrics, []} encountered an error but has not been detached: %ArgumentError{message: "errors were found at the given arguments:\n\n  * 1st argument: the table identifier does not refer to an existing ETS table\n"}
+18:16:12.215 [info] Muster[realtime@172.31.42.63|realtime_channels_us-east-1] Starting
+18:16:12.216 [info] Forum[realtime@172.31.42.63|users] Starting
+18:16:12.218 [info] [libcluster:postgres] Connected to Postgres database
+18:16:12.219 [info] Starting Reconnector
+18:16:12.224 [info] Running RealtimeWeb.Endpoint with cowboy 2.18.0 at :::4000 (http)
+18:16:12.224 [info] Access RealtimeWeb.Endpoint at http://realtime.supabase.co:443
+18:16:12.225 [notice] [scope: :realtime_postgres_cdc_0, event: :tables_created]
+18:16:12.225 [notice] [scope: :realtime_postgres_cdc_0, handler: :registry, event: :discovering_cluster]
+18:16:12.225 [notice] [scope: :realtime_postgres_cdc_0, handler: :pg, event: :discovering_cluster]
+18:16:12.225 [notice] [scope: :realtime_postgres_cdc_0, event: :scope_added]
+18:16:12.225 [notice] [scope: :realtime_postgres_cdc_1, event: :tables_created]
+18:16:12.225 [notice] [scope: :realtime_postgres_cdc_1, handler: :registry, event: :discovering_cluster]
+18:16:12.225 [notice] [scope: :realtime_postgres_cdc_1, handler: :pg, event: :discovering_cluster]
+18:16:12.225 [notice] [scope: :realtime_postgres_cdc_1, event: :scope_added]
+18:16:12.225 [notice] [scope: :realtime_postgres_cdc_2, event: :tables_created]
+18:16:12.225 [notice] [scope: :realtime_postgres_cdc_2, handler: :registry, event: :discovering_cluster]
+18:16:12.225 [notice] [scope: :realtime_postgres_cdc_2, event: :scope_added]
+18:16:12.225 [notice] [scope: :realtime_postgres_cdc_2, handler: :pg, event: :discovering_cluster]
+18:16:12.226 [notice] [scope: :realtime_postgres_cdc_3, event: :tables_created]
+18:16:12.226 [notice] [scope: :realtime_postgres_cdc_3, handler: :registry, event: :discovering_cluster]
+18:16:12.226 [notice] [scope: :realtime_postgres_cdc_3, handler: :pg, event: :discovering_cluster]
+18:16:12.226 [notice] [scope: :realtime_postgres_cdc_3, event: :scope_added]
+18:16:12.226 [notice] [scope: :realtime_postgres_cdc_4, event: :tables_created]
+18:16:12.226 [notice] [scope: :realtime_postgres_cdc_4, handler: :registry, event: :discovering_cluster]
+18:16:12.226 [notice] [scope: :realtime_postgres_cdc_4, handler: :pg, event: :discovering_cluster]
+18:16:12.226 [notice] [scope: :realtime_postgres_cdc_4, event: :scope_added]
+18:16:12.226 [info] Janitor started
+18:16:12.227 [info] Starting MetricsCleaner
+18:16:42.216 [info] Muster[realtime@172.31.42.63|realtime_channels_us-east-1] status :converging -> :ready (members [:"realtime@172.31.42.63"])
+18:16:47.172 [info] Starting Elixir.Realtime.RateCounter for: {:channel, :joins, "realtime-dev"}
+18:16:47.179 [info] Starting Elixir.Realtime.RateCounter for: {:database, :connect, "realtime-dev"}
+18:16:47.180 project=realtime-dev external_id=realtime-dev [info] Realtime.Tenants.Connect.GetTenant executed in 0 ms
+18:16:47.181 project=realtime-dev external_id=realtime-dev error_code=DatabaseIpVersionIsIpv4 [warning] DatabaseIpVersionIsIpv4: Tenant database host 127.0.0.1 resolved to an IPv4 address
+18:16:47.192 project=realtime-dev external_id=realtime-dev error_code=DatabaseIpVersionIsIpv4 [warning] DatabaseIpVersionIsIpv4: Tenant database host 127.0.0.1 resolved to an IPv4 address
+18:16:47.193 project=realtime-dev external_id=realtime-dev [info] Realtime.Tenants.Connect.CheckConnection executed in 13 ms
+18:16:47.193 project=realtime-dev external_id=realtime-dev [info] Realtime.Tenants.Connect.ReconcileMigrations executed in 0 ms
+18:16:47.194 project=realtime-dev external_id=realtime-dev [info] Realtime.Tenants.Connect.RegisterProcess executed in 0 ms
+18:16:47.194 project=realtime-dev external_id=realtime-dev [info] Tenant realtime-dev is initializing: :"realtime@172.31.42.63"
+18:16:47.194 project=realtime-dev external_id=realtime-dev [info] Creating partitions for realtime.messages
+18:16:47.194 [info] Starting Elixir.Realtime.RateCounter for: {:channel, :events, "realtime-dev"}
+18:16:47.194 [info] Starting Elixir.Realtime.RateCounter for: {:channel, :presence_events, "realtime-dev"}
+18:16:47.198 [info] Starting replication for Broadcast Changes
+18:16:47.198 error_code=DatabaseIpVersionIsIpv4 [warning] DatabaseIpVersionIsIpv4: Tenant database host 127.0.0.1 resolved to an IPv4 address
+18:16:47.198 project=realtime-dev external_id=realtime-dev [info] Initializing connection with the status: %Realtime.Tenants.ReplicationConnection{
+  tenant_id: "realtime-dev",
+  opts: [],
+  step: :disconnected,
+  publication_name: "supabase_realtime_messages_publication",
+  replication_slot_name: "supabase_realtime_messages_replication_slot_bench",
+  output_plugin: "pgoutput",
+  proto_version: 2,
+  relations: %{},
+  buffer: [],
+  monitored_pid: #PID<0.4104.0>,
+  latency_committed_at: nil,
+  query_timeout: 240000,
+  pg_version: nil
+}
+18:16:47.201 project=realtime-dev external_id=realtime-dev [info] Checking if replication slot supabase_realtime_messages_replication_slot_bench exists
+18:16:47.204 project=realtime-dev external_id=realtime-dev [info] Check publication supabase_realtime_messages_publication for table realtime.messages exists
+18:16:47.204 project=realtime-dev external_id=realtime-dev [info] Create publication supabase_realtime_messages_publication for table realtime.messages
+18:16:47.206 project=realtime-dev external_id=realtime-dev [info] Create replication slot supabase_realtime_messages_replication_slot_bench using plugin pgoutput
+18:16:47.221 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:16:47.225 project=realtime-dev external_id=realtime-dev [info] #PID<0.4137.0> Starting stream replication for slot supabase_realtime_messages_replication_slot_bench using publication supabase_realtime_messages_publication and protocol version 2
+18:16:47.677 request_id=GOOwA_W_3XIAjYEAABLD [info] GET /metrics
+18:16:47.678 request_id=GOOwA_W_3XIAjYEAABLD [info] GET /metrics - Sent 200 in 0ms
+18:16:47.680 request_id=GOOwA_W_3XIAjYEAABLD [info] Collected cluster metrics in 1 milliseconds
+18:16:52.222 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:16:57.223 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:17:02.224 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:17:07.225 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:17:07.854 request_id=GOOwCKhY0rGve10AAiai [info] GET /admin/dashboard/home
+18:17:07.854 request_id=GOOwCKhY0rGve10AAiai [warning] GET /admin/dashboard/home - Sent 401 in 0ms
+18:17:07.903 request_id=GOOwCKtDDecYnvkAAhsD [info] GET /admin/dashboard/home
+18:17:07.905 request_id=GOOwCKtDDecYnvkAAhsD [info] GET /admin/dashboard/home - Sent 200 in 2ms
+18:17:07.993 request_id=GOOwCLCl45moFMgAAioC [info] GET /admin/dashboard/css-16cc3c04366b654b6edc2eccc5b34d51
+18:17:07.993 request_id=GOOwCLCl45moFMgAAioC [info] GET /admin/dashboard/css-16cc3c04366b654b6edc2eccc5b34d51 - Sent 200 in 0ms
+18:17:08.054 request_id=GOOwCLRGktXkCRsAAiqi [info] GET /admin/dashboard/js-ed5e7fe09c4c070b17a29394f937154e
+18:17:08.054 request_id=GOOwCLRGktXkCRsAAiqi [info] GET /admin/dashboard/js-ed5e7fe09c4c070b17a29394f937154e - Sent 200 in 0ms
+18:17:08.313 request_id=GOOwCMOyolRAU-oAAjAi [info] GET /favicon.ico
+18:17:08.313 request_id=GOOwCMOyolRAU-oAAjAi [warning] GET /favicon.ico - Sent 404 in 0ms
+18:17:08.313 request_id=GOOwCMOyolRAU-oAAjAi error_code=HttpClientError [warning] HttpClientError: Sent 404 response: Phoenix.Router.NoRouteError - no route found for GET /favicon.ico (RealtimeWeb.Router)
+18:17:08.363 [info] CONNECTED TO Phoenix.LiveView.Socket in 14µs
+  Transport: :websocket
+  Serializer: Phoenix.Socket.V2.JSONSerializer
+  Parameters: %{"_csrf_token" => "[FILTERED]", "vsn" => "[FILTERED]"}
+18:17:12.226 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:17:17.201 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:17:17.227 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:17:17.683 request_id=GOOwCvI0R0k7RyMAAyxB [info] GET /metrics
+18:17:17.683 request_id=GOOwCvI0R0k7RyMAAyxB [info] GET /metrics - Sent 200 in 0ms
+18:17:17.685 request_id=GOOwCvI0R0k7RyMAAyxB [info] Collected cluster metrics in 2 milliseconds
+18:17:22.202 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:17:22.228 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:17:27.203 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:17:27.229 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:17:32.204 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:17:32.230 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:17:37.205 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:17:37.231 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:17:42.206 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:17:42.232 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:17:47.207 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:17:47.233 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:17:47.683 request_id=GOOwEe5W9zvFvsgABjIj [info] GET /metrics
+18:17:47.683 request_id=GOOwEe5W9zvFvsgABjIj [info] GET /metrics - Sent 200 in 0ms
+18:17:47.687 request_id=GOOwEe5W9zvFvsgABjIj [info] Collected cluster metrics in 3 milliseconds
+18:17:52.208 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:17:52.234 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:17:57.209 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:17:57.235 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:18:02.210 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:18:02.236 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:18:07.211 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:18:07.237 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:18:12.212 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:18:12.238 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:18:17.213 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:18:17.239 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:18:17.673 request_id=GOOwGOnnUc1sDJ0ACShj [info] GET /metrics
+18:18:17.673 request_id=GOOwGOnnUc1sDJ0ACShj [info] GET /metrics - Sent 200 in 0ms
+18:18:17.676 request_id=GOOwGOnnUc1sDJ0ACShj [info] Collected cluster metrics in 2 milliseconds
+18:18:22.214 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:18:22.240 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:18:27.215 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:18:27.241 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:18:32.217 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:18:32.242 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:18:37.217 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:18:37.243 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:18:42.218 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:18:42.244 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:18:47.219 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:18:47.245 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:18:47.678 request_id=GOOwH-ZVDkIGTs0ADDOB [info] GET /metrics
+18:18:47.678 request_id=GOOwH-ZVDkIGTs0ADDOB [info] GET /metrics - Sent 200 in 0ms
+18:18:47.681 request_id=GOOwH-ZVDkIGTs0ADDOB [info] Collected cluster metrics in 2 milliseconds
+18:18:52.220 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:18:52.246 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:18:57.221 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:18:57.247 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:19:02.222 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:19:02.248 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:19:07.223 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:19:07.249 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:19:12.224 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:19:12.250 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:19:17.225 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:19:17.251 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:19:17.693 request_id=GOOwJuNcwjTWMbYAD0fj [info] GET /metrics
+18:19:17.693 request_id=GOOwJuNcwjTWMbYAD0fj [info] GET /metrics - Sent 200 in 0ms
+18:19:17.696 request_id=GOOwJuNcwjTWMbYAD0fj [info] Collected cluster metrics in 2 milliseconds
+18:19:22.226 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:19:22.252 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:19:27.227 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:19:27.253 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:19:32.228 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:19:32.254 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:19:37.229 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:19:37.255 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:19:42.230 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:19:42.256 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:19:47.233 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:19:47.257 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:19:47.678 request_id=GOOwLd6bRJUMEbYAEm2E [info] GET /metrics
+18:19:47.679 request_id=GOOwLd6bRJUMEbYAEm2E [info] GET /metrics - Sent 200 in 0ms
+18:19:47.681 request_id=GOOwLd6bRJUMEbYAEm2E [info] Collected cluster metrics in 2 milliseconds
+18:19:52.233 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:19:52.259 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:19:57.234 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:19:57.259 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:20:02.235 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:20:02.260 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:20:07.236 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:20:07.261 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:20:12.237 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:20:12.262 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:20:17.239 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:20:17.263 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:20:17.675 request_id=GOOwNNqNJ1KNJ-kAFV3B [info] GET /metrics
+18:20:17.675 request_id=GOOwNNqNJ1KNJ-kAFV3B [info] GET /metrics - Sent 200 in 0ms
+18:20:17.677 request_id=GOOwNNqNJ1KNJ-kAFV3B [info] Collected cluster metrics in 1 milliseconds
+18:20:22.240 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:20:22.264 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:20:27.241 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:20:27.266 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:20:32.242 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:20:32.266 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:20:37.243 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:20:37.267 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:20:42.244 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:20:42.268 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:20:47.245 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:20:47.269 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:20:47.683 request_id=GOOwO9cuoLXfI9sAGMti [info] GET /metrics
+18:20:47.683 request_id=GOOwO9cuoLXfI9sAGMti [info] GET /metrics - Sent 200 in 0ms
+18:20:47.688 request_id=GOOwO9cuoLXfI9sAGMti [info] Collected cluster metrics in 4 milliseconds
+18:20:52.246 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:20:52.270 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:20:57.247 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:20:57.272 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:21:02.248 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:21:02.273 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:21:07.250 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:21:07.275 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:21:12.251 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:21:12.275 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:21:17.251 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:21:17.276 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:21:17.679 request_id=GOOwQtMeAKTY8eAAG1aD [info] GET /metrics
+18:21:17.682 request_id=GOOwQtMeAKTY8eAAG1aD [info] GET /metrics - Sent 200 in 2ms
+18:21:17.686 request_id=GOOwQtMeAKTY8eAAG1aD [info] Collected cluster metrics in 4 milliseconds
+18:21:22.252 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:21:22.277 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:21:27.256 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:21:27.278 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:21:32.257 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:21:32.279 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:21:37.258 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:21:37.281 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:21:42.259 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:21:42.282 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:21:47.260 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:21:47.283 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:21:47.673 request_id=GOOwSc7e_6YpzEQAHpfE [info] GET /metrics
+18:21:47.673 request_id=GOOwSc7e_6YpzEQAHpfE [info] GET /metrics - Sent 200 in 0ms
+18:21:47.677 request_id=GOOwSc7e_6YpzEQAHpfE [info] Collected cluster metrics in 3 milliseconds
+18:21:52.270 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:21:52.285 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:21:57.272 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:21:57.286 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:22:02.279 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:22:02.288 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:22:07.280 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:22:07.289 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:22:12.281 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:22:12.290 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:22:17.282 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:22:17.291 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:22:17.683 request_id=GOOwUMufXBLC_gcAHs_i [info] GET /metrics
+18:22:17.684 request_id=GOOwUMufXBLC_gcAHs_i [info] GET /metrics - Sent 200 in 0ms
+18:22:17.687 request_id=GOOwUMufXBLC_gcAHs_i [info] Collected cluster metrics in 2 milliseconds
+18:22:22.283 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:22:22.293 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:22:27.284 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:22:27.295 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:22:32.285 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:22:32.297 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:22:37.290 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:22:37.297 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:22:42.291 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:22:42.298 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:22:47.293 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:22:47.299 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:22:48.033 request_id=GOOwV9ybzsnGHu0AHtBC [info] GET /metrics
+18:22:48.034 request_id=GOOwV9ybzsnGHu0AHtBC [info] GET /metrics - Sent 200 in 0ms
+18:22:48.038 request_id=GOOwV9ybzsnGHu0AHtBC [info] Collected cluster metrics in 4 milliseconds
+18:22:52.294 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:22:52.301 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:22:57.295 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:22:57.303 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:23:02.296 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:23:02.305 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:23:07.297 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:23:07.305 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:23:12.299 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:23:12.307 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:23:17.302 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:23:17.308 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:23:17.693 request_id=GOOwXsR61LN--d8AHoRB [info] GET /metrics
+18:23:17.693 request_id=GOOwXsR61LN--d8AHoRB [info] GET /metrics - Sent 200 in 0ms
+18:23:17.696 request_id=GOOwXsR61LN--d8AHoRB [info] Collected cluster metrics in 2 milliseconds
+18:23:22.302 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:23:22.310 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:23:27.305 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:23:27.312 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:23:32.306 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:23:32.313 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:23:37.308 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:23:37.314 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:23:42.310 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:23:42.315 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:23:47.312 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:23:47.316 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:23:47.688 request_id=GOOwZcBRwkYLNPMAHtCC [info] GET /metrics
+18:23:47.688 request_id=GOOwZcBRwkYLNPMAHtCC [info] GET /metrics - Sent 200 in 0ms
+18:23:47.692 request_id=GOOwZcBRwkYLNPMAHtCC [info] Collected cluster metrics in 3 milliseconds
+18:23:52.312 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:23:52.317 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:23:57.314 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:23:57.319 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:24:02.316 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:24:02.321 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:24:07.317 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:24:07.321 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:24:12.318 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:24:12.322 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:24:17.319 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:24:17.324 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:24:17.678 request_id=GOOwbLvbcg51pdAAHtDi [info] GET /metrics
+18:24:17.679 request_id=GOOwbLvbcg51pdAAHtDi [info] GET /metrics - Sent 200 in 0ms
+18:24:17.686 request_id=GOOwbLvbcg51pdAAHtDi [info] Collected cluster metrics in 6 milliseconds
+18:24:22.321 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:24:22.324 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:24:27.322 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:24:27.325 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:24:32.323 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:24:32.326 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:24:37.324 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:24:37.327 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:24:42.325 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:24:42.329 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:24:47.326 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:24:47.329 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:24:47.679 request_id=GOOwc7gLKevXE1IAHphk [info] GET /metrics
+18:24:47.679 request_id=GOOwc7gLKevXE1IAHphk [info] GET /metrics - Sent 200 in 0ms
+18:24:47.682 request_id=GOOwc7gLKevXE1IAHphk [info] Collected cluster metrics in 2 milliseconds
+18:24:52.329 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:24:52.332 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:24:57.329 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:24:57.332 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:25:02.330 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:25:02.335 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:25:07.331 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:25:07.338 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:25:12.332 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:25:12.339 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:25:17.333 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:25:17.340 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:25:17.685 request_id=GOOwerSKNVaka2kAHpjE [info] GET /metrics
+18:25:17.685 request_id=GOOwerSKNVaka2kAHpjE [info] GET /metrics - Sent 200 in 0ms
+18:25:17.689 request_id=GOOwerSKNVaka2kAHpjE [info] Collected cluster metrics in 3 milliseconds
+18:25:22.335 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:25:22.343 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:25:27.336 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:25:27.343 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:25:32.338 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:25:32.344 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:25:37.340 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:25:37.345 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:25:42.340 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:25:42.346 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:25:47.342 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:25:47.347 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:25:47.713 request_id=GOOwgbJZNdleQvsAHlVD [info] GET /metrics
+18:25:47.713 request_id=GOOwgbJZNdleQvsAHlVD [info] GET /metrics - Sent 200 in 0ms
+18:25:47.717 request_id=GOOwgbJZNdleQvsAHlVD [info] Collected cluster metrics in 3 milliseconds
+18:25:52.342 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:25:52.348 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:25:57.343 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:25:57.350 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:26:02.345 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:26:02.351 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:26:07.345 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:26:07.352 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:26:12.347 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:26:12.353 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:26:17.349 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:26:17.354 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:26:17.693 request_id=GOOwiK1O7qwwDrsAHoVh [info] GET /metrics
+18:26:17.693 request_id=GOOwiK1O7qwwDrsAHoVh [info] GET /metrics - Sent 200 in 0ms
+18:26:17.695 request_id=GOOwiK1O7qwwDrsAHoVh [info] Collected cluster metrics in 1 milliseconds
+18:26:22.350 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:26:22.355 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:26:27.352 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:26:27.356 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:26:32.352 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:26:32.357 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:26:37.353 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:26:37.358 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:26:42.355 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:26:42.359 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:26:47.356 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:26:47.360 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:26:47.823 request_id=GOOwj7Exb1Hzu6kAHtHC [info] GET /metrics
+18:26:47.824 request_id=GOOwj7Exb1Hzu6kAHtHC [info] GET /metrics - Sent 200 in 0ms
+18:26:47.828 request_id=GOOwj7Exb1Hzu6kAHtHC [info] Collected cluster metrics in 3 milliseconds
+18:26:52.357 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:26:52.362 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:26:57.358 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:26:57.362 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:27:02.359 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:27:02.363 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:27:07.360 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:27:07.365 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:27:12.361 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:27:12.366 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:27:17.362 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:27:17.366 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:27:17.693 request_id=GOOwlqWW-ZThn8MAHoXh [info] GET /metrics
+18:27:17.693 request_id=GOOwlqWW-ZThn8MAHoXh [info] GET /metrics - Sent 200 in 0ms
+18:27:17.699 request_id=GOOwlqWW-ZThn8MAHoXh [info] Collected cluster metrics in 5 milliseconds
+18:27:22.363 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:27:22.368 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:27:27.364 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:27:27.369 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:27:32.365 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:27:32.370 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:27:37.366 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:27:37.372 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:27:42.367 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:27:42.374 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:27:47.368 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:27:47.374 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:27:47.738 request_id=GOOwnaRrfwELUBsAHoYh [info] GET /metrics
+18:27:47.738 request_id=GOOwnaRrfwELUBsAHoYh [info] GET /metrics - Sent 200 in 0ms
+18:27:47.742 request_id=GOOwnaRrfwELUBsAHoYh [info] Collected cluster metrics in 3 milliseconds
+18:27:52.374 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:27:52.377 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:27:57.375 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:27:57.383 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:28:02.378 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:28:02.383 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:28:07.379 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:28:07.385 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:28:12.379 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:28:12.387 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:28:17.381 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:28:17.388 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:28:17.684 request_id=GOOwpJ1RjuX1bn4AHlYj [info] GET /metrics
+18:28:17.684 request_id=GOOwpJ1RjuX1bn4AHlYj [info] GET /metrics - Sent 200 in 0ms
+18:28:17.686 request_id=GOOwpJ1RjuX1bn4AHlYj [info] Collected cluster metrics in 1 milliseconds
+18:28:22.382 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:28:22.389 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:28:27.382 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:28:27.390 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:28:32.383 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:28:32.393 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:28:37.389 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:28:37.394 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:28:42.391 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:28:42.395 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:28:47.394 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:28:47.396 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:28:47.689 request_id=GOOwq5nDnX-YKWEAHlZj [info] GET /metrics
+18:28:47.691 request_id=GOOwq5nDnX-YKWEAHlZj [info] GET /metrics - Sent 200 in 2ms
+18:28:47.695 request_id=GOOwq5nDnX-YKWEAHlZj [info] Collected cluster metrics in 4 milliseconds
+18:28:52.395 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:28:52.397 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:28:57.397 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:28:57.399 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:29:02.399 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:29:02.399 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:29:07.399 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:29:07.401 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:29:12.400 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:29:12.403 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:29:17.401 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:29:17.405 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:29:17.688 request_id=GOOwspXh47xT1VUAHlaD [info] GET /metrics
+18:29:17.689 request_id=GOOwspXh47xT1VUAHlaD [info] GET /metrics - Sent 200 in 0ms
+18:29:17.696 request_id=GOOwspXh47xT1VUAHlaD [info] Collected cluster metrics in 6 milliseconds
+18:29:22.402 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:29:22.405 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:29:27.403 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:29:27.407 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:29:32.404 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:29:32.407 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:29:37.405 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:29:37.408 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:29:42.407 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:29:42.410 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:29:47.409 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:29:47.411 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:29:47.669 request_id=GOOwuZDcEfqj7h0AHlbD [info] GET /metrics
+18:29:47.670 request_id=GOOwuZDcEfqj7h0AHlbD [info] GET /metrics - Sent 200 in 0ms
+18:29:47.679 request_id=GOOwuZDcEfqj7h0AHlbD [info] Collected cluster metrics in 9 milliseconds
+18:29:52.410 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:29:52.412 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:29:57.411 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:29:57.413 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:30:02.412 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:30:02.414 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:30:07.413 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:30:07.415 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:30:12.415 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:30:12.417 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:30:17.417 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:30:17.418 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:30:17.663 request_id=GOOwwIyibBqwg6cAHtLC [info] GET /metrics
+18:30:17.664 request_id=GOOwwIyibBqwg6cAHtLC [info] GET /metrics - Sent 200 in 0ms
+18:30:17.667 request_id=GOOwwIyibBqwg6cAHtLC [info] Collected cluster metrics in 3 milliseconds
+18:30:22.418 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:30:22.424 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:30:27.419 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:30:27.425 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:30:32.420 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:30:32.427 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:30:37.421 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:30:37.428 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:30:42.424 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:30:42.430 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:30:47.426 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:30:47.431 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:30:47.690 request_id=GOOwx4pfDdKIO3MAHlcD [info] GET /metrics
+18:30:47.691 request_id=GOOwx4pfDdKIO3MAHlcD [info] GET /metrics - Sent 200 in 1ms
+18:30:47.694 request_id=GOOwx4pfDdKIO3MAHlcD [info] Collected cluster metrics in 3 milliseconds
+18:30:52.426 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:30:52.432 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:30:57.429 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:30:57.435 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:31:02.430 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:31:02.437 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:31:07.432 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:31:07.438 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:31:12.434 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:31:12.439 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:31:17.437 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:31:17.439 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:31:17.755 request_id=GOOwzopmAMKDC1EAHtNC [info] GET /metrics
+18:31:17.758 request_id=GOOwzopmAMKDC1EAHtNC [info] GET /metrics - Sent 200 in 3ms
+18:31:17.767 request_id=GOOwzopmAMKDC1EAHtNC [info] Collected cluster metrics in 8 milliseconds
+18:31:22.440 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:31:22.442 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:31:27.440 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:31:27.442 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:31:32.441 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:31:32.444 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:31:37.443 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:31:37.444 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:31:42.444 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:31:42.445 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:31:47.488 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3650.0>, :long_message_queue, true}|
+ process info: {{:"$initial_call", {Forum.Muster.Shard, :init, 1}}, {:"$ancestors", [:"realtime_channels_us-east-1_forum_shards_supervisor", :"realtime_channels_us-east-1_forum_supervisor", Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: :"realtime_channels_us-east-1_muster_shard_3", message_queue_len: 2151, total_heap_size: 1018132]
+18:31:47.973 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:31:48.439 request_id=GOOw1a9N6QpWHR0AHtOC [info] GET /metrics
+18:31:48.446 request_id=GOOw1a9N6QpWHR0AHtOC [info] GET /metrics - Sent 200 in 7ms
+18:31:48.525 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:31:48.584 request_id=GOOw1a9N6QpWHR0AHtOC [info] Collected cluster metrics in 96 milliseconds
+18:31:48.679 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3681.0>, :long_message_queue, true}|
+ process info: {{:"$initial_call", {Forum.Partition, :init, 1}}, {:"$ancestors", [:users_forum_supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: :users_forum_partition_3, message_queue_len: 49988, total_heap_size: 1771545]
+18:31:48.831 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3662.0>, :long_message_queue, true}|
+ process info: {{:"$initial_call", {Registry.Partition, :init, 1}}, {:"$ancestors", [Realtime.PubSub, Realtime.PubSub.Supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: Realtime.PubSub.PIDPartition7, message_queue_len: 9903, total_heap_size: 57778]
+18:31:48.835 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3663.0>, :long_message_queue, true}|
+ process info: {{:"$initial_call", {Registry.Partition, :init, 1}}, {:"$ancestors", [Realtime.PubSub, Realtime.PubSub.Supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: Realtime.PubSub.PIDPartition8, message_queue_len: 10009, total_heap_size: 56016]
+18:31:48.841 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3659.0>, :long_message_queue, true}|
+ process info: {{:"$initial_call", {Registry.Partition, :init, 1}}, {:"$ancestors", [Realtime.PubSub, Realtime.PubSub.Supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: Realtime.PubSub.PIDPartition4, message_queue_len: 10014, total_heap_size: 56462]
+18:31:48.850 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3658.0>, :long_message_queue, true}|
+ process info: {{:"$initial_call", {Registry.Partition, :init, 1}}, {:"$ancestors", [Realtime.PubSub, Realtime.PubSub.Supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: Realtime.PubSub.PIDPartition3, message_queue_len: 9752, total_heap_size: 56637]
+18:31:48.861 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3657.0>, :long_message_queue, true}|
+ process info: {{:"$initial_call", {Registry.Partition, :init, 1}}, {:"$ancestors", [Realtime.PubSub, Realtime.PubSub.Supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: Realtime.PubSub.PIDPartition2, message_queue_len: 9937, total_heap_size: 56778]
+18:31:48.865 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3660.0>, :long_message_queue, true}|
+ process info: {{:"$initial_call", {Registry.Partition, :init, 1}}, {:"$ancestors", [Realtime.PubSub, Realtime.PubSub.Supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: Realtime.PubSub.PIDPartition5, message_queue_len: 9693, total_heap_size: 55764]
+18:31:48.872 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3661.0>, :long_message_queue, true}|
+ process info: {{:"$initial_call", {Registry.Partition, :init, 1}}, {:"$ancestors", [Realtime.PubSub, Realtime.PubSub.Supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: Realtime.PubSub.PIDPartition6, message_queue_len: 9821, total_heap_size: 54717]
+18:31:48.885 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3664.0>, :long_message_queue, true}|
+ process info: {{:"$initial_call", {Registry.Partition, :init, 1}}, {:"$ancestors", [Realtime.PubSub, Realtime.PubSub.Supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: Realtime.PubSub.PIDPartition9, message_queue_len: 9874, total_heap_size: 57691]
+18:31:48.899 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3656.0>, :long_message_queue, true}|
+ process info: {{:"$initial_call", {Registry.Partition, :init, 1}}, {:"$ancestors", [Realtime.PubSub, Realtime.PubSub.Supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: Realtime.PubSub.PIDPartition1, message_queue_len: 9935, total_heap_size: 57515]
+18:31:48.911 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3655.0>, :long_message_queue, true}|
+ process info: {{:"$initial_call", {Registry.Partition, :init, 1}}, {:"$ancestors", [Realtime.PubSub, Realtime.PubSub.Supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: Realtime.PubSub.PIDPartition0, message_queue_len: 10016, total_heap_size: 55768]
+18:31:48.915 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3772.0>, :long_message_queue, true}|
+ process info: {{:"$initial_call", {:supervisor, Supervisor.Default, 1}}, {:"$ancestors", [RealtimeWeb.Endpoint.RealtimeWeb.UserSocket, RealtimeWeb.Endpoint, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: [], message_queue_len: 0, total_heap_size: 595376]
+18:31:48.923 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3770.0>, :long_message_queue, true}|
+ process info: {{:"$initial_call", {:supervisor, Supervisor.Default, 1}}, {:"$ancestors", [RealtimeWeb.Endpoint.RealtimeWeb.UserSocket, RealtimeWeb.Endpoint, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: [], message_queue_len: 0, total_heap_size: 366597]
+18:31:48.933 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3.0>, :long_message_queue, true}|
+ process info: {nil, nil} [registered_name: [], message_queue_len: 0, total_heap_size: 233]
+18:31:48.943 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3.0>, :long_message_queue, false}|
+ process info: {nil, nil} [registered_name: [], message_queue_len: 0, total_heap_size: 233]
+18:31:48.948 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3769.0>, :long_message_queue, true}|
+ process info: {{:"$initial_call", {:supervisor, Supervisor.Default, 1}}, {:"$ancestors", [RealtimeWeb.Endpoint.RealtimeWeb.UserSocket, RealtimeWeb.Endpoint, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: [], message_queue_len: 0, total_heap_size: 591911]
+18:31:48.952 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3770.0>, :long_message_queue, false}|
+ process info: {{:"$initial_call", {:supervisor, Supervisor.Default, 1}}, {:"$ancestors", [RealtimeWeb.Endpoint.RealtimeWeb.UserSocket, RealtimeWeb.Endpoint, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: [], message_queue_len: 0, total_heap_size: 366597]
+18:31:48.960 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3772.0>, :long_message_queue, false}|
+ process info: {{:"$initial_call", {:supervisor, Supervisor.Default, 1}}, {:"$ancestors", [RealtimeWeb.Endpoint.RealtimeWeb.UserSocket, RealtimeWeb.Endpoint, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: [], message_queue_len: 0, total_heap_size: 595376]
+18:31:48.964 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3769.0>, :long_message_queue, false}|
+ process info: {{:"$initial_call", {:supervisor, Supervisor.Default, 1}}, {:"$ancestors", [RealtimeWeb.Endpoint.RealtimeWeb.UserSocket, RealtimeWeb.Endpoint, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: [], message_queue_len: 0, total_heap_size: 591911]
+18:31:52.696 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3663.0>, :long_message_queue, false}|
+ process info: {{:"$initial_call", {Registry.Partition, :init, 1}}, {:"$ancestors", [Realtime.PubSub, Realtime.PubSub.Supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: Realtime.PubSub.PIDPartition8, message_queue_len: 0, total_heap_size: 2065]
+18:31:52.977 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:31:53.528 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:31:54.978 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3660.0>, :long_message_queue, false}|
+ process info: {{:"$initial_call", {Registry.Partition, :init, 1}}, {:"$ancestors", [Realtime.PubSub, Realtime.PubSub.Supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: Realtime.PubSub.PIDPartition5, message_queue_len: 0, total_heap_size: 3039]
+18:31:55.250 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3659.0>, :long_message_queue, false}|
+ process info: {{:"$initial_call", {Registry.Partition, :init, 1}}, {:"$ancestors", [Realtime.PubSub, Realtime.PubSub.Supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: Realtime.PubSub.PIDPartition4, message_queue_len: 0, total_heap_size: 3011]
+18:31:55.846 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3661.0>, :long_message_queue, false}|
+ process info: {{:"$initial_call", {Registry.Partition, :init, 1}}, {:"$ancestors", [Realtime.PubSub, Realtime.PubSub.Supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: Realtime.PubSub.PIDPartition6, message_queue_len: 0, total_heap_size: 1377]
+18:31:56.856 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3658.0>, :long_message_queue, false}|
+ process info: {{:"$initial_call", {Registry.Partition, :init, 1}}, {:"$ancestors", [Realtime.PubSub, Realtime.PubSub.Supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: Realtime.PubSub.PIDPartition3, message_queue_len: 0, total_heap_size: 1370]
+18:31:56.906 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3655.0>, :long_message_queue, false}|
+ process info: {{:"$initial_call", {Registry.Partition, :init, 1}}, {:"$ancestors", [Realtime.PubSub, Realtime.PubSub.Supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: Realtime.PubSub.PIDPartition0, message_queue_len: 0, total_heap_size: 3060]
+18:31:57.187 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3657.0>, :long_message_queue, false}|
+ process info: {{:"$initial_call", {Registry.Partition, :init, 1}}, {:"$ancestors", [Realtime.PubSub, Realtime.PubSub.Supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: Realtime.PubSub.PIDPartition2, message_queue_len: 0, total_heap_size: 1981]
+18:31:57.197 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3662.0>, :long_message_queue, false}|
+ process info: {{:"$initial_call", {Registry.Partition, :init, 1}}, {:"$ancestors", [Realtime.PubSub, Realtime.PubSub.Supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: Realtime.PubSub.PIDPartition7, message_queue_len: 0, total_heap_size: 993]
+18:31:57.376 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3656.0>, :long_message_queue, false}|
+ process info: {{:"$initial_call", {Registry.Partition, :init, 1}}, {:"$ancestors", [Realtime.PubSub, Realtime.PubSub.Supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: Realtime.PubSub.PIDPartition1, message_queue_len: 0, total_heap_size: 1611]
+18:31:57.447 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3664.0>, :long_message_queue, false}|
+ process info: {{:"$initial_call", {Registry.Partition, :init, 1}}, {:"$ancestors", [Realtime.PubSub, Realtime.PubSub.Supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: Realtime.PubSub.PIDPartition9, message_queue_len: 0, total_heap_size: 1241]
+18:31:57.978 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+18:31:58.529 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:32:03.530 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:32:08.531 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:32:13.532 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:32:16.197 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3650.0>, :long_message_queue, false}|
+ process info: {{:"$initial_call", {Forum.Muster.Shard, :init, 1}}, {:"$ancestors", [:"realtime_channels_us-east-1_forum_shards_supervisor", :"realtime_channels_us-east-1_forum_supervisor", Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: :"realtime_channels_us-east-1_muster_shard_3", message_queue_len: 0, total_heap_size: 2391020]
+18:32:17.743 request_id=GOOw3IH_gfrHOmAAHohh [info] GET /metrics
+18:32:17.744 request_id=GOOw3IH_gfrHOmAAHohh [info] GET /metrics - Sent 200 in 0ms
+18:32:17.746 request_id=GOOw3IH_gfrHOmAAHohh [info] Collected cluster metrics in 1 milliseconds
+18:32:18.534 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:32:18.755 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3681.0>, :long_message_queue, false}|
+ process info: {{:"$initial_call", {Forum.Partition, :init, 1}}, {:"$ancestors", [:users_forum_supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: :users_forum_partition_3, message_queue_len: 0, total_heap_size: 2805589]
+18:32:23.535 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:32:28.536 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:32:33.537 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:32:38.538 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:32:43.539 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:32:47.678 request_id=GOOw43o3QBvivToAHokB [info] GET /metrics
+18:32:47.678 request_id=GOOw43o3QBvivToAHokB [info] GET /metrics - Sent 200 in 0ms
+18:32:47.680 request_id=GOOw43o3QBvivToAHokB [info] Collected cluster metrics in 2 milliseconds
+18:32:48.541 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:32:53.542 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:32:58.543 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:33:03.544 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:33:08.545 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:33:13.546 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:33:17.683 request_id=GOOw6naoJm0zs2IAHonB [info] GET /metrics
+18:33:17.683 request_id=GOOw6naoJm0zs2IAHonB [info] GET /metrics - Sent 200 in 0ms
+18:33:17.685 request_id=GOOw6naoJm0zs2IAHonB [info] Collected cluster metrics in 1 milliseconds
+18:33:18.548 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:33:23.549 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:33:28.550 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:33:33.551 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:33:38.552 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:33:43.553 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:33:47.693 request_id=GOOw8XNiv9yER_gAHoqB [info] GET /metrics
+18:33:47.693 request_id=GOOw8XNiv9yER_gAHoqB [info] GET /metrics - Sent 200 in 0ms
+18:33:47.695 request_id=GOOw8XNiv9yER_gAHoqB [info] Collected cluster metrics in 1 milliseconds
+18:33:48.555 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:33:53.556 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:33:58.557 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:34:03.558 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:34:08.559 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:34:13.560 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+18:34:17.683 request_id=GOOw-G71mIiksgEAHosh [info] GET /metrics
+18:34:17.683 request_id=GOOw-G71mIiksgEAHosh [info] GET /metrics - Sent 200 in 0ms
+18:34:17.685 request_id=GOOw-G71mIiksgEAHosh [info] Collected cluster metrics in 1 milliseconds
+18:34:18.562 project=realtime-dev [info] Billing metrics: [:realtime, :connections]

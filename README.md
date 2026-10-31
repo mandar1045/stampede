@@ -41,7 +41,7 @@ Without Igniter, add it to your dependencies:
 ```elixir
 def deps do
   [
-    {:stampede, "~> 1.2", only: [:dev, :test]}
+    {:stampede, "~> 1.3", only: [:dev, :test]}
   ]
 end
 ```
@@ -165,6 +165,17 @@ That's about as far as this server goes, because at 600,000 its memory was
 Everything you need to run it yourself, and every number it measured, is in
 [`bench/million`](https://github.com/mandar1045/stampede/tree/main/bench/million).
 The goal is still a million.
+
+A fresh app only tells you so much, so I tried it on a real product too: an open
+source real-time server built with Phoenix, self-hosted from its official
+release, on one 4-core machine. With 100 users in each channel and every message
+going to all of them, it held **50,000 users for 10 minutes**, delivered 80.9
+million messages, and round trips stayed at 5.71ms at p95. Its own metrics counted
+the same users:
+
+![The server's own metrics during the run, holding 50,000 connected users at about 112,000 events a second](assets/realtime-50k.png)
+
+There's more on how I checked that in the [case study](guides/supabase_realtime.md).
 
 Before that, I'd tried it on my laptop: a fresh Phoenix app in production
 mode, with a LiveView page where every user loads the page, joins, clicks
@@ -310,10 +321,11 @@ def run(_vu) do
 end
 ```
 
-It has your clicks, forms, uploads, channels, navigation and pauses. Passwords,
-tokens and the like become `"CHANGE_ME"`, in forms and in URLs, so they don't end
-up in a file you might commit. I tried it with a real browser, and the scenario
-it wrote ran against the same app with no errors.
+It has your clicks, forms, uploads, channels, navigation and pauses, and signing
+in works too. Passwords, tokens and the like become `"CHANGE_ME"`, in forms and in
+URLs, so they don't end up in a file you might commit. I tried it in a real
+browser on a `phx.gen.auth` app, signing in with a password, and the scenario it
+wrote ran against the same app with no errors.
 
 Signing in isn't recorded yet, so record the pages after it and add the sign-in
 by hand. The [guide](guides/recording.md) has the details.
@@ -431,7 +443,9 @@ photo = :crypto.strong_rand_bytes(200_000)
 
 Pages behind a login work too. `connect/2` follows redirects and keeps the
 cookies they set, so a route that signs in a test user and redirects is
-enough, and the [login guide](guides/login.md) walks through it. LiveView
+enough. Or go through the real form, since `Stampede.HTTP` keeps cookies with
+`cookies: true` and `Stampede.HTTP.csrf_token/1` finds the page's token. The
+[login guide](guides/login.md) walks through both. LiveView
 runs record `live.page`, `live.join`, `live.event`, `live.patch`,
 `live.navigate` and `live.upload`.
 
@@ -568,7 +582,7 @@ running across a network.
 A load test can also be a plain script:
 
 ```elixir
-Mix.install([{:stampede, "~> 1.2"}])
+Mix.install([{:stampede, "~> 1.3"}])
 
 defmodule Lobby do
   use Stampede.Scenario
@@ -595,6 +609,7 @@ System.halt(if result.passed?, do: 0, else: 1)
   * [Spreading the load over machines](guides/distributed.md)
   * [Load testing AI chat APIs](guides/llm.md)
   * [Seeing inside your app](guides/probe.md)
+  * [Watching a run in Prometheus and Grafana](guides/prometheus.md)
   * [Recording a session](guides/recording.md)
   * [Case study: Supabase Realtime](guides/supabase_realtime.md)
 

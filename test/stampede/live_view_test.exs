@@ -1,7 +1,7 @@
 defmodule Stampede.LiveViewTest do
   use ExUnit.Case, async: true
 
-  alias Stampede.LiveView
+  alias Stampede.{HTTP, LiveView}
 
   defmodule Clicking do
     use Stampede.Scenario
@@ -36,6 +36,28 @@ defmodule Stampede.LiveViewTest do
       {:ok, view} = LiveView.connect(url("/sign-in/sam"))
 
       assert {:ok, %{"visitor" => "sam"}} = LiveView.click(view, "state")
+    end
+
+    test "uses the session a VU signed in with over HTTP, when asked to" do
+      {:ok, page} = HTTP.get(url("/counter"), cookies: true)
+      user = %{"name" => "ada", "password" => "open sesame"}
+      form = %{"_csrf_token" => HTTP.csrf_token(page), "user" => user}
+
+      assert {:ok, %{status: 302}} = HTTP.post(url("/sign-in"), cookies: true, form: form)
+
+      {:ok, view} = LiveView.connect(url("/counter"), cookies: true)
+      assert {:ok, %{"visitor" => "ada"}} = LiveView.click(view, "state")
+
+      {:ok, stranger} = LiveView.connect(url("/counter"))
+      assert {:ok, %{"visitor" => "jo"}} = LiveView.click(stranger, "state")
+    end
+
+    test "adds the cookies it gets to the VU's, when asked to" do
+      {:ok, view} = LiveView.connect(url("/sign-in/sam"), cookies: true)
+      assert {:ok, %{"visitor" => "sam"}} = LiveView.click(view, "state")
+
+      {:ok, again} = LiveView.connect(url("/counter"), cookies: true)
+      assert {:ok, %{"visitor" => "sam"}} = LiveView.click(again, "state")
     end
 
     test "returns an error after too many redirects" do
@@ -286,7 +308,7 @@ defmodule Stampede.LiveViewTest do
   end
 
   test "records uploads inside a run" do
-    result = Stampede.run(Uploading, vus: 2, duration: 1_000)
+    result = Stampede.run(Uploading, vus: 2, duration: 1_000, graceful_stop: 10_000)
 
     assert result.errors == []
     assert result.metrics["live.upload"].count > 0
@@ -305,7 +327,7 @@ defmodule Stampede.LiveViewTest do
   end
 
   test "records navigation metrics inside a run" do
-    result = Stampede.run(Browsing, vus: 2, duration: 1_000)
+    result = Stampede.run(Browsing, vus: 2, duration: 1_000, graceful_stop: 10_000)
 
     assert result.errors == []
     assert result.metrics["live.patch"].count > 0

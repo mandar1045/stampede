@@ -13,6 +13,19 @@ defmodule Stampede.ChannelsTest do
     %{socket: socket}
   end
 
+  test "keep: holds on to the messages a VU wants, and only counts the rest", %{url: url} do
+    {:ok, socket} = Channels.connect(url, keep: &(&1["from"] == "me"))
+    {:ok, _reply} = Channels.join(socket, "room:lobby")
+
+    :ok = Channels.cast(socket, "room:lobby", "shout", %{"from" => "someone"})
+    :ok = Channels.cast(socket, "room:lobby", "shout", %{"from" => "me"})
+
+    # Sent before anything waits for it, and still there.
+    Process.sleep(100)
+    assert {:ok, %{"from" => "me"}} = Channels.await(socket, "room:lobby", "shout")
+    assert {:error, :timeout} = Channels.await(socket, "room:lobby", "shout", 50)
+  end
+
   describe "connect/2" do
     test "connects to a Phoenix socket", %{url: url} do
       assert {:ok, socket} = Channels.connect(url)

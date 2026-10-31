@@ -7,7 +7,12 @@ defmodule Stampede.ExUnitTest do
 
   test "assert_load/2 returns the result of a run that passed" do
     result =
-      assert_load(Observed, vus: 1, duration: 200, thresholds: [{"iteration.errors", count: 0}])
+      assert_load(Observed,
+        vus: 1,
+        duration: 200,
+        graceful_stop: 10_000,
+        thresholds: [{"iteration.errors", count: 0}]
+      )
 
     assert %Stampede.Result{scenario: Observed, passed?: true} = result
     assert result.metrics["iteration"].count > 0

@@ -65,6 +65,9 @@ defmodule Stampede.SSE do
       `text/event-stream` is added unless one is given.
     * `:body` - the body, as iodata
     * `:json` - a term to send as JSON instead of a `:body`
+    * `:cookies` - when `true`, uses the cookies of `Stampede.HTTP`'s
+      `:cookies` option, so a stream can come after signing in. Defaults to
+      `false`.
     * `:timeout` - how long the whole stream may take, in milliseconds.
       Defaults to `60_000`.
     * `:metric` - the prefix of the metrics to record, or `nil` to record
@@ -79,6 +82,7 @@ defmodule Stampede.SSE do
         headers: [],
         body: nil,
         json: nil,
+        cookies: false,
         timeout: 60_000,
         metric: "sse",
         transport_opts: []

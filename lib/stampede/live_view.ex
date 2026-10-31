@@ -49,7 +49,7 @@ defmodule Stampede.LiveView do
   along with the connection metrics listed in `Stampede.Channels`.
   """
 
-  alias Stampede.{Channels, HTTP, Metrics}
+  alias Stampede.{Channels, Cookies, HTTP, Metrics}
 
   @derive {Inspect, only: [:socket, :topic, :url]}
   @enforce_keys [:socket, :topic, :url]
@@ -66,6 +66,10 @@ defmodule Stampede.LiveView do
 
     * `:headers` - extra headers for both the page and the socket, such as a
       `cookie` for pages behind a login
+    * `:cookies` - when `true`, starts with the cookies this VU got from
+      `Stampede.HTTP` with its `:cookies` option, and adds to them, so a
+      scenario can sign in over HTTP and then open a LiveView as that user.
+      Defaults to `false`.
     * `:max_redirects` - how many redirects to follow while loading the page,
       keeping the cookies they set. Defaults to `5`.
     * `:socket_path` - where the LiveView socket is mounted. Defaults to
@@ -84,6 +88,7 @@ defmodule Stampede.LiveView do
     opts =
       Keyword.validate!(opts,
         headers: [],
+        cookies: false,
         max_redirects: 5,
         socket_path: "/live",
         timeout: 5_000,
@@ -99,7 +104,7 @@ defmodule Stampede.LiveView do
     with {:ok, page} <- fetch_page(url, opts),
          {:ok, root} <- root_view(page.body),
          params = connect_params(page.body),
-         opts = Keyword.put(opts, :headers, with_cookies(opts[:headers], page.cookies)),
+         opts = Keyword.put(opts, :headers, Cookies.add_to(opts[:headers], page.cookies)),
          {:ok, socket} <-
            Channels.connect(socket_url(page.url, opts[:socket_path]),
              params: params,
@@ -212,7 +217,7 @@ defmodule Stampede.LiveView do
   """
   @spec change(t(), String.t(), map(), keyword()) :: {:ok, map() | nil} | {:error, term()}
   def change(%__MODULE__{} = view, event, params, opts \\ []) when is_map(params) do
-    push(view, "form", event, encode_form(params), opts)
+    push(view, "form", event, HTTP.encode_form(params), opts)
   end
 
   @doc """
@@ -222,7 +227,7 @@ defmodule Stampede.LiveView do
   """
   @spec submit(t(), String.t(), map(), keyword()) :: {:ok, map() | nil} | {:error, term()}
   def submit(%__MODULE__{} = view, event, params, opts \\ []) when is_map(params) do
-    push(view, "form", event, encode_form(params), opts)
+    push(view, "form", event, HTTP.encode_form(params), opts)
   end
 
   @typedoc """
@@ -314,9 +319,13 @@ defmodule Stampede.LiveView do
     started_at = System.monotonic_time()
     metrics = Metrics.current()
 
-    case load(url, [], opts[:max_redirects], opts) do
+    host = URI.parse(url).host
+    cookies = if opts[:cookies], do: Cookies.get(host), else: []
+
+    case load(url, cookies, opts[:max_redirects], opts) do
       {:ok, page} ->
         Metrics.record_since(metrics, "live.page", started_at)
+        if opts[:cookies], do: Cookies.put(host, page.cookies)
         {:ok, page}
 
       {:error, reason} ->
@@ -327,14 +336,14 @@ defmodule Stampede.LiveView do
 
   defp load(url, cookies, redirects_left, opts) do
     request_opts = [
-      headers: with_cookies(opts[:headers], cookies),
+      headers: Cookies.add_to(opts[:headers], cookies),
       timeout: opts[:timeout],
       transport_opts: opts[:transport_opts],
       metric: nil
     ]
 
     with {:ok, response} <- HTTP.request(:get, url, request_opts) do
-      cookies = store_cookies(cookies, response.headers)
+      cookies = Cookies.store(cookies, response.headers)
 
       case {response.status, List.keyfind(response.headers, "location", 0)} do
         {200, _location} ->
@@ -673,11 +682,9 @@ defmodule Stampede.LiveView do
   end
 
   defp connect_params(html) do
-    with [tag] <- Regex.run(~r/<meta\s[^>]*name="csrf-token"[^>]*>/, html),
-         token when is_binary(token) <- attribute(tag, "content") do
-      %{"_csrf_token" => token}
-    else
-      _other -> %{}
+    case HTTP.csrf_token(html) do
+      nil -> %{}
+      token -> %{"_csrf_token" => token}
     end
   end
 
@@ -693,42 +700,4 @@ defmodule Stampede.LiveView do
     scheme = if uri.scheme == "https", do: "wss", else: "ws"
     URI.to_string(%URI{uri | scheme: scheme, path: path, query: nil, fragment: nil})
   end
-
-  # Cookies are kept as {name, "name=value"}, so a later Set-Cookie with the
-  # same name replaces the earlier one.
-  defp store_cookies(cookies, headers) do
-    for {"set-cookie", value} <- headers, reduce: cookies do
-      cookies ->
-        [pair | _attributes] = String.split(value, ";", parts: 2)
-        [name | _value] = String.split(pair, "=", parts: 2)
-        List.keystore(cookies, name, 0, {name, pair})
-    end
-  end
-
-  defp with_cookies(headers, []), do: headers
-
-  defp with_cookies(headers, cookies) do
-    {given, headers} =
-      Enum.split_with(headers, fn {name, _value} -> String.downcase(name) == "cookie" end)
-
-    values = Enum.map(given, &elem(&1, 1)) ++ Enum.map(cookies, &elem(&1, 1))
-    [{"cookie", Enum.join(values, "; ")} | headers]
-  end
-
-  defp encode_form(params) do
-    params |> flatten(nil) |> URI.encode_query()
-  end
-
-  defp flatten(map, prefix) when is_map(map) do
-    Enum.flat_map(map, fn {key, value} -> flatten(value, nest(prefix, key)) end)
-  end
-
-  defp flatten(list, prefix) when is_list(list) do
-    Enum.flat_map(list, &flatten(&1, prefix <> "[]"))
-  end
-
-  defp flatten(value, prefix), do: [{prefix, to_string(value)}]
-
-  defp nest(nil, key), do: to_string(key)
-  defp nest(prefix, key), do: "#{prefix}[#{key}]"
 end

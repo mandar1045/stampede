@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Real client</title>
+<style>
+  body { margin: 0; padding: 28px; font: 16px system-ui, sans-serif; background: #fff; color: #1a1a1a; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  p { margin: 0 0 20px; color: #666; }
+  .tiles { display: flex; gap: 12px; margin-bottom: 20px; }
+  .tile { flex: 1; border: 1px solid #ddd; border-radius: 8px; padding: 14px; }
+  .tile span { display: block; font-size: 13px; color: #666; }
+  .tile strong { font-size: 26px; }
+  pre { margin: 0; padding: 14px; background: #f5f5f5; border-radius: 8px; height: 420px; overflow: hidden; font-size: 13px; }
+</style>
+</head>
+<body>
+<h1>A real browser on the server under test</h1>
+<p>realtime-js 2.118.0, not Stampede. In the same channel as the load test.</p>
+<div class="tiles">
+  <div class="tile"><span>Status</span><strong id="status">connecting</strong></div>
+  <div class="tile"><span>Messages received</span><strong id="count">0</strong></div>
+  <div class="tile"><span>My own message, there and back</span><strong id="roundtrip">-</strong></div>
+</div>
+<pre id="log"></pre>
+<script type="module">
+  import { RealtimeClient } from "https://esm.sh/@supabase/realtime-js@2.118.0";
+
+  const query = new URLSearchParams(location.search);
+  const client = new RealtimeClient(query.get("url"), { params: { apikey: query.get("key") } });
+  const channel = client.channel(query.get("channel"), { config: { broadcast: { self: true } } });
+  const text = (id, value) => (document.getElementById(id).textContent = value);
+  const me = "browser-" + Math.random().toString(36).slice(2, 8);
+  const lines = [];
+  let count = 0;
+
+  channel
+    .on("broadcast", { event: "shout" }, ({ payload }) => {
+      text("count", (++count).toLocaleString());
+      if (payload.from === me) text("roundtrip", (performance.now() - payload.sent).toFixed(1) + " ms");
+      lines.unshift(new Date().toISOString().slice(11, 23) + "  " + JSON.stringify(payload));
+      lines.length = Math.min(lines.length, 22);
+      text("log", lines.join("\n"));
+    })
+    .subscribe((status) => {
+      text("status", status.toLowerCase());
+      if (status === "SUBSCRIBED") {
+        setInterval(() => {
+          const id = me + "-" + Date.now();
+          channel.send({ type: "broadcast", event: "shout", payload: { id, from: me, text: "Hello from a real browser", sent: performance.now() } });
+        }, 3000);
+      }
+    });
+</script>
+</body>
+</html>

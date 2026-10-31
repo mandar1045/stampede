@@ -1,0 +1,290 @@
+{
+ "realtime_connections_global_connected": [
+  {
+   "metric": {
+    "__name__": "realtime_connections_global_connected",
+    "host": "172.31.42.63",
+    "id": "172.31.42.63",
+    "instance": "localhost:14000",
+    "job": "realtime",
+    "region": "us-east-1"
+   },
+   "values": [
+    [
+     1793469441.055,
+     "0"
+    ],
+    [
+     1793469471.055,
+     "1414"
+    ],
+    [
+     1793469501.055,
+     "3001"
+    ],
+    [
+     1793469531.055,
+     "0"
+    ]
+   ]
+  }
+ ],
+ "phoenix_connections_total": [
+  {
+   "metric": {
+    "__name__": "phoenix_connections_total",
+    "host": "172.31.42.63",
+    "id": "172.31.42.63",
+    "instance": "localhost:14000",
+    "job": "realtime",
+    "region": "us-east-1"
+   },
+   "values": [
+    [
+     1793469441.055,
+     "0"
+    ],
+    [
+     1793469471.055,
+     "1414"
+    ],
+    [
+     1793469501.055,
+     "3002"
+    ],
+    [
+     1793469531.055,
+     "0"
+    ]
+   ]
+  }
+ ],
+ "beam_stats_process_count": [
+  {
+   "metric": {
+    "__name__": "beam_stats_process_count",
+    "host": "172.31.42.63",
+    "id": "172.31.42.63",
+    "instance": "localhost:14000",
+    "job": "realtime",
+    "region": "us-east-1"
+   },
+   "values": [
+    [
+     1793469441.055,
+     "738"
+    ],
+    [
+     1793469471.055,
+     "3576"
+    ],
+    [
+     1793469501.055,
+     "6752"
+    ],
+    [
+     1793469531.055,
+     "748"
+    ]
+   ]
+  }
+ ],
+ "beam_stats_port_count": [
+  {
+   "metric": {
+    "__name__": "beam_stats_port_count",
+    "host": "172.31.42.63",
+    "id": "172.31.42.63",
+    "instance": "localhost:14000",
+    "job": "realtime",
+    "region": "us-east-1"
+   },
+   "values": [
+    [
+     1793469441.055,
+     "16"
+    ],
+    [
+     1793469471.055,
+     "1432"
+    ],
+    [
+     1793469501.055,
+     "3020"
+    ],
+    [
+     1793469531.055,
+     "18"
+    ]
+   ]
+  }
+ ],
+ "beam_stats_run_queue_count": [
+  {
+   "metric": {
+    "__name__": "beam_stats_run_queue_count",
+    "host": "172.31.42.63",
+    "id": "172.31.42.63",
+    "instance": "localhost:14000",
+    "job": "realtime",
+    "region": "us-east-1",
+    "type": "dirty"
+   },
+   "values": [
+    [
+     1793469441.055,
+     "0"
+    ],
+    [
+     1793469471.055,
+     "0"
+    ],
+    [
+     1793469501.055,
+     "0"
+    ],
+    [
+     1793469531.055,
+     "0"
+    ]
+   ]
+  },
+  {
+   "metric": {
+    "__name__": "beam_stats_run_queue_count",
+    "host": "172.31.42.63",
+    "id": "172.31.42.63",
+    "instance": "localhost:14000",
+    "job": "realtime",
+    "region": "us-east-1",
+    "type": "normal"
+   },
+   "values": [
+    [
+     1793469441.055,
+     "0"
+    ],
+    [
+     1793469471.055,
+     "0"
+    ],
+    [
+     1793469501.055,
+     "0"
+    ],
+    [
+     1793469531.055,
+     "0"
+    ]
+   ]
+  }
+ ],
+ "osmon_cpu_util": [
+  {
+   "metric": {
+    "__name__": "osmon_cpu_util",
+    "host": "172.31.42.63",
+    "id": "172.31.42.63",
+    "instance": "localhost:14000",
+    "job": "realtime",
+    "region": "us-east-1"
+   },
+   "values": [
+    [
+     1793469441.055,
+     "0.7014028056112225"
+    ],
+    [
+     1793469471.055,
+     "5.474635861376194"
+    ],
+    [
+     1793469501.055,
+     "3.4673366834170856"
+    ],
+    [
+     1793469531.055,
+     "0.9004502251125562"
+    ]
+   ]
+  }
+ ],
+ "osmon_ram_usage": [
+  {
+   "metric": {
+    "__name__": "osmon_ram_usage",
+    "host": "172.31.42.63",
+    "id": "172.31.42.63",
+    "instance": "localhost:14000",
+    "job": "realtime",
+    "region": "us-east-1"
+   },
+   "values": [
+    [
+     1793469441.055,
+     "3.4843589863515945"
+    ],
+    [
+     1793469471.055,
+     "3.874297237134101"
+    ],
+    [
+     1793469501.055,
+     "4.287062836121848"
+    ],
+    [
+     1793469531.055,
+     "4.174501678368372"
+    ]
+   ]
+  }
+ ],
+ "realtime_channel_global_events": [
+  {
+   "metric": {
+    "__name__": "realtime_channel_global_events",
+    "host": "172.31.42.63",
+    "id": "172.31.42.63",
+    "instance": "localhost:14000",
+    "job": "realtime",
+    "region": "us-east-1"
+   },
+   "values": [
+    [
+     1793469501.055,
+     "39390"
+    ],
+    [
+     1793469531.055,
+     "150500"
+    ]
+   ]
+  }
+ ],
+ "realtime_channel_global_output_bytes": [
+  {
+   "metric": {
+    "__name__": "realtime_channel_global_output_bytes",
+    "host": "172.31.42.63",
+    "id": "172.31.42.63",
+    "instance": "localhost:14000",
+    "job": "realtime",
+    "region": "us-east-1"
+   },
+   "values": [
+    [
+     1793469471.055,
+     "210922"
+    ],
+    [
+     1793469501.055,
+     "2977250"
+    ],
+    [
+     1793469531.055,
+     "9075440"
+    ]
+   ]
+  }
+ ]
+}

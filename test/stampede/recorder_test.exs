@@ -74,18 +74,156 @@ defmodule Stampede.RecorderTest do
     refute scenario =~ "4242"
   end
 
-  test "records plain GET requests, and leaves other requests as a comment" do
+  test "records requests with what they sent, and what they got back" do
     steps =
       record(fn ->
         {:ok, %{status: 200}} = Stampede.HTTP.get(url("/plain"))
         {:ok, _response} = Stampede.HTTP.post(url("/api/echo"), json: %{a: 1})
+        {:ok, _response} = Stampede.HTTP.put(url("/api/echo"), json: [1, 2])
       end)
 
-    assert kinds(steps) == [:http, :http]
+    assert kinds(steps) == [:http, :http, :http]
 
     scenario = Recorder.to_scenario(steps, Plain)
+    assert scenario =~ "Stampede.HTTP.clear_cookies()"
+
+    assert scenario =~
+             ~r/\{:ok, %\{status: 200\}\} =\s+Stampede.HTTP.get\("http.*\/plain", cookies: true\)/
+
+    assert scenario =~
+             ~r/\{:ok, %\{status: 200\}\} =\s+Stampede.HTTP.post\("http.*\/api\/echo", cookies: true, json: %\{"a" => 1\}\)/
+
+    assert scenario =~ ~r/Stampede.HTTP.put\("http.*\/api\/echo", cookies: true, json: \[1, 2\]\)/
+  end
+
+  test "leaves cookies out when nothing needs them" do
+    steps = record(fn -> {:ok, _response} = Stampede.HTTP.get(url("/plain")) end)
+    scenario = Recorder.to_scenario(steps, Plain)
+
+    refute scenario =~ "cookies"
     assert scenario =~ ~r/Stampede.HTTP.get\("http.*\/plain"\)/
+  end
+
+  test "leaves a request it can't replay as a comment" do
+    steps =
+      record(fn ->
+        {:ok, _response} =
+          Stampede.HTTP.post(url("/api/echo"),
+            headers: [{"content-type", "multipart/form-data; boundary=x"}],
+            body: "--x--"
+          )
+      end)
+
+    scenario = Recorder.to_scenario(steps, Plain)
     assert scenario =~ ~r/# POST http.*\/api\/echo happened here/
+    refute scenario =~ "clear_cookies"
+  end
+
+  defp sign_in do
+    {:ok, page} = Stampede.HTTP.get(url("/counter"), cookies: true)
+    token = Stampede.HTTP.csrf_token(page)
+
+    {:ok, %{status: 302}} =
+      Stampede.HTTP.post(url("/sign-in"),
+        cookies: true,
+        headers: [{"referer", url("/counter?from=form&token=abc")}],
+        form: %{
+          "_csrf_token" => token,
+          "user" => %{"name" => "ada", "password" => "open sesame"}
+        }
+      )
+
+    {:ok, view} = LiveView.connect(url("/counter"), cookies: true)
+    :ok = LiveView.close(view)
+    Stampede.HTTP.clear_cookies()
+  end
+
+  test "writes a sign-in that works, without the password" do
+    steps = record(&sign_in/0)
+    scenario = Recorder.to_scenario(steps, Stampede.RecordedSignIn)
+
+    refute scenario =~ "open sesame"
+    refute scenario =~ "abc"
+    assert scenario =~ ~s|"_csrf_token" => Stampede.HTTP.csrf_token(page)|
+    assert scenario =~ "Put real values where it says CHANGE_ME"
+    assert scenario =~ ~r/\{:ok, %\{url: "http.*\/counter"\} = view\} =/
+    assert scenario =~ ~r/Stampede.LiveView.connect\("http.*\/counter", cookies: true\)/
+
+    # The token and the session come from the VU's own requests each time.
+    working =
+      String.replace(scenario, ~s("password" => "CHANGE_ME"), ~s("password" => "open sesame"))
+
+    [{module, _binary}] = Code.compile_string(working)
+
+    result =
+      Stampede.run(module,
+        stages: nil,
+        vus: 2,
+        duration: 300,
+        graceful_stop: 10_000,
+        thresholds: []
+      )
+
+    assert result.metrics["iteration"].count >= 2
+    refute Map.has_key?(result.metrics, "iteration.errors")
+    :code.purge(module)
+    :code.delete(module)
+
+    # A wrong password shows up as an error, rather than as a fast sign-in.
+    [{module, _binary}] = Code.compile_string(scenario)
+
+    result =
+      Stampede.run(module,
+        stages: nil,
+        vus: 1,
+        duration: 100,
+        graceful_stop: 10_000,
+        thresholds: []
+      )
+
+    assert result.metrics["iteration.errors"].count >= 1
+    :code.purge(module)
+    :code.delete(module)
+  end
+
+  test "sends the token in a header when that's how the app did" do
+    steps =
+      record(fn ->
+        {:ok, page} = Stampede.HTTP.get(url("/counter"), cookies: true)
+
+        {:ok, _response} =
+          Stampede.HTTP.post(url("/api/echo"),
+            cookies: true,
+            headers: [
+              {"referer", url("/counter")},
+              {"x-csrf-token", Stampede.HTTP.csrf_token(page)}
+            ],
+            json: %{a: 1}
+          )
+
+        Stampede.HTTP.clear_cookies()
+      end)
+
+    assert Recorder.to_scenario(steps, Plain) =~
+             ~s|headers: [{"x-csrf-token", Stampede.HTTP.csrf_token(page)}]|
+  end
+
+  test "keeps secrets out of nested forms and lists" do
+    steps =
+      record(fn ->
+        {:ok, _response} =
+          Stampede.HTTP.post(url("/api/echo"),
+            json: %{
+              users: [%{name: "ada", password: "kept-in-a-list"}],
+              secret: %{value: "kept-in-a-map"},
+              tokens: ["list-of-secrets"]
+            }
+          )
+      end)
+
+    scenario = Recorder.to_scenario(steps, Plain)
+    assert scenario =~ "ada"
+    for secret <- ~w(kept-in-a-list kept-in-a-map list-of-secrets), do: refute(scenario =~ secret)
   end
 
   test "records events sent to components" do
@@ -174,7 +312,7 @@ defmodule Stampede.RecorderTest do
     assert source =~ ":crypto.strong_rand_bytes(13)"
 
     [{module, _binary}] = Code.compile_string(source)
-    result = Stampede.run(module, stages: nil, vus: 1, duration: 500)
+    result = Stampede.run(module, stages: nil, vus: 1, duration: 500, graceful_stop: 10_000)
 
     assert result.errors == []
     assert result.metrics["live.upload"].count >= 1
@@ -207,7 +345,7 @@ defmodule Stampede.RecorderTest do
       Regex.replace(~r/ws:\/\/[^"]+/, source, Stampede.TestEndpoint.socket_url(), global: true)
 
     [{module, _binary}] = Code.compile_string(source)
-    result = Stampede.run(module, stages: nil, vus: 1, duration: 500)
+    result = Stampede.run(module, stages: nil, vus: 1, duration: 500, graceful_stop: 10_000)
 
     assert result.errors == []
     assert result.metrics["channel.join"].count >= 1
@@ -233,7 +371,7 @@ defmodule Stampede.RecorderTest do
     assert IO.iodata_to_binary([Code.format_string!(source), "\n"]) == source
 
     [{module, _binary}] = Code.compile_string(source)
-    result = Stampede.run(module, stages: nil, vus: 2, duration: 1_000)
+    result = Stampede.run(module, stages: nil, vus: 2, duration: 1_000, graceful_stop: 10_000)
 
     assert result.errors == []
     assert result.metrics["live.join"].count >= 2

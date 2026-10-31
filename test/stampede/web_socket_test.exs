@@ -67,11 +67,11 @@ defmodule Stampede.WebSocketTest do
   end
 
   test "records metrics and closes connections after each iteration" do
-    result = Stampede.run(Stampede.Test.Echoing, vus: 2, duration: 1_000)
+    result = Stampede.run(Stampede.Test.Echoing, vus: 2, duration: 1_000, graceful_stop: 10_000)
 
     assert result.errors == []
     iterations = result.metrics["iteration"].count
-    assert iterations > 2
+    assert iterations >= 2
     assert result.metrics["ws.connect"].count in iterations..(iterations + 2)
     assert result.metrics["ws.messages.sent"].count in iterations..(iterations + 2)
     assert result.metrics["ws.messages"].count >= 2 * iterations

@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stampede report</title>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface: #fcfcfb;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #898781;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.1);
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --good: #0ca30c;
+  --critical: #d03b3b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface: #1a1a19;
+    --ink: #f0efec;
+    --ink-2: #c3c2b7;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255, 255, 255, 0.1);
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+main { max-width: 72rem; margin: 0 auto; padding: 24px 16px 48px; }
+h1 { font-size: 20px; margin: 0 0 8px; }
+h2 { font-size: 18px; margin: 0; overflow-wrap: anywhere; }
+h3 { font-size: 14px; margin: 24px 0 8px; }
+section { margin-top: 32px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.meta, figcaption, summary { color: var(--ink-2); }
+.meta { margin: 0; }
+.status { font-weight: 600; }
+.status::before { margin-right: 4px; }
+.passed::before { content: "\2713"; color: var(--good); }
+.failed::before { content: "\2717"; color: var(--critical); }
+.running::before { content: "\25CF"; color: var(--series-1); }
+.notice {
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.tiles, .charts { display: grid; gap: 12px; margin-top: 16px; }
+.tiles { grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); }
+.charts { grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); }
+.tile, .chart, .table {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.tile { padding: 12px; }
+.tile span { display: block; color: var(--ink-2); font-size: 12px; }
+.tile strong { font-size: 22px; font-weight: 600; }
+.chart { position: relative; margin: 0; padding: 12px; outline-offset: 2px; }
+figcaption { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13px; }
+figcaption b { color: var(--ink); font-weight: 600; margin-right: auto; overflow-wrap: anywhere; }
+.key { display: inline-block; width: 12px; height: 2px; margin-right: 4px; vertical-align: middle; }
+.k1 { background: var(--series-1); }
+.k2 { background: var(--series-2); }
+.k3 { background: var(--series-3); }
+svg { display: block; width: 100%; height: auto; margin-top: 8px; overflow: visible; }
+svg text { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+svg line, svg path, svg circle { vector-effect: non-scaling-stroke; }
+.grid { stroke: var(--grid); }
+.axis { stroke: var(--axis); }
+.cross { stroke: var(--muted); display: none; }
+.line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.line.s1 { stroke: var(--series-1); }
+.line.s2 { stroke: var(--series-2); }
+.line.s3 { stroke: var(--series-3); }
+.dot { stroke: var(--surface); stroke-width: 2; }
+.dot.s1 { fill: var(--series-1); }
+.dot.s2 { fill: var(--series-2); }
+.dot.s3 { fill: var(--series-3); }
+.tip {
+  position: absolute;
+  top: 40px;
+  min-width: 8rem;
+  padding: 8px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  font-size: 12px;
+  pointer-events: none;
+}
+.tip div { white-space: nowrap; }
+.tip .at { color: var(--ink-2); margin-bottom: 2px; }
+.tip strong { font-variant-numeric: tabular-nums; margin-right: 6px; }
+.tip span:last-child { color: var(--ink-2); }
+.table { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { padding: 6px 12px; text-align: right; white-space: nowrap; }
+th { color: var(--ink-2); font-weight: 500; }
+th:first-child, td:first-child { text-align: left; }
+td:first-child { white-space: normal; overflow-wrap: anywhere; }
+tr + tr td, thead + tbody td { border-top: 1px solid var(--grid); }
+details { margin-top: 16px; }
+summary { cursor: pointer; }
+details .table { margin-top: 8px; max-height: 24rem; overflow-y: auto; }
+pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; }
+.errors td { vertical-align: top; text-align: left; }
+</style>
+</head>
+<body>
+<main>
+<h1>Stampede report</h1>
+<section>
+<header><h2>Load.Realtime</h2><span class="status passed">Passed</span><p class="meta">Ran for 60.0s</p></header>
+<div class="tiles">
+<div class="tile"><span>Iterations</span><strong>0</strong></div>
+<div class="tile"><span>Iterations per second</span><strong>0.00</strong></div>
+<div class="tile"><span>Iteration p95</span><strong>–</strong></div>
+<div class="tile"><span>Errors</span><strong>0</strong></div>
+<div class="tile"><span>Peak VUs</span><strong>3,000</strong></div>
+</div>
+<div class="charts">
+<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[49.1,54.2,59.4,64.5,69.6,74.7,79.8,84.9,90.1,95.2,100.3,105.4,110.5,115.7,120.8,125.9,131.0,136.1,141.2,146.4,151.5,156.6,161.7,166.8,171.9,177.1,182.2,187.3,192.4,197.5,202.6,207.8,212.9,218.0,223.1,228.2,233.3,238.5,243.6,248.7,253.8,258.9,264.1,269.2,274.3,279.4,284.5,289.6,294.8,299.9,305.0,310.1,315.2,320.3,325.5,330.6,335.7,340.8,345.9,348.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.1s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.3s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.4s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.5s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.0s&quot;],&quot;width&quot;:360,&quot;series&quot;:[{&quot;name&quot;:&quot;VUs&quot;,&quot;slot&quot;:1,&quot;values&quot;:[&quot;101&quot;,&quot;202&quot;,&quot;303&quot;,&quot;404&quot;,&quot;505&quot;,&quot;606&quot;,&quot;707&quot;,&quot;808&quot;,&quot;909&quot;,&quot;1,010&quot;,&quot;1,111&quot;,&quot;1,212&quot;,&quot;1,313&quot;,&quot;1,414&quot;,&quot;1,515&quot;,&quot;1,616&quot;,&quot;1,717&quot;,&quot;1,818&quot;,&quot;1,919&quot;,&quot;2,020&quot;,&quot;2,121&quot;,&quot;2,222&quot;,&quot;2,323&quot;,&quot;2,424&quot;,&quot;2,525&quot;,&quot;2,626&quot;,&quot;2,727&quot;,&quot;2,828&quot;,&quot;2,929&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;]}]}">
+<figcaption><b>VUs</b></figcaption>
+<svg viewBox="0 0 360 180" role="img" aria-label="VUs">
+<line class="axis" x1="44" x2="348" y1="156.0" y2="156.0"/><text x="38" y="156.0" dy="0.32em" text-anchor="end">0</text>
+<line class="grid" x1="44" x2="348" y1="108.0" y2="108.0"/><text x="38" y="108.0" dy="0.32em" text-anchor="end">1K</text>
+<line class="grid" x1="44" x2="348" y1="60.0" y2="60.0"/><text x="38" y="60.0" dy="0.32em" text-anchor="end">2K</text>
+<line class="grid" x1="44" x2="348" y1="12.0" y2="12.0"/><text x="38" y="12.0" dy="0.32em" text-anchor="end">3K</text>
+<text x="44.0" y="174" text-anchor="middle">0s</text>
+<text x="120.0" y="174" text-anchor="middle">15s</text>
+<text x="196.0" y="174" text-anchor="middle">30s</text>
+<text x="272.0" y="174" text-anchor="middle">45s</text>
+<text x="348.0" y="174" text-anchor="middle">1m</text>
+<path class="line s1" d="M49.1,151.2 L54.2,146.3 L59.4,141.5 L64.5,136.6 L69.6,131.8 L74.7,126.9 L79.8,122.1 L84.9,117.2 L90.1,112.4 L95.2,107.5 L100.3,102.7 L105.4,97.8 L110.5,93.0 L115.7,88.1 L120.8,83.3 L125.9,78.4 L131.0,73.6 L136.1,68.7 L141.2,63.9 L146.4,59.0 L151.5,54.2 L156.6,49.3 L161.7,44.5 L166.8,39.6 L171.9,34.8 L177.1,30.0 L182.2,25.1 L187.3,20.3 L192.4,15.4 L197.5,12.0 L202.6,12.0 L207.8,12.0 L212.9,12.0 L218.0,12.0 L223.1,12.0 L228.2,12.0 L233.3,12.0 L238.5,12.0 L243.6,12.0 L248.7,12.0 L253.8,12.0 L258.9,12.0 L264.1,12.0 L269.2,12.0 L274.3,12.0 L279.4,12.0 L284.5,12.0 L289.6,12.0 L294.8,12.0 L299.9,12.0 L305.0,12.0 L310.1,12.0 L315.2,12.0 L320.3,12.0 L325.5,12.0 L330.6,12.0 L335.7,12.0 L340.8,12.0 L345.9,12.0 L348.0,12.0"/>
+<line class="cross" y1="12" y2="156"/>
+</svg>
+<div class="tip" hidden></div>
+</figure>
+<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[49.1,54.2,59.4,64.5,69.6,74.7,79.8,84.9,90.1,95.2,100.3,105.4,110.5,115.7,120.8,125.9,131.0,136.1,141.2,146.4,151.5,156.6,161.7,166.8,171.9,177.1,182.2,187.3,192.4,197.5,202.6,207.8,212.9,218.0,223.1,228.2,233.3,238.5,243.6,248.7,253.8,258.9,264.1,269.2,274.3,279.4,284.5,289.6,294.8,299.9,305.0,310.1,315.2,320.3,325.5,330.6,335.7,340.8,345.9,348.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.1s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.3s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.4s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.5s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.0s&quot;],&quot;width&quot;:360,&quot;series&quot;:[{&quot;name&quot;:&quot;iterations&quot;,&quot;slot&quot;:1,&quot;values&quot;:[&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;]}]}">
+<figcaption><b>Iterations per second</b></figcaption>
+<svg viewBox="0 0 360 180" role="img" aria-label="Iterations per second">
+<line class="axis" x1="44" x2="348" y1="156.0" y2="156.0"/><text x="38" y="156.0" dy="0.32em" text-anchor="end">0</text>
+<line class="grid" x1="44" x2="348" y1="12.0" y2="12.0"/><text x="38" y="12.0" dy="0.32em" text-anchor="end">0.25</text>
+<text x="44.0" y="174" text-anchor="middle">0s</text>
+<text x="120.0" y="174" text-anchor="middle">15s</text>
+<text x="196.0" y="174" text-anchor="middle">30s</text>
+<text x="272.0" y="174" text-anchor="middle">45s</text>
+<text x="348.0" y="174" text-anchor="middle">1m</text>
+<path class="line s1" d="M49.1,156.0 L54.2,156.0 L59.4,156.0 L64.5,156.0 L69.6,156.0 L74.7,156.0 L79.8,156.0 L84.9,156.0 L90.1,156.0 L95.2,156.0 L100.3,156.0 L105.4,156.0 L110.5,156.0 L115.7,156.0 L120.8,156.0 L125.9,156.0 L131.0,156.0 L136.1,156.0 L141.2,156.0 L146.4,156.0 L151.5,156.0 L156.6,156.0 L161.7,156.0 L166.8,156.0 L171.9,156.0 L177.1,156.0 L182.2,156.0 L187.3,156.0 L192.4,156.0 L197.5,156.0 L202.6,156.0 L207.8,156.0 L212.9,156.0 L218.0,156.0 L223.1,156.0 L228.2,156.0 L233.3,156.0 L238.5,156.0 L243.6,156.0 L248.7,156.0 L253.8,156.0 L258.9,156.0 L264.1,156.0 L269.2,156.0 L274.3,156.0 L279.4,156.0 L284.5,156.0 L289.6,156.0 L294.8,156.0 L299.9,156.0 L305.0,156.0 L310.1,156.0 L315.2,156.0 L320.3,156.0 L325.5,156.0 L330.6,156.0 L335.7,156.0 L340.8,156.0 L345.9,156.0 L348.0,156.0"/>
+<line class="cross" y1="12" y2="156"/>
+</svg>
+<div class="tip" hidden></div>
+</figure>
+<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[49.1,54.2,59.4,64.5,69.6,74.7,79.8,84.9,90.1,95.2,100.3,105.4,110.5,115.7,120.8,125.9,131.0,136.1,141.2,146.4,151.5,156.6,161.7,166.8,171.9,177.1,182.2,187.3,192.4,197.5,202.6,207.8,212.9,218.0,223.1,228.2,233.3,238.5,243.6,248.7,253.8,258.9,264.1,269.2,274.3,279.4,284.5,289.6,294.8,299.9,305.0,310.1,315.2,320.3,325.5,330.6,335.7,340.8,345.9,348.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.1s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.3s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.4s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.5s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.0s&quot;],&quot;width&quot;:360,&quot;series&quot;:[{&quot;name&quot;:&quot;p50&quot;,&quot;slot&quot;:1,&quot;values&quot;:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,&quot;1.02ms&quot;,&quot;1.13ms&quot;,&quot;1.06ms&quot;,&quot;1.04ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.11ms&quot;,&quot;1.02ms&quot;,&quot;1.04ms&quot;,&quot;1.00ms&quot;,&quot;1.06ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.06ms&quot;,&quot;1.02ms&quot;,&quot;1.04ms&quot;,&quot;1.04ms&quot;,&quot;1.04ms&quot;,&quot;1.04ms&quot;,&quot;1.04ms&quot;,&quot;1.02ms&quot;,&quot;1.02ms&quot;,&quot;1.02ms&quot;,&quot;1.00ms&quot;,&quot;1.02ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.02ms&quot;,&quot;1.02ms&quot;,&quot;1.02ms&quot;]},{&quot;name&quot;:&quot;p95&quot;,&quot;slot&quot;:2,&quot;values&quot;:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,&quot;4.15ms&quot;,&quot;1.22ms&quot;,&quot;1.47ms&quot;,&quot;1.20ms&quot;,&quot;1.65ms&quot;,&quot;1.56ms&quot;,&quot;1.44ms&quot;,&quot;1.56ms&quot;,&quot;1.44ms&quot;,&quot;1.13ms&quot;,&quot;1.62ms&quot;,&quot;1.22ms&quot;,&quot;1.25ms&quot;,&quot;1.44ms&quot;,&quot;1.47ms&quot;,&quot;1.35ms&quot;,&quot;1.47ms&quot;,&quot;1.53ms&quot;,&quot;1.47ms&quot;,&quot;1.53ms&quot;,&quot;1.56ms&quot;,&quot;1.83ms&quot;,&quot;1.62ms&quot;,&quot;1.44ms&quot;,&quot;1.56ms&quot;,&quot;1.56ms&quot;,&quot;1.38ms&quot;,&quot;1.56ms&quot;,&quot;1.59ms&quot;,&quot;1.44ms&quot;]},{&quot;name&quot;:&quot;p99&quot;,&quot;slot&quot;:3,&quot;values&quot;:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,&quot;4.15ms&quot;,&quot;1.22ms&quot;,&quot;1.47ms&quot;,&quot;1.20ms&quot;,&quot;1.75ms&quot;,&quot;1.59ms&quot;,&quot;1.53ms&quot;,&quot;1.56ms&quot;,&quot;1.65ms&quot;,&quot;1.18ms&quot;,&quot;1.62ms&quot;,&quot;1.22ms&quot;,&quot;1.47ms&quot;,&quot;1.69ms&quot;,&quot;2.10ms&quot;,&quot;1.56ms&quot;,&quot;1.62ms&quot;,&quot;2.06ms&quot;,&quot;1.94ms&quot;,&quot;1.94ms&quot;,&quot;1.94ms&quot;,&quot;2.10ms&quot;,&quot;2.10ms&quot;,&quot;1.75ms&quot;,&quot;1.90ms&quot;,&quot;2.02ms&quot;,&quot;1.69ms&quot;,&quot;1.59ms&quot;,&quot;1.94ms&quot;,&quot;1.56ms&quot;]}]}">
+<figcaption><b>broadcast.ack</b><span><i class="key k1"></i>p50</span><span><i class="key k2"></i>p95</span><span><i class="key k3"></i>p99</span></figcaption>
+<svg viewBox="0 0 360 180" role="img" aria-label="broadcast.ack">
+<line class="axis" x1="44" x2="348" y1="156.0" y2="156.0"/><text x="38" y="156.0" dy="0.32em" text-anchor="end">0</text>
+<line class="grid" x1="44" x2="348" y1="108.0" y2="108.0"/><text x="38" y="108.0" dy="0.32em" text-anchor="end">2ms</text>
+<line class="grid" x1="44" x2="348" y1="60.0" y2="60.0"/><text x="38" y="60.0" dy="0.32em" text-anchor="end">4ms</text>
+<line class="grid" x1="44" x2="348" y1="12.0" y2="12.0"/><text x="38" y="12.0" dy="0.32em" text-anchor="end">6ms</text>
+<text x="44.0" y="174" text-anchor="middle">0s</text>
+<text x="120.0" y="174" text-anchor="middle">15s</text>
+<text x="196.0" y="174" text-anchor="middle">30s</text>
+<text x="272.0" y="174" text-anchor="middle">45s</text>
+<text x="348.0" y="174" text-anchor="middle">1m</text>
+<path class="line s1" d="M202.6,131.5 L207.8,128.9 L212.9,130.5 L218.0,131.0 L223.1,129.9 L228.2,130.5 L233.3,129.4 L238.5,131.5 L243.6,131.0 L248.7,131.9 L253.8,130.5 L258.9,129.9 L264.1,130.5 L269.2,130.5 L274.3,131.5 L279.4,131.0 L284.5,131.0 L289.6,131.0 L294.8,131.0 L299.9,131.0 L305.0,131.5 L310.1,131.5 L315.2,131.5 L320.3,131.9 L325.5,131.5 L330.6,129.9 L335.7,130.5 L340.8,131.5 L345.9,131.5 L348.0,131.5"/>
+<path class="line s2" d="M202.6,56.5 L207.8,126.6 L212.9,120.8 L218.0,127.2 L223.1,116.3 L228.2,118.6 L233.3,121.5 L238.5,118.6 L243.6,121.5 L248.7,128.9 L253.8,117.1 L258.9,126.6 L264.1,126.0 L269.2,121.5 L274.3,120.8 L279.4,123.5 L284.5,120.8 L289.6,119.4 L294.8,120.8 L299.9,119.4 L305.0,118.6 L310.1,112.2 L315.2,117.1 L320.3,121.5 L325.5,118.6 L330.6,118.6 L335.7,122.9 L340.8,118.6 L345.9,117.9 L348.0,121.5"/>
+<path class="line s3" d="M202.6,56.5 L207.8,126.6 L212.9,120.8 L218.0,127.2 L223.1,113.9 L228.2,117.9 L233.3,119.4 L238.5,118.6 L243.6,116.3 L248.7,127.8 L253.8,117.1 L258.9,126.6 L264.1,120.8 L269.2,115.5 L274.3,105.6 L279.4,118.6 L284.5,117.1 L289.6,106.6 L294.8,109.5 L299.9,109.5 L305.0,109.5 L310.1,105.6 L315.2,105.6 L320.3,113.9 L325.5,110.4 L330.6,107.6 L335.7,115.5 L340.8,117.9 L345.9,109.5 L348.0,118.6"/>
+<line class="cross" y1="12" y2="156"/>
+</svg>
+<div class="tip" hidden></div>
+</figure>
+<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[49.1,54.2,59.4,64.5,69.6,74.7,79.8,84.9,90.1,95.2,100.3,105.4,110.5,115.7,120.8,125.9,131.0,136.1,141.2,146.4,151.5,156.6,161.7,166.8,171.9,177.1,182.2,187.3,192.4,197.5,202.6,207.8,212.9,218.0,223.1,228.2,233.3,238.5,243.6,248.7,253.8,258.9,264.1,269.2,274.3,279.4,284.5,289.6,294.8,299.9,305.0,310.1,315.2,320.3,325.5,330.6,335.7,340.8,345.9,348.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.1s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.3s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.4s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.5s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.0s&quot;],&quot;width&quot;:360,&quot;series&quot;:[{&quot;name&quot;:&quot;p50&quot;,&quot;slot&quot;:1,&quot;values&quot;:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,&quot;1.11ms&quot;,&quot;1.18ms&quot;,&quot;1.15ms&quot;,&quot;1.09ms&quot;,&quot;1.13ms&quot;,&quot;1.11ms&quot;,&quot;1.15ms&quot;,&quot;1.06ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.13ms&quot;,&quot;1.13ms&quot;,&quot;1.11ms&quot;,&quot;1.11ms&quot;,&quot;1.09ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.09ms&quot;,&quot;1.11ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.06ms&quot;,&quot;1.09ms&quot;,&quot;1.13ms&quot;,&quot;1.11ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.06ms&quot;]},{&quot;name&quot;:&quot;p95&quot;,&quot;slot&quot;:2,&quot;values&quot;:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,&quot;4.23ms&quot;,&quot;1.27ms&quot;,&quot;1.50ms&quot;,&quot;1.25ms&quot;,&quot;1.69ms&quot;,&quot;1.62ms&quot;,&quot;1.50ms&quot;,&quot;1.62ms&quot;,&quot;1.53ms&quot;,&quot;1.18ms&quot;,&quot;1.65ms&quot;,&quot;1.27ms&quot;,&quot;1.30ms&quot;,&quot;1.53ms&quot;,&quot;1.50ms&quot;,&quot;1.50ms&quot;,&quot;1.53ms&quot;,&quot;1.56ms&quot;,&quot;1.56ms&quot;,&quot;1.56ms&quot;,&quot;1.59ms&quot;,&quot;1.90ms&quot;,&quot;1.69ms&quot;,&quot;1.50ms&quot;,&quot;1.62ms&quot;,&quot;1.62ms&quot;,&quot;1.44ms&quot;,&quot;1.59ms&quot;,&quot;1.65ms&quot;,&quot;1.47ms&quot;]},{&quot;name&quot;:&quot;p99&quot;,&quot;slot&quot;:3,&quot;values&quot;:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,&quot;4.23ms&quot;,&quot;1.27ms&quot;,&quot;1.50ms&quot;,&quot;1.25ms&quot;,&quot;1.83ms&quot;,&quot;1.65ms&quot;,&quot;1.59ms&quot;,&quot;1.62ms&quot;,&quot;1.69ms&quot;,&quot;1.22ms&quot;,&quot;1.69ms&quot;,&quot;1.27ms&quot;,&quot;1.50ms&quot;,&quot;1.72ms&quot;,&quot;2.14ms&quot;,&quot;1.59ms&quot;,&quot;1.65ms&quot;,&quot;2.10ms&quot;,&quot;1.98ms&quot;,&quot;2.02ms&quot;,&quot;1.98ms&quot;,&quot;2.19ms&quot;,&quot;2.14ms&quot;,&quot;1.83ms&quot;,&quot;1.98ms&quot;,&quot;2.14ms&quot;,&quot;1.72ms&quot;,&quot;1.62ms&quot;,&quot;1.98ms&quot;,&quot;1.62ms&quot;]}]}">
+<figcaption><b>broadcast.roundtrip</b><span><i class="key k1"></i>p50</span><span><i class="key k2"></i>p95</span><span><i class="key k3"></i>p99</span></figcaption>
+<svg viewBox="0 0 360 180" role="img" aria-label="broadcast.roundtrip">
+<line class="axis" x1="44" x2="348" y1="156.0" y2="156.0"/><text x="38" y="156.0" dy="0.32em" text-anchor="end">0</text>
+<line class="grid" x1="44" x2="348" y1="108.0" y2="108.0"/><text x="38" y="108.0" dy="0.32em" text-anchor="end">2ms</text>
+<line class="grid" x1="44" x2="348" y1="60.0" y2="60.0"/><text x="38" y="60.0" dy="0.32em" text-anchor="end">4ms</text>
+<line class="grid" x1="44" x2="348" y1="12.0" y2="12.0"/><text x="38" y="12.0" dy="0.32em" text-anchor="end">6ms</text>
+<text x="44.0" y="174" text-anchor="middle">0s</text>
+<text x="120.0" y="174" text-anchor="middle">15s</text>
+<text x="196.0" y="174" text-anchor="middle">30s</text>
+<text x="272.0" y="174" text-anchor="middle">45s</text>
+<text x="348.0" y="174" text-anchor="middle">1m</text>
+<path class="line s1" d="M202.6,129.4 L207.8,127.8 L212.9,128.3 L218.0,129.9 L223.1,128.9 L228.2,129.4 L233.3,128.3 L238.5,130.5 L243.6,129.9 L248.7,130.5 L253.8,128.9 L258.9,128.9 L264.1,129.4 L269.2,129.4 L274.3,129.9 L279.4,129.9 L284.5,130.5 L289.6,129.9 L294.8,129.4 L299.9,129.9 L305.0,130.5 L310.1,129.9 L315.2,130.5 L320.3,130.5 L325.5,129.9 L330.6,128.9 L335.7,129.4 L340.8,129.9 L345.9,130.5 L348.0,130.5"/>
+<path class="line s2" d="M202.6,54.5 L207.8,125.4 L212.9,120.1 L218.0,126.0 L223.1,115.5 L228.2,117.1 L233.3,120.1 L238.5,117.1 L243.6,119.4 L248.7,127.8 L253.8,116.3 L258.9,125.4 L264.1,124.8 L269.2,119.4 L274.3,120.1 L279.4,120.1 L284.5,119.4 L289.6,118.6 L294.8,118.6 L299.9,118.6 L305.0,117.9 L310.1,110.4 L315.2,115.5 L320.3,120.1 L325.5,117.1 L330.6,117.1 L335.7,121.5 L340.8,117.9 L345.9,116.3 L348.0,120.8"/>
+<path class="line s3" d="M202.6,54.5 L207.8,125.4 L212.9,120.1 L218.0,126.0 L223.1,112.2 L228.2,116.3 L233.3,117.9 L238.5,117.1 L243.6,115.5 L248.7,126.6 L253.8,115.5 L258.9,125.4 L264.1,120.1 L269.2,114.7 L274.3,104.6 L279.4,117.9 L284.5,116.3 L289.6,105.6 L294.8,108.5 L299.9,107.6 L305.0,108.5 L310.1,103.5 L315.2,104.6 L320.3,112.2 L325.5,108.5 L330.6,104.6 L335.7,114.7 L340.8,117.1 L345.9,108.5 L348.0,117.1"/>
+<line class="cross" y1="12" y2="156"/>
+</svg>
+<div class="tip" hidden></div>
+</figure>
+<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[49.1,54.2,59.4,64.5,69.6,74.7,79.8,84.9,90.1,95.2,100.3,105.4,110.5,115.7,120.8,125.9,131.0,136.1,141.2,146.4,151.5,156.6,161.7,166.8,171.9,177.1,182.2,187.3,192.4,197.5,202.6,207.8,212.9,218.0,223.1,228.2,233.3,238.5,243.6,248.7,253.8,258.9,264.1,269.2,274.3,279.4,284.5,289.6,294.8,299.9,305.0,310.1,315.2,320.3,325.5,330.6,335.7,340.8,345.9,348.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.1s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.3s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.4s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.5s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.0s&quot;],&quot;width&quot;:360,&quot;series&quot;:[{&quot;name&quot;:&quot;p50&quot;,&quot;slot&quot;:1,&quot;values&quot;:[&quot;1.72ms&quot;,&quot;1.65ms&quot;,&quot;1.65ms&quot;,&quot;1.69ms&quot;,&quot;1.75ms&quot;,&quot;1.72ms&quot;,&quot;1.75ms&quot;,&quot;1.75ms&quot;,&quot;1.72ms&quot;,&quot;1.98ms&quot;,&quot;1.86ms&quot;,&quot;1.75ms&quot;,&quot;1.98ms&quot;,&quot;1.83ms&quot;,&quot;1.90ms&quot;,&quot;1.86ms&quot;,&quot;1.90ms&quot;,&quot;1.65ms&quot;,&quot;1.75ms&quot;,&quot;1.69ms&quot;,&quot;1.69ms&quot;,&quot;1.69ms&quot;,&quot;1.83ms&quot;,&quot;1.75ms&quot;,&quot;1.83ms&quot;,&quot;1.75ms&quot;,&quot;1.69ms&quot;,&quot;1.90ms&quot;,&quot;1.83ms&quot;,&quot;1.83ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},{&quot;name&quot;:&quot;p95&quot;,&quot;slot&quot;:2,&quot;values&quot;:[&quot;15.22ms&quot;,&quot;2.37ms&quot;,&quot;3.33ms&quot;,&quot;2.95ms&quot;,&quot;4.87ms&quot;,&quot;3.20ms&quot;,&quot;2.67ms&quot;,&quot;3.33ms&quot;,&quot;3.46ms&quot;,&quot;3.40ms&quot;,&quot;3.33ms&quot;,&quot;3.13ms&quot;,&quot;3.07ms&quot;,&quot;3.01ms&quot;,&quot;3.20ms&quot;,&quot;2.89ms&quot;,&quot;3.40ms&quot;,&quot;2.52ms&quot;,&quot;2.95ms&quot;,&quot;3.07ms&quot;,&quot;3.07ms&quot;,&quot;3.13ms&quot;,&quot;3.13ms&quot;,&quot;2.52ms&quot;,&quot;3.07ms&quot;,&quot;2.42ms&quot;,&quot;2.42ms&quot;,&quot;3.01ms&quot;,&quot;3.07ms&quot;,&quot;3.07ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},{&quot;name&quot;:&quot;p99&quot;,&quot;slot&quot;:3,&quot;values&quot;:[&quot;16.16ms&quot;,&quot;2.95ms&quot;,&quot;5.71ms&quot;,&quot;3.40ms&quot;,&quot;6.84ms&quot;,&quot;3.61ms&quot;,&quot;3.07ms&quot;,&quot;3.75ms&quot;,&quot;4.77ms&quot;,&quot;5.83ms&quot;,&quot;3.53ms&quot;,&quot;3.40ms&quot;,&quot;3.75ms&quot;,&quot;3.53ms&quot;,&quot;3.40ms&quot;,&quot;3.26ms&quot;,&quot;3.53ms&quot;,&quot;3.33ms&quot;,&quot;3.53ms&quot;,&quot;6.57ms&quot;,&quot;3.07ms&quot;,&quot;3.46ms&quot;,&quot;3.40ms&quot;,&quot;3.53ms&quot;,&quot;3.53ms&quot;,&quot;3.20ms&quot;,&quot;2.78ms&quot;,&quot;3.33ms&quot;,&quot;3.13ms&quot;,&quot;3.26ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]}]}">
+<figcaption><b>channel.join</b><span><i class="key k1"></i>p50</span><span><i class="key k2"></i>p95</span><span><i class="key k3"></i>p99</span></figcaption>
+<svg viewBox="0 0 360 180" role="img" aria-label="channel.join">
+<line class="axis" x1="44" x2="348" y1="156.0" y2="156.0"/><text x="38" y="156.0" dy="0.32em" text-anchor="end">0</text>
+<line class="grid" x1="44" x2="348" y1="120.0" y2="120.0"/><text x="38" y="120.0" dy="0.32em" text-anchor="end">5ms</text>
+<line class="grid" x1="44" x2="348" y1="84.0" y2="84.0"/><text x="38" y="84.0" dy="0.32em" text-anchor="end">10ms</text>
+<line class="grid" x1="44" x2="348" y1="48.0" y2="48.0"/><text x="38" y="48.0" dy="0.32em" text-anchor="end">15ms</text>
+<line class="grid" x1="44" x2="348" y1="12.0" y2="12.0"/><text x="38" y="12.0" dy="0.32em" text-anchor="end">20ms</text>
+<text x="44.0" y="174" text-anchor="middle">0s</text>
+<text x="120.0" y="174" text-anchor="middle">15s</text>
+<text x="196.0" y="174" text-anchor="middle">30s</text>
+<text x="272.0" y="174" text-anchor="middle">45s</text>
+<text x="348.0" y="174" text-anchor="middle">1m</text>
+<path class="line s1" d="M49.1,143.6 L54.2,144.1 L59.4,144.1 L64.5,143.9 L69.6,143.4 L74.7,143.6 L79.8,143.4 L84.9,143.4 L90.1,143.6 L95.2,141.8 L100.3,142.6 L105.4,143.4 L110.5,141.8 L115.7,142.8 L120.8,142.3 L125.9,142.6 L131.0,142.3 L136.1,144.1 L141.2,143.4 L146.4,143.9 L151.5,143.9 L156.6,143.9 L161.7,142.8 L166.8,143.4 L171.9,142.8 L177.1,143.4 L182.2,143.9 L187.3,142.3 L192.4,142.8 L197.5,142.8"/>
+<path class="line s2" d="M49.1,46.4 L54.2,138.9 L59.4,132.0 L64.5,134.7 L69.6,121.0 L74.7,133.0 L79.8,136.8 L84.9,132.0 L90.1,131.1 L95.2,131.6 L100.3,132.0 L105.4,133.4 L110.5,133.9 L115.7,134.3 L120.8,133.0 L125.9,135.2 L131.0,131.6 L136.1,137.9 L141.2,134.7 L146.4,133.9 L151.5,133.9 L156.6,133.4 L161.7,133.4 L166.8,137.9 L171.9,133.9 L177.1,138.6 L182.2,138.6 L187.3,134.3 L192.4,133.9 L197.5,133.9"/>
+<path class="line s3" d="M49.1,39.7 L54.2,134.7 L59.4,114.9 L64.5,131.6 L69.6,106.8 L74.7,130.0 L79.8,133.9 L84.9,129.0 L90.1,121.7 L95.2,114.0 L100.3,130.6 L105.4,131.6 L110.5,129.0 L115.7,130.6 L120.8,131.6 L125.9,132.5 L131.0,130.6 L136.1,132.0 L141.2,130.6 L146.4,108.7 L151.5,133.9 L156.6,131.1 L161.7,131.6 L166.8,130.6 L171.9,130.6 L177.1,133.0 L182.2,136.0 L187.3,132.0 L192.4,133.4 L197.5,132.5"/>
+<line class="cross" y1="12" y2="156"/>
+</svg>
+<div class="tip" hidden></div>
+</figure>
+<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[49.1,54.2,59.4,64.5,69.6,74.7,79.8,84.9,90.1,95.2,100.3,105.4,110.5,115.7,120.8,125.9,131.0,136.1,141.2,146.4,151.5,156.6,161.7,166.8,171.9,177.1,182.2,187.3,192.4,197.5,202.6,207.8,212.9,218.0,223.1,228.2,233.3,238.5,243.6,248.7,253.8,258.9,264.1,269.2,274.3,279.4,284.5,289.6,294.8,299.9,305.0,310.1,315.2,320.3,325.5,330.6,335.7,340.8,345.9,348.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.1s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.3s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.4s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.5s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.0s&quot;],&quot;width&quot;:360,&quot;series&quot;:[{&quot;name&quot;:&quot;p50&quot;,&quot;slot&quot;:1,&quot;values&quot;:[&quot;2.06ms&quot;,&quot;1.90ms&quot;,&quot;1.98ms&quot;,&quot;1.90ms&quot;,&quot;2.02ms&quot;,&quot;1.98ms&quot;,&quot;1.98ms&quot;,&quot;1.90ms&quot;,&quot;1.94ms&quot;,&quot;2.02ms&quot;,&quot;2.02ms&quot;,&quot;1.94ms&quot;,&quot;2.06ms&quot;,&quot;1.98ms&quot;,&quot;2.02ms&quot;,&quot;2.06ms&quot;,&quot;1.94ms&quot;,&quot;1.94ms&quot;,&quot;1.98ms&quot;,&quot;1.98ms&quot;,&quot;1.94ms&quot;,&quot;2.02ms&quot;,&quot;2.02ms&quot;,&quot;1.98ms&quot;,&quot;1.98ms&quot;,&quot;2.02ms&quot;,&quot;2.14ms&quot;,&quot;1.94ms&quot;,&quot;1.98ms&quot;,&quot;2.14ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},{&quot;name&quot;:&quot;p95&quot;,&quot;slot&quot;:2,&quot;values&quot;:[&quot;20.14ms&quot;,&quot;2.78ms&quot;,&quot;5.60ms&quot;,&quot;2.67ms&quot;,&quot;2.95ms&quot;,&quot;2.57ms&quot;,&quot;2.67ms&quot;,&quot;2.67ms&quot;,&quot;2.67ms&quot;,&quot;2.62ms&quot;,&quot;2.78ms&quot;,&quot;2.57ms&quot;,&quot;3.83ms&quot;,&quot;2.62ms&quot;,&quot;3.33ms&quot;,&quot;2.67ms&quot;,&quot;2.72ms&quot;,&quot;2.72ms&quot;,&quot;2.57ms&quot;,&quot;2.57ms&quot;,&quot;2.67ms&quot;,&quot;2.52ms&quot;,&quot;2.62ms&quot;,&quot;2.52ms&quot;,&quot;2.62ms&quot;,&quot;2.57ms&quot;,&quot;3.01ms&quot;,&quot;2.42ms&quot;,&quot;2.95ms&quot;,&quot;2.84ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},{&quot;name&quot;:&quot;p99&quot;,&quot;slot&quot;:3,&quot;values&quot;:[&quot;21.38ms&quot;,&quot;5.71ms&quot;,&quot;6.19ms&quot;,&quot;5.60ms&quot;,&quot;6.98ms&quot;,&quot;2.78ms&quot;,&quot;5.49ms&quot;,&quot;5.38ms&quot;,&quot;2.78ms&quot;,&quot;2.95ms&quot;,&quot;3.07ms&quot;,&quot;2.67ms&quot;,&quot;5.38ms&quot;,&quot;2.72ms&quot;,&quot;5.60ms&quot;,&quot;2.89ms&quot;,&quot;2.95ms&quot;,&quot;3.33ms&quot;,&quot;2.72ms&quot;,&quot;6.98ms&quot;,&quot;3.07ms&quot;,&quot;2.62ms&quot;,&quot;3.07ms&quot;,&quot;2.67ms&quot;,&quot;2.84ms&quot;,&quot;2.67ms&quot;,&quot;3.75ms&quot;,&quot;2.57ms&quot;,&quot;3.75ms&quot;,&quot;6.57ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]}]}">
+<figcaption><b>ws.connect</b><span><i class="key k1"></i>p50</span><span><i class="key k2"></i>p95</span><span><i class="key k3"></i>p99</span></figcaption>
+<svg viewBox="0 0 360 180" role="img" aria-label="ws.connect">
+<line class="axis" x1="44" x2="348" y1="156.0" y2="156.0"/><text x="38" y="156.0" dy="0.32em" text-anchor="end">0</text>
+<line class="grid" x1="44" x2="348" y1="108.0" y2="108.0"/><text x="38" y="108.0" dy="0.32em" text-anchor="end">10ms</text>
+<line class="grid" x1="44" x2="348" y1="60.0" y2="60.0"/><text x="38" y="60.0" dy="0.32em" text-anchor="end">20ms</text>
+<line class="grid" x1="44" x2="348" y1="12.0" y2="12.0"/><text x="38" y="12.0" dy="0.32em" text-anchor="end">30ms</text>
+<text x="44.0" y="174" text-anchor="middle">0s</text>
+<text x="120.0" y="174" text-anchor="middle">15s</text>
+<text x="196.0" y="174" text-anchor="middle">30s</text>
+<text x="272.0" y="174" text-anchor="middle">45s</text>
+<text x="348.0" y="174" text-anchor="middle">1m</text>
+<path class="line s1" d="M49.1,146.1 L54.2,146.9 L59.4,146.5 L64.5,146.9 L69.6,146.3 L74.7,146.5 L79.8,146.5 L84.9,146.9 L90.1,146.7 L95.2,146.3 L100.3,146.3 L105.4,146.7 L110.5,146.1 L115.7,146.5 L120.8,146.3 L125.9,146.1 L131.0,146.7 L136.1,146.7 L141.2,146.5 L146.4,146.5 L151.5,146.7 L156.6,146.3 L161.7,146.3 L166.8,146.5 L171.9,146.5 L177.1,146.3 L182.2,145.7 L187.3,146.7 L192.4,146.5 L197.5,145.7"/>
+<path class="line s2" d="M49.1,59.3 L54.2,142.7 L59.4,129.1 L64.5,143.2 L69.6,141.8 L74.7,143.7 L79.8,143.2 L84.9,143.2 L90.1,143.2 L95.2,143.4 L100.3,142.7 L105.4,143.7 L110.5,137.6 L115.7,143.4 L120.8,140.0 L125.9,143.2 L131.0,142.9 L136.1,142.9 L141.2,143.7 L146.4,143.7 L151.5,143.2 L156.6,143.9 L161.7,143.4 L166.8,143.9 L171.9,143.4 L177.1,143.7 L182.2,141.5 L187.3,144.4 L192.4,141.8 L197.5,142.4"/>
+<path class="line s3" d="M49.1,53.4 L54.2,128.6 L59.4,126.3 L64.5,129.1 L69.6,122.5 L74.7,142.7 L79.8,129.7 L84.9,130.2 L90.1,142.7 L95.2,141.8 L100.3,141.3 L105.4,143.2 L110.5,130.2 L115.7,142.9 L120.8,129.1 L125.9,142.1 L131.0,141.8 L136.1,140.0 L141.2,142.9 L146.4,122.5 L151.5,141.3 L156.6,143.4 L161.7,141.3 L166.8,143.2 L171.9,142.4 L177.1,143.2 L182.2,138.0 L187.3,143.7 L192.4,138.0 L197.5,124.5"/>
+<line class="cross" y1="12" y2="156"/>
+</svg>
+<div class="tip" hidden></div>
+</figure>
+</div>
+<h3>Metrics</h3>
+<div class="table"><table>
+<thead><tr><th>metric</th><th>count</th><th>rate/s</th><th>mean</th><th>p50</th><th>p90</th><th>p95</th><th>p99</th><th>max</th></tr></thead>
+<tbody>
+<tr><td>broadcast.ack</td><td>1,479</td><td>24.65</td><td>1.09ms</td><td>1.04ms</td><td>1.38ms</td><td>1.53ms</td><td>1.90ms</td><td>4.15ms</td></tr>
+<tr><td>broadcast.roundtrip</td><td>1,479</td><td>24.65</td><td>1.14ms</td><td>1.09ms</td><td>1.44ms</td><td>1.59ms</td><td>1.98ms</td><td>4.23ms</td></tr>
+<tr><td>channel.join</td><td>3,000</td><td>50.00</td><td>1.96ms</td><td>1.75ms</td><td>2.72ms</td><td>3.13ms</td><td>4.58ms</td><td>16.16ms</td></tr>
+<tr><td>channel.messages</td><td>148,904</td><td>2481.69</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>ws.connect</td><td>3,000</td><td>50.00</td><td>2.16ms</td><td>1.98ms</td><td>2.57ms</td><td>2.72ms</td><td>5.60ms</td><td>21.38ms</td></tr>
+</tbody></table></div>
+<h3>Thresholds</h3>
+<div class="table"><table>
+<thead><tr><th>metric</th><th>stat</th><th>limit</th><th>value</th><th>status</th></tr></thead>
+<tbody>
+<tr><td>channel.join</td><td>p95</td><td>1.00s</td><td>3.13ms</td><td><span class="status passed">pass</span></td></tr>
+<tr><td>broadcast.roundtrip</td><td>p95</td><td>1.00s</td><td>1.59ms</td><td><span class="status passed">pass</span></td></tr>
+<tr><td>iteration.errors</td><td>count</td><td>0</td><td>0</td><td><span class="status passed">pass</span></td></tr>
+</tbody></table></div>
+<details><summary>Timeline</summary>
+<div class="table"><table>
+<thead><tr><th>time</th><th>VUs</th><th>iterations/s</th><th>errors/s</th><th>broadcast.ack p95</th><th>broadcast.roundtrip p95</th><th>channel.join p95</th><th>ws.connect p95</th></tr></thead>
+<tbody>
+<tr><td>1.0s</td><td>101</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>15.22ms</td><td>20.14ms</td></tr>
+<tr><td>2.0s</td><td>202</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>2.37ms</td><td>2.78ms</td></tr>
+<tr><td>3.0s</td><td>303</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>3.33ms</td><td>5.60ms</td></tr>
+<tr><td>4.0s</td><td>404</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>2.95ms</td><td>2.67ms</td></tr>
+<tr><td>5.1s</td><td>505</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>4.87ms</td><td>2.95ms</td></tr>
+<tr><td>6.1s</td><td>606</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>3.20ms</td><td>2.57ms</td></tr>
+<tr><td>7.1s</td><td>707</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>2.67ms</td><td>2.67ms</td></tr>
+<tr><td>8.1s</td><td>808</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>3.33ms</td><td>2.67ms</td></tr>
+<tr><td>9.1s</td><td>909</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>3.46ms</td><td>2.67ms</td></tr>
+<tr><td>10.1s</td><td>1,010</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>3.40ms</td><td>2.62ms</td></tr>
+<tr><td>11.1s</td><td>1,111</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>3.33ms</td><td>2.78ms</td></tr>
+<tr><td>12.1s</td><td>1,212</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>3.13ms</td><td>2.57ms</td></tr>
+<tr><td>13.1s</td><td>1,313</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>3.07ms</td><td>3.83ms</td></tr>
+<tr><td>14.1s</td><td>1,414</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>3.01ms</td><td>2.62ms</td></tr>
+<tr><td>15.2s</td><td>1,515</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>3.20ms</td><td>3.33ms</td></tr>
+<tr><td>16.2s</td><td>1,616</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>2.89ms</td><td>2.67ms</td></tr>
+<tr><td>17.2s</td><td>1,717</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>3.40ms</td><td>2.72ms</td></tr>
+<tr><td>18.2s</td><td>1,818</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>2.52ms</td><td>2.72ms</td></tr>
+<tr><td>19.2s</td><td>1,919</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>2.95ms</td><td>2.57ms</td></tr>
+<tr><td>20.2s</td><td>2,020</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>3.07ms</td><td>2.57ms</td></tr>
+<tr><td>21.2s</td><td>2,121</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>3.07ms</td><td>2.67ms</td></tr>
+<tr><td>22.2s</td><td>2,222</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>3.13ms</td><td>2.52ms</td></tr>
+<tr><td>23.2s</td><td>2,323</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>3.13ms</td><td>2.62ms</td></tr>
+<tr><td>24.2s</td><td>2,424</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>2.52ms</td><td>2.52ms</td></tr>
+<tr><td>25.3s</td><td>2,525</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>3.07ms</td><td>2.62ms</td></tr>
+<tr><td>26.3s</td><td>2,626</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>2.42ms</td><td>2.57ms</td></tr>
+<tr><td>27.3s</td><td>2,727</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>2.42ms</td><td>3.01ms</td></tr>
+<tr><td>28.3s</td><td>2,828</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>3.01ms</td><td>2.42ms</td></tr>
+<tr><td>29.3s</td><td>2,929</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>3.07ms</td><td>2.95ms</td></tr>
+<tr><td>30.3s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>3.07ms</td><td>2.84ms</td></tr>
+<tr><td>31.3s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>4.15ms</td><td>4.23ms</td><td>–</td><td>–</td></tr>
+<tr><td>32.3s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.22ms</td><td>1.27ms</td><td>–</td><td>–</td></tr>
+<tr><td>33.3s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.47ms</td><td>1.50ms</td><td>–</td><td>–</td></tr>
+<tr><td>34.3s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.20ms</td><td>1.25ms</td><td>–</td><td>–</td></tr>
+<tr><td>35.4s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.65ms</td><td>1.69ms</td><td>–</td><td>–</td></tr>
+<tr><td>36.4s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.56ms</td><td>1.62ms</td><td>–</td><td>–</td></tr>
+<tr><td>37.4s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.44ms</td><td>1.50ms</td><td>–</td><td>–</td></tr>
+<tr><td>38.4s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.56ms</td><td>1.62ms</td><td>–</td><td>–</td></tr>
+<tr><td>39.4s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.44ms</td><td>1.53ms</td><td>–</td><td>–</td></tr>
+<tr><td>40.4s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.13ms</td><td>1.18ms</td><td>–</td><td>–</td></tr>
+<tr><td>41.4s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.62ms</td><td>1.65ms</td><td>–</td><td>–</td></tr>
+<tr><td>42.4s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.22ms</td><td>1.27ms</td><td>–</td><td>–</td></tr>
+<tr><td>43.4s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.25ms</td><td>1.30ms</td><td>–</td><td>–</td></tr>
+<tr><td>44.4s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.44ms</td><td>1.53ms</td><td>–</td><td>–</td></tr>
+<tr><td>45.5s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.47ms</td><td>1.50ms</td><td>–</td><td>–</td></tr>
+<tr><td>46.5s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.35ms</td><td>1.50ms</td><td>–</td><td>–</td></tr>
+<tr><td>47.5s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.47ms</td><td>1.53ms</td><td>–</td><td>–</td></tr>
+<tr><td>48.5s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.53ms</td><td>1.56ms</td><td>–</td><td>–</td></tr>
+<tr><td>49.5s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.47ms</td><td>1.56ms</td><td>–</td><td>–</td></tr>
+<tr><td>50.5s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.53ms</td><td>1.56ms</td><td>–</td><td>–</td></tr>
+<tr><td>51.5s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.56ms</td><td>1.59ms</td><td>–</td><td>–</td></tr>
+<tr><td>52.5s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.83ms</td><td>1.90ms</td><td>–</td><td>–</td></tr>
+<tr><td>53.5s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.62ms</td><td>1.69ms</td><td>–</td><td>–</td></tr>
+<tr><td>54.5s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.44ms</td><td>1.50ms</td><td>–</td><td>–</td></tr>
+<tr><td>55.6s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.56ms</td><td>1.62ms</td><td>–</td><td>–</td></tr>
+<tr><td>56.6s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.56ms</td><td>1.62ms</td><td>–</td><td>–</td></tr>
+<tr><td>57.6s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.38ms</td><td>1.44ms</td><td>–</td><td>–</td></tr>
+<tr><td>58.6s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.56ms</td><td>1.59ms</td><td>–</td><td>–</td></tr>
+<tr><td>59.6s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.59ms</td><td>1.65ms</td><td>–</td><td>–</td></tr>
+<tr><td>60.0s</td><td>3,000</td><td>0.00</td><td>0.00</td><td>1.44ms</td><td>1.47ms</td><td>–</td><td>–</td></tr>
+</tbody></table></div>
+</details>
+</section>
+</main>
+<script>
+const setupCharts = (root) => {
+for (const chart of root.querySelectorAll(".chart")) {
+  const data = JSON.parse(chart.dataset.points);
+  const svg = chart.querySelector("svg");
+  const cross = chart.querySelector(".cross");
+  const tip = chart.querySelector(".tip");
+  let index = null;
+
+  const show = (i) => {
+    index = i;
+    cross.setAttribute("x1", data.x[i]);
+    cross.setAttribute("x2", data.x[i]);
+    cross.style.display = "block";
+
+    const at = document.createElement("div");
+    at.className = "at";
+    at.textContent = data.at[i];
+    tip.replaceChildren(at);
+
+    for (const series of data.series) {
+      const row = document.createElement("div");
+      const key = document.createElement("span");
+      const value = document.createElement("strong");
+      const name = document.createElement("span");
+      key.className = "key k" + series.slot;
+      value.textContent = series.values[i] ?? "\u2013";
+      name.textContent = series.name;
+      row.append(key, value, name);
+      tip.append(row);
+    }
+
+    tip.hidden = false;
+    const x = svg.offsetLeft + (data.x[i] / data.width) * svg.clientWidth;
+    const right = x + 12 + tip.offsetWidth <= chart.clientWidth;
+    tip.style.left = Math.max(right ? x + 12 : x - 12 - tip.offsetWidth, 0) + "px";
+  };
+
+  const hide = () => {
+    index = null;
+    cross.style.display = "none";
+    tip.hidden = true;
+  };
+
+  svg.addEventListener("pointermove", (event) => {
+    const box = svg.getBoundingClientRect();
+    const x = ((event.clientX - box.left) / box.width) * data.width;
+    let nearest = 0;
+    data.x.forEach((point, i) => {
+      if (Math.abs(point - x) < Math.abs(data.x[nearest] - x)) nearest = i;
+    });
+    show(nearest);
+  });
+
+  svg.addEventListener("pointerleave", hide);
+  chart.addEventListener("blur", hide);
+  chart.addEventListener("keydown", (event) => {
+    const last = data.x.length - 1;
+    if (event.key === "ArrowLeft") show(index === null ? last : Math.max(index - 1, 0));
+    else if (event.key === "ArrowRight") show(index === null ? 0 : Math.min(index + 1, last));
+    else if (event.key === "Escape") hide();
+    else return;
+    event.preventDefault();
+  });
+}
+};
+
+setupCharts(document);
+</script>
+</body>
+</html>

@@ -11,6 +11,10 @@ yourself. The goal is a million. So far, one 4-core server has held
     chat room, who join and send a message every 30 to 60 seconds.
     `live.exs` is people on a LiveView page, who click a button every 30 to
     60 seconds.
+    `realtime.exs` is people in group chats on Supabase Realtime.
+  * [`realtime/`](realtime/) starts the official Supabase Realtime release.
+  * [`proof/`](proof/) records real pages during a run, including a real
+    `realtime-js` client in Firefox.
   * [`aws/`](aws/) starts the machines, runs a scenario and tears it all
     down.
   * [`results/`](results/) has what each run measured.
@@ -86,6 +90,52 @@ EventBridge schedule terminates them all 5 minutes later in case one can't.
 `./status.sh` lists what's running.
 
 ## Results
+
+### 50,000 Supabase Realtime users on a 4-core server (October 31, 2026)
+
+Stock Phoenix tells you what Phoenix can do. This one is a real product: the
+official `supabase/realtime:v2.150.2` release, self-hosted on one r7g.xlarge (4
+cores, 32 GB), with Postgres on the same machine and three r7g.xlarge for the
+load. Each channel has 100 users, and each user sends a broadcast every 30 to 60
+seconds that everyone in the channel receives. The write-up is in the
+[case study](../../guides/supabase_realtime.md).
+
+```console
+$ ZONE=ap-south-1a SERVER_TYPE=r7g.xlarge LOADERS=3 SOURCE_IPS=14 ./up.sh
+$ ./deploy.sh
+$ PAUSE=30-60 STEP_RAMP=60 ./run-realtime.sh --find-limit --start 10000 --step 10000 --up-to 120000 --hold 60s
+$ VUS=50000 RAMP=300 HOLD=600 PAUSE=30-60 PROOF_SECONDS=960 ./run-realtime.sh
+```
+
+[`20261031-realtime-find-limit`](results/20261031-realtime-find-limit):
+
+| Users | Join p95 | Round trip p95 | Errors | Server CPU | Server memory | |
+|---:|---:|---:|---:|---:|---:|---|
+| 10,000 | 5.27ms | 1.72ms | 0 | 17% | 1.8 GB | pass |
+| 20,000 | 5.94ms | 2.02ms | 0 | 33% | 2.6 GB | pass |
+| 30,000 | 6.31ms | 2.52ms | 0 | 50% | 3.3 GB | pass |
+| 40,000 | 8.69ms | 3.53ms | 0 | 67% | 4.0 GB | pass |
+| **50,000** | **17.16ms** | **6.44ms** | **0** | **82%** | **4.7 GB** | **pass** |
+| 60,000 | 1.06s | 75.38ms | 0 | 94% | 5.4 GB | fail |
+
+The 60,000 step failed on joins, at 1.06s against a limit of 1 second, with the
+CPU at 99.9% at its peak. Stampede counted no errors there, but Realtime's log has
+one during the step, a metrics poll timing out, and 20 more just after the run,
+from joins that timed out. There are none before 60,000. That's in
+[`realtime.log`](results/20261031-realtime-find-limit/realtime.log).
+
+[`20261031-realtime-hold-50k`](results/20261031-realtime-hold-50k) then ramped up
+over 5 minutes and held 50,000 for 10: 80.9 million messages delivered, about
+111,000 a second, with a round trip of 5.71ms at p95 and 10.62ms at p99, and no
+errors. The server held at 79% CPU and 4.7 GB, and the load machines peaked at 51%.
+Realtime's log has no errors at all, and no warnings until 50,000 users
+disconnected at once when the run ended.
+
+[`realtime-metrics.json`](results/20261031-realtime-hold-50k/realtime-metrics.json)
+is Realtime's own count, which peaked at 50,001, the users and one real browser,
+and [`sockets.log`](results/20261031-realtime-hold-50k/sockets.log) is the kernel's,
+every 10 seconds. I also recorded the dashboards, a real `realtime-js` client in
+Firefox and the terminal during both runs.
 
 The AI model server runs are in the
 [guide](https://github.com/mandar1045/stampede/blob/main/guides/llm.md#a-real-run),

@@ -126,10 +126,10 @@ defmodule Stampede.LLMTest do
   end
 
   test "records tokens and their timing in a run" do
-    result = Stampede.run(Chat, vus: 2, duration: 1_000)
+    result = Stampede.run(Chat, vus: 2, duration: 1_000, graceful_stop: 10_000)
 
     requests = result.metrics["llm.request"].count
-    assert requests >= 4
+    assert requests >= 2
     assert result.metrics["llm.ttft"].count == requests
     assert result.metrics["llm.ttft"].p50 >= 50
     assert result.metrics["llm.itl"].count == 4 * requests

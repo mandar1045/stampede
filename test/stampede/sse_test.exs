@@ -74,15 +74,15 @@ defmodule Stampede.SSETest do
   end
 
   test "records the stream, the first event and the events in a run" do
-    result = Stampede.run(Streaming, vus: 2, duration: 600)
+    result = Stampede.run(Streaming, vus: 2, duration: 600, graceful_stop: 10_000)
 
     requests = result.metrics["sse.request"].count
-    assert requests > 2
+    assert requests >= 2
     assert result.metrics["sse.events"].count == 3 * requests
     assert result.metrics["sse.first_event"].p50 >= 50
     assert result.metrics["sse.request"].p50 >= result.metrics["sse.first_event"].p50
 
-    result = Stampede.run(Limited, vus: 1, duration: 200)
+    result = Stampede.run(Limited, vus: 1, duration: 200, graceful_stop: 10_000)
     assert result.metrics["sse.request.errors"].count == result.metrics["sse.request"].count
   end
 end

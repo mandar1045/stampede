@@ -1,7 +1,7 @@
 defmodule Stampede.MixProject do
   use Mix.Project
 
-  @version "1.2.0"
+  @version "1.3.0"
   @source_url "https://github.com/mandar1045/stampede"
 
   def project do
@@ -62,6 +62,7 @@ defmodule Stampede.MixProject do
         "guides/distributed.md",
         "guides/llm.md",
         "guides/probe.md",
+        "guides/prometheus.md",
         "guides/recording.md",
         "guides/supabase_realtime.md",
         "CHANGELOG.md",
