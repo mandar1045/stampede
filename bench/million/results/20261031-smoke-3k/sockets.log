@@ -1,0 +1,77 @@
+2026-10-31T17:56:55Z
+Total: 248
+TCP:   111 (estab 24, closed 75, orphaned 0, timewait 75)
+Mem:           31486        1275       26866          89        3808       30210
+realtime 0.23% 228.9MiB / 30.75GiB
+realtime-db 1.76% 73.14MiB / 30.75GiB
+
+2026-10-31T17:57:07Z
+Total: 240
+TCP:   116 (estab 24, closed 80, orphaned 0, timewait 80)
+Mem:           31486        1115       27025          89        3809       30370
+realtime 0.14% 216.8MiB / 30.75GiB
+realtime-db 1.01% 73.58MiB / 30.75GiB
+
+2026-10-31T17:57:20Z
+Total: 236
+TCP:   96 (estab 20, closed 64, orphaned 0, timewait 64)
+Mem:           31486        1085       27054          90        3810       30400
+realtime 0.12% 217MiB / 30.75GiB
+realtime-db 0.06% 73.78MiB / 30.75GiB
+
+2026-10-31T17:57:32Z
+Total: 319
+TCP:   188 (estab 103, closed 73, orphaned 0, timewait 73)
+Mem:           31486        1081       27059          90        3810       30405
+realtime 17.84% 232.1MiB / 30.75GiB
+realtime-db 1.74% 78.24MiB / 30.75GiB
+
+2026-10-31T17:57:44Z
+Total: 1521
+TCP:   1396 (estab 1305, closed 79, orphaned 0, timewait 79)
+Mem:           31486        1199       26939          92        3814       30286
+realtime 21.32% 358.8MiB / 30.75GiB
+realtime-db 0.04% 80.5MiB / 30.75GiB
+
+2026-10-31T17:57:56Z
+Total: 2739
+TCP:   2591 (estab 2523, closed 56, orphaned 0, timewait 56)
+Mem:           31486        1289       26848          92        3815       30197
+realtime 22.21% 446MiB / 30.75GiB
+realtime-db 0.13% 80.93MiB / 30.75GiB
+
+2026-10-31T17:58:08Z
+Total: 3242
+TCP:   3082 (estab 3026, closed 44, orphaned 0, timewait 44)
+Mem:           31486        1337       26799          92        3816       30148
+realtime 11.27% 482.9MiB / 30.75GiB
+realtime-db 0.02% 80.93MiB / 30.75GiB
+
+2026-10-31T17:58:20Z
+Total: 3243
+TCP:   3078 (estab 3027, closed 39, orphaned 0, timewait 39)
+Mem:           31486        1351       26785          92        3816       30134
+realtime 25.11% 497.7MiB / 30.75GiB
+realtime-db 0.08% 81.4MiB / 30.75GiB
+
+2026-10-31T17:58:32Z
+Total: 241
+TCP:   76 (estab 25, closed 39, orphaned 0, timewait 39)
+Mem:           31486        1364       26772          92        3816       30121
+realtime 0.35% 470.2MiB / 30.75GiB
+realtime-db 0.05% 81.37MiB / 30.75GiB
+
+2026-10-31T17:58:44Z
+Total: 237
+TCP:   71 (estab 21, closed 38, orphaned 0, timewait 38)
+Mem:           31486        1308       26828          92        3816       30177
+realtime 1.00% 431.2MiB / 30.75GiB
+realtime-db 1.81% 81.31MiB / 30.75GiB
+
+2026-10-31T17:58:56Z
+Total: 237
+TCP:   70 (estab 21, closed 37, orphaned 0, timewait 37)
+Mem:           31486        1303       26834          92        3816       30183
+realtime 0.08% 427.1MiB / 30.75GiB
+realtime-db 1.76% 81.35MiB / 30.75GiB
+

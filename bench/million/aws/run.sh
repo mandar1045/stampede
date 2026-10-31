@@ -17,11 +17,14 @@ vus=${2:-1000}
 ramp=${3:-60}
 hold=${4:-60}
 stampede_args=("${@:5}")
+# NO_PROBE=1 runs without watching the app, to compare what watching costs.
 load_env="PAUSE=${PAUSE:-30-60} ${STEP_RAMP:+STEP_RAMP=$STEP_RAMP}"
 name="$(date -u +%Y%m%d-%H%M)-$scenario-$vus"
 mkdir -p "$RESULTS/$name"
 
 read -r _ _ server_public server_private _ < <(nodes server)
+probe_flag="--probe app@$server_private"
+if [ -n "${NO_PROBE:-}" ]; then probe_flag=""; fi
 mapfile -t loaders < <(nodes loader)
 [ -f "$STATE/cookie" ] || head -c 32 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' > "$STATE/cookie"
 cookie=$(cat "$STATE/cookie")
@@ -46,8 +49,9 @@ stop_old "$server_public"
 start_monitor "$server_public"
 secret=$(head -c 64 /dev/urandom | base64 -w0)
 on "$server_public" "cd stampede/bench/million/app || exit 1; MIX_ENV=prod PHX_SERVER=true PORT=4000 \
-  PHX_HOST=$server_private LOG_LEVEL=warning SECRET_KEY_BASE=$secret ELIXIR_ERL_OPTIONS='+P 10000000 $no_spin' \
-  setsid nohup mix phx.server > ~/server.log 2>&1 < /dev/null &"
+  PHX_HOST=$server_private LOG_LEVEL=warning SECRET_KEY_BASE=$secret \
+  setsid nohup elixir --name app@$server_private --cookie $cookie --erl '$erl_flags' -S mix phx.server \
+  > ~/server.log 2>&1 < /dev/null &"
 for _ in $(seq 60); do
   on "$server_public" 'ss -ltn | grep -q ":4000 "' && break
   sleep 2
@@ -81,7 +85,7 @@ on "$public" "rm -f run.log results.json report.html
   cd stampede/bench/million/load || exit 1; $load_env SOURCE_IPS=$extra SERVER=$server_private:4000 VUS=$vus RAMP=$ramp HOLD=$hold \
     setsid nohup elixir --name load@$private --cookie $cookie --erl '$erl_flags' \
     -S mix stampede.run loadtest/$scenario.exs ${nodes_flag:+--nodes $nodes_flag} \
-    ${stampede_args[*]} --out ~/results.json --html ~/report.html > ~/run.log 2>&1 < /dev/null &"
+    $probe_flag ${stampede_args[*]} --out ~/results.json --html ~/report.html > ~/run.log 2>&1 < /dev/null &"
 
 # Follows the run, a line every 30 seconds, until its summary is printed.
 sleep 20

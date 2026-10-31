@@ -66,7 +66,7 @@ defmodule Mix.Tasks.Stampede.RunTest do
     path =
       write_scenario!(tmp_dir, "Strict", """
         @impl true
-        def options, do: [duration: 100, thresholds: [{"iteration", count: 0}]]
+        def options, do: [duration: 100, graceful_stop: 10_000, thresholds: [{"iteration", count: 0}]]
 
         @impl true
         def run(_vu), do: Process.sleep(10)
@@ -99,6 +99,19 @@ defmodule Mix.Tasks.Stampede.RunTest do
     assert output =~ "Held 2 VUs, the most it was asked to try"
     assert output =~ "Wrote the badge to #{badge}"
     assert File.read!(badge) =~ ~s(aria-label="load tested: 2+ VUs")
+  end
+
+  test "watches the app's nodes with --probe", %{tmp_dir: tmp_dir} do
+    path =
+      write_scenario!(tmp_dir, "Probed", """
+        @impl true
+        def run(_vu), do: Process.sleep(20)
+      """)
+
+    args = ["--vus", "1", "--duration", "1500ms", "--probe", to_string(node()), path]
+    output = capture_io(fn -> Mix.Tasks.Stampede.Run.run(args) end)
+
+    assert output =~ ~r/\n  server\n    .* at its busiest: schedulers \d+% busy, /
   end
 
   test "raises on invalid arguments", %{tmp_dir: tmp_dir} do

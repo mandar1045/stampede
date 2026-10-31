@@ -93,6 +93,26 @@ defmodule Stampede.DashboardTest do
     assert {:error, _reason} = Stampede.HTTP.get(ctx.url <> "/")
   end
 
+  defmodule Chatting do
+    use Stampede.Scenario
+
+    @impl true
+    def run(_vu) do
+      Stampede.LLM.chat(Stampede.TestEndpoint.page_url("/v1"),
+        model: "mock",
+        messages: [],
+        max_tokens: 3
+      )
+    end
+  end
+
+  test "shows tokens while a run chats with a model server", %{url: url} do
+    task = Task.async(fn -> Stampede.run(Chatting, vus: 2, duration: 2_500) end)
+
+    assert await_runs!(url, "TTFT p95") =~ "Tokens per second"
+    Task.await(task)
+  end
+
   test "serves finished runs as the HTML report and the JSON", %{url: url} do
     Stampede.run(Observed, vus: 1, duration: 200)
     runs = await_runs!(url, "Ran for")

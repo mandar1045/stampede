@@ -23,6 +23,7 @@ defmodule Stampede.TestRouter do
     get "/moved", Stampede.TestPageController, :moved
     get "/loop", Stampede.TestPageController, :loop
     get "/sign-in/:name", Stampede.TestPageController, :sign_in
+    post "/sign-in", Stampede.TestPageController, :sign_in_form
 
     live_session :elsewhere do
       live "/elsewhere", Stampede.TestOtherLive
@@ -37,6 +38,18 @@ defmodule Stampede.TestRouter do
     get "/fail", Stampede.TestApiController, :fail
     get "/close", Stampede.TestApiController, :close
     get "/echo-socket", Stampede.TestApiController, :echo_socket
+    get "/cookies", Stampede.TestApiController, :cookies
+    get "/cookies/set", Stampede.TestApiController, :set_cookie
+    get "/cookies/forget", Stampede.TestApiController, :forget_cookie
+    get "/events", Stampede.TestEventsController, :steady
+    post "/events", Stampede.TestEventsController, :steady
+    get "/events/tricky", Stampede.TestEventsController, :tricky
+    get "/events/broken", Stampede.TestEventsController, :broken
+    get "/events/limited", Stampede.TestEventsController, :limited
+  end
+
+  scope "/v1" do
+    post "/chat/completions", Stampede.TestLLMController, :chat
   end
 
   defp put_visitor(conn, _opts) do
@@ -71,6 +84,12 @@ defmodule Stampede.TestPageController do
     |> Plug.Conn.put_session("visitor", name)
     |> redirect(to: "/counter")
   end
+
+  def sign_in_form(conn, %{"user" => %{"name" => name, "password" => "open sesame"}}) do
+    sign_in(conn, %{"name" => name})
+  end
+
+  def sign_in_form(conn, _params), do: conn |> put_status(401) |> html("<p>try again</p>")
 end
 
 defmodule Stampede.TestApiController do
@@ -79,6 +98,18 @@ defmodule Stampede.TestApiController do
   def hello(conn, _params), do: json(conn, %{hello: "world"})
   def echo(conn, params), do: json(conn, %{method: conn.method, params: params})
   def fail(conn, _params), do: conn |> put_status(500) |> json(%{error: "failed"})
+
+  def cookies(conn, _params) do
+    json(conn, %{cookie: conn |> Plug.Conn.get_req_header("cookie") |> Enum.join()})
+  end
+
+  def set_cookie(conn, %{"name" => name, "value" => value}) do
+    conn |> Plug.Conn.put_resp_cookie(name, value, http_only: true) |> json(%{})
+  end
+
+  def forget_cookie(conn, %{"name" => name}) do
+    conn |> Plug.Conn.delete_resp_cookie(name) |> json(%{})
+  end
 
   # The client's port tells requests sent on the same connection apart.
   def port(conn, _params), do: text(conn, Integer.to_string(Plug.Conn.get_peer_data(conn).port))

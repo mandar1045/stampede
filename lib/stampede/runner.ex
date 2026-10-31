@@ -1,7 +1,7 @@
 defmodule Stampede.Runner do
   @moduledoc false
 
-  alias Stampede.{Limit, Metrics, Plan, Reporter, Result, Thresholds}
+  alias Stampede.{Limit, Metrics, Plan, Probe, Reporter, Result, Thresholds}
   alias Stampede.Runner.Driver
 
   @options [
@@ -15,6 +15,7 @@ defmodule Stampede.Runner do
     thresholds: [],
     find_limit: nil,
     nodes: nil,
+    probe: nil,
     progress: false
   ]
 
@@ -93,6 +94,7 @@ defmodule Stampede.Runner do
     # time, instead of stalling with them.
     priority = Process.flag(:priority, :high)
     printer = if opts[:progress], do: start_printer()
+    probes = Probe.start(opts[:probe])
 
     state =
       try do
@@ -102,6 +104,11 @@ defmodule Stampede.Runner do
         %{
           scenario: scenario,
           printer: printer,
+          probes: probes,
+          server: %{},
+          server_rows: %{},
+          lost: [],
+          queues: [],
           named?: named?,
           limit: run.limit,
           running: drivers,
@@ -116,13 +123,24 @@ defmodule Stampede.Runner do
         }
         |> collect()
         |> flush(true)
+      rescue
+        exception ->
+          Probe.stop(probes)
+          reraise exception, __STACKTRACE__
       after
         stop_printer(printer)
         Process.flag(:priority, priority)
       end
 
+    lost_rows = state.server_rows |> Map.take(state.lost) |> Map.values()
+    server_rows = lost_rows ++ Probe.stop(Map.drop(probes, state.lost), state.server_rows)
     duration = state.finals |> Enum.map(& &1.duration) |> Enum.max()
-    summary = state.finals |> Enum.map(& &1.rows) |> Metrics.merge() |> Metrics.summary(duration)
+
+    summary =
+      Enum.map(state.finals, & &1.rows)
+      |> Kernel.++(server_rows)
+      |> Metrics.merge()
+      |> Metrics.summary(duration)
 
     result =
       Result.new(
@@ -133,6 +151,7 @@ defmodule Stampede.Runner do
         Enum.reverse(state.timeline)
       )
       |> with_limit(state.limit)
+      |> Map.put(:server, Probe.summary(probes, state.timeline, state.queues, state.lost))
 
     measurements = %{duration: System.monotonic_time() - started_at}
 
@@ -276,10 +295,26 @@ defmodule Stampede.Runner do
 
   defp collect(state) do
     running = state.running
+    probes = state.probes
 
     receive do
       {:interval, pid, interval} when is_map_key(running, pid) ->
         state |> add_interval(interval) |> flush(false) |> collect()
+
+      {:probe, pid, sample} when is_map_key(probes, pid) ->
+        collect(put_in(state.server[pid], sample))
+
+      {:probe_queues, pid, queues} when is_map_key(probes, pid) ->
+        collect(%{state | queues: queues ++ state.queues})
+
+      {:probe_rows, pid, rows} when is_map_key(probes, pid) ->
+        collect(put_in(state.server_rows[pid], rows))
+
+      # The app went down, which is worth knowing, so the run goes on to show
+      # what that did.
+      {:DOWN, _monitor, :process, pid, _reason} when is_map_key(probes, pid) ->
+        server = Map.delete(state.server, pid)
+        collect(%{state | server: server, lost: [pid | state.lost]})
 
       {:done, pid, final} when is_map_key(running, pid) ->
         {{_node, monitor}, running} = Map.pop!(running, pid)
@@ -328,6 +363,7 @@ defmodule Stampede.Runner do
     state = check_limit(state, entry)
     summary = Metrics.summary(entry.rows, entry.at - state.last_at)
     point = %{at: entry.at, vus: entry.vus, busy: entry.busy, metrics: summary.metrics}
+    point = with_server(point, state.server)
     iterations = state.iterations + Metrics.count(entry.rows, "iteration")
     errors = state.errors + Metrics.count(entry.rows, "iteration.errors")
 
@@ -355,10 +391,20 @@ defmodule Stampede.Runner do
     }
   end
 
+  # The latest of what the probes saw. They keep their own time, so it's as
+  # close to this second as they've reported.
+  defp with_server(point, server) when map_size(server) == 0, do: point
+
+  defp with_server(point, server) do
+    Map.put(point, :server, server |> Map.values() |> Probe.merge_samples())
+  end
+
   # Once a step fails, the drivers wrap up, and later seconds are not checked.
   defp check_limit(%{limit: %Limit{} = limit} = state, entry)
        when not is_map_key(state, :wrapped) do
-    case Limit.add_second(limit, entry.at, entry.rows, entry.busy) do
+    server_busy = state.server |> Map.values() |> Enum.map(& &1.busy) |> Enum.max(fn -> 0.0 end)
+
+    case Limit.add_second(limit, entry.at, entry.rows, entry.busy, server_busy, state.lost != []) do
       {:continue, new_limit} ->
         print_step(state, limit, new_limit)
         %{state | limit: new_limit}

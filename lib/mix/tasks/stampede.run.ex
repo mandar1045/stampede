@@ -34,6 +34,9 @@ defmodule Mix.Tasks.Stampede.Run do
     * `--html` - a file to write an HTML report of every scenario to, with
       charts of how each run went, see `Stampede.Reporter.to_html/1`
     * `--nodes` - other nodes to run VUs on too, separated by commas
+    * `--probe` - the application's nodes to watch from the inside, separated
+      by commas, see `:probe` in `Stampede.run/2`. The task must run on a
+      named node, with the application's cookie.
     * `--parallel` - runs the scenarios at the same time
     * `--dashboard` - serves a page that shows the runs as they happen, see
       `Stampede.Dashboard`
@@ -72,6 +75,7 @@ defmodule Mix.Tasks.Stampede.Run do
     out: :string,
     html: :string,
     nodes: :string,
+    probe: :string,
     parallel: :boolean,
     dashboard: :boolean,
     dashboard_port: :integer,
@@ -211,6 +215,12 @@ defmodule Mix.Tasks.Stampede.Run do
 
         limit = if opts[:hold], do: [{:hold, parse_duration!(opts[:hold])} | limit], else: limit
         Keyword.put(overrides, :find_limit, if(limit == [], do: true, else: limit))
+
+      {:probe, nodes}, overrides ->
+        probes =
+          nodes |> String.split(",", trim: true) |> Enum.map(&String.to_atom(String.trim(&1)))
+
+        Keyword.put(overrides, :probe, probes)
 
       {_option, _value}, overrides ->
         overrides

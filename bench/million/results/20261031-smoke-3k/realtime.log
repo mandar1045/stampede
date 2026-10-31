@@ -1,0 +1,200 @@
++ '[' true = true ']'
++ echo 'Seeding selfhosted Realtime'
++ /app/bin/realtime eval 'Realtime.Release.seeds(Realtime.Repo)'
+Seeding selfhosted Realtime
+17:56:52.766 [warning] Failed to load OTP-trusted CAs: :error::function_clause, falling back to hardcoded authorities
+17:56:52.802 [info] Loading 118 CA(s) from :hardcoded store
+17:56:52.872 [info] [driver: :tcp, port: 5369, socket: [~c"#Port<0.5>"], msg: ~c"server_setup_successfully"]
+17:56:52.875 [info] [domain: [:gen_rpc, :dispatcher], "$kind": :gen_rpc_dispatcher_start]
+17:56:53.007 [notice] [scope: RegionNodes, event: :tables_created]
+17:56:53.010 [notice] [scope: RegionNodes, handler: :registry, event: :discovering_cluster]
+17:56:53.012 [notice] [scope: RegionNodes, handler: :pg, event: :discovering_cluster]
+17:56:53.012 [notice] [scope: RegionNodes, event: :scope_added]
+17:56:53.012 [notice] [scope: Realtime.Tenants.Connect, event: :tables_created]
+17:56:53.012 [notice] [scope: Realtime.Tenants.Connect, handler: :registry, event: :discovering_cluster]
+17:56:53.012 [notice] [scope: Realtime.Tenants.Connect, handler: :pg, event: :discovering_cluster]
+17:56:53.012 [notice] [scope: Realtime.Tenants.Connect, event: :scope_added]
+17:56:53.308 [warning] MFA {Realtime.PromEx.Plugins.TenantGlobal, :execute_global_connection_metrics, []} encountered an error but has not been detached: %ArgumentError{message: "errors were found at the given arguments:\n\n  * 1st argument: the table identifier does not refer to an existing ETS table\n"}
+17:56:53.308 [warning] MFA {Realtime.PromEx.Plugins.Tenant, :execute_tenant_metrics, []} encountered an error but has not been detached: %ArgumentError{message: "errors were found at the given arguments:\n\n  * 1st argument: the table identifier does not refer to an existing ETS table\n"}
+17:56:53.323 [info] Muster[nonode@nohost|realtime_channels_us-east-1] Starting
+17:56:53.323 [info] [libcluster:postgres] Connected to Postgres database
+17:56:53.332 [info] Forum[nonode@nohost|users] Starting
+17:56:53.353 [info] Starting Reconnector
+17:56:53.381 [info] Running RealtimeWeb.Endpoint with cowboy 2.18.0 at :::4000 (http)
+17:56:53.381 [info] Access RealtimeWeb.Endpoint at http://realtime.supabase.co:443
+17:56:53.505 request_id=GOOu7etrCHKobvEAAB3h [info] GET /healthcheck
+17:56:53.539 request_id=GOOu7etrCHKobvEAAB3h [info] GET /healthcheck - Sent 200 in 33ms
+17:56:53.550 [notice] [scope: :realtime_postgres_cdc_0, event: :tables_created]
+17:56:53.550 [notice] [scope: :realtime_postgres_cdc_0, handler: :registry, event: :discovering_cluster]
+17:56:53.550 [notice] [scope: :realtime_postgres_cdc_0, handler: :pg, event: :discovering_cluster]
+17:56:53.550 [notice] [scope: :realtime_postgres_cdc_0, event: :scope_added]
+17:56:53.550 [notice] [scope: :realtime_postgres_cdc_1, event: :tables_created]
+17:56:53.550 [notice] [scope: :realtime_postgres_cdc_1, handler: :registry, event: :discovering_cluster]
+17:56:53.550 [notice] [scope: :realtime_postgres_cdc_1, handler: :pg, event: :discovering_cluster]
+17:56:53.550 [notice] [scope: :realtime_postgres_cdc_1, event: :scope_added]
+17:56:53.550 [notice] [scope: :realtime_postgres_cdc_2, event: :tables_created]
+17:56:53.550 [notice] [scope: :realtime_postgres_cdc_2, handler: :registry, event: :discovering_cluster]
+17:56:53.550 [notice] [scope: :realtime_postgres_cdc_2, event: :scope_added]
+17:56:53.550 [notice] [scope: :realtime_postgres_cdc_2, handler: :pg, event: :discovering_cluster]
+17:56:53.551 [notice] [scope: :realtime_postgres_cdc_3, event: :tables_created]
+17:56:53.551 [notice] [scope: :realtime_postgres_cdc_3, handler: :registry, event: :discovering_cluster]
+17:56:53.551 [notice] [scope: :realtime_postgres_cdc_3, handler: :pg, event: :discovering_cluster]
+17:56:53.551 [notice] [scope: :realtime_postgres_cdc_3, event: :scope_added]
+17:56:53.551 [notice] [scope: :realtime_postgres_cdc_4, event: :tables_created]
+17:56:53.551 [notice] [scope: :realtime_postgres_cdc_4, handler: :registry, event: :discovering_cluster]
+17:56:53.551 [notice] [scope: :realtime_postgres_cdc_4, handler: :pg, event: :discovering_cluster]
+17:56:53.551 [notice] [scope: :realtime_postgres_cdc_4, event: :scope_added]
+17:56:53.552 [info] Janitor started
+17:56:53.552 [info] Starting MetricsCleaner
+17:56:53.641 project=realtime-dev external_id=realtime-dev error_code=DatabaseIpVersionIsIpv4 [warning] DatabaseIpVersionIsIpv4: Tenant database host 127.0.0.1 resolved to an IPv4 address
+17:56:53.643 project=realtime-dev external_id=realtime-dev [info] Applying migrations to 127.0.0.1
+17:56:53.687 project=realtime-dev external_id=realtime-dev [info] Finished loading the dump of 95 migrations for tenant realtime-dev in 42ms
+17:56:53.702 error_code=DatabaseIpVersionIsIpv4 [warning] DatabaseIpVersionIsIpv4: Tenant database host 127.0.0.1 resolved to an IPv4 address
+17:56:53.708 [info] Creating partitions for realtime.messages
+17:56:53.735 [info] Tenant set-up successfully
+[os_mon] memory supervisor port (memsup): Erlang has closed
+[os_mon] cpu supervisor port (cpu_sup): Erlang has closed
++ echo 'Starting Realtime'
++ ulimit -n
++ exec /app/bin/server
+Starting Realtime
+1000000
+=WARNING REPORT==== 31-Oct-2026::17:56:55.280430 ===
+Failed to load OTP-trusted CAs: error:function_clause, falling back to hardcoded authorities
+17:56:55.313 [info] [driver: :tcp, port: 5369, socket: [~c"#Port<0.7>"], msg: ~c"server_setup_successfully"]
+17:56:55.313 [info] [domain: [:gen_rpc, :dispatcher], "$kind": :gen_rpc_dispatcher_start]
+17:56:55.337 [notice] [scope: RegionNodes, event: :tables_created]
+17:56:55.337 [notice] [scope: RegionNodes, handler: :pg, event: :discovering_cluster]
+17:56:55.337 [notice] [scope: RegionNodes, handler: :registry, event: :discovering_cluster]
+17:56:55.337 [notice] [scope: RegionNodes, event: :scope_added]
+17:56:55.337 [notice] [scope: Realtime.Tenants.Connect, event: :tables_created]
+17:56:55.337 [notice] [scope: Realtime.Tenants.Connect, handler: :registry, event: :discovering_cluster]
+17:56:55.337 [notice] [scope: Realtime.Tenants.Connect, handler: :pg, event: :discovering_cluster]
+17:56:55.337 [notice] [scope: Realtime.Tenants.Connect, event: :scope_added]
+17:56:55.372 [warning] MFA {Realtime.PromEx.Plugins.TenantGlobal, :execute_global_connection_metrics, []} encountered an error but has not been detached: %ArgumentError{message: "errors were found at the given arguments:\n\n  * 1st argument: the table identifier does not refer to an existing ETS table\n"}
+17:56:55.387 [warning] MFA {Realtime.PromEx.Plugins.Tenant, :execute_tenant_metrics, []} encountered an error but has not been detached: %ArgumentError{message: "errors were found at the given arguments:\n\n  * 1st argument: the table identifier does not refer to an existing ETS table\n"}
+17:56:55.388 [info] Muster[realtime@172.31.42.63|realtime_channels_us-east-1] Starting
+17:56:55.389 [info] Forum[realtime@172.31.42.63|users] Starting
+17:56:55.391 [info] [libcluster:postgres] Connected to Postgres database
+17:56:55.393 [info] Starting Reconnector
+17:56:55.398 [info] Running RealtimeWeb.Endpoint with cowboy 2.18.0 at :::4000 (http)
+17:56:55.398 [info] Access RealtimeWeb.Endpoint at http://realtime.supabase.co:443
+17:56:55.398 [notice] [scope: :realtime_postgres_cdc_0, event: :tables_created]
+17:56:55.399 [notice] [scope: :realtime_postgres_cdc_0, handler: :registry, event: :discovering_cluster]
+17:56:55.399 [notice] [scope: :realtime_postgres_cdc_0, handler: :pg, event: :discovering_cluster]
+17:56:55.399 [notice] [scope: :realtime_postgres_cdc_0, event: :scope_added]
+17:56:55.399 [notice] [scope: :realtime_postgres_cdc_1, event: :tables_created]
+17:56:55.399 [notice] [scope: :realtime_postgres_cdc_1, handler: :registry, event: :discovering_cluster]
+17:56:55.399 [notice] [scope: :realtime_postgres_cdc_1, handler: :pg, event: :discovering_cluster]
+17:56:55.399 [notice] [scope: :realtime_postgres_cdc_1, event: :scope_added]
+17:56:55.399 [notice] [scope: :realtime_postgres_cdc_2, event: :tables_created]
+17:56:55.399 [notice] [scope: :realtime_postgres_cdc_2, handler: :registry, event: :discovering_cluster]
+17:56:55.399 [notice] [scope: :realtime_postgres_cdc_2, handler: :pg, event: :discovering_cluster]
+17:56:55.399 [notice] [scope: :realtime_postgres_cdc_2, event: :scope_added]
+17:56:55.399 [notice] [scope: :realtime_postgres_cdc_3, event: :tables_created]
+17:56:55.399 [notice] [scope: :realtime_postgres_cdc_3, handler: :registry, event: :discovering_cluster]
+17:56:55.399 [notice] [scope: :realtime_postgres_cdc_3, handler: :pg, event: :discovering_cluster]
+17:56:55.400 [notice] [scope: :realtime_postgres_cdc_3, event: :scope_added]
+17:56:55.400 [notice] [scope: :realtime_postgres_cdc_4, event: :tables_created]
+17:56:55.400 [notice] [scope: :realtime_postgres_cdc_4, handler: :registry, event: :discovering_cluster]
+17:56:55.400 [notice] [scope: :realtime_postgres_cdc_4, handler: :pg, event: :discovering_cluster]
+17:56:55.400 [notice] [scope: :realtime_postgres_cdc_4, event: :scope_added]
+17:56:55.400 [info] Janitor started
+17:56:55.400 [info] Starting MetricsCleaner
+17:57:17.697 request_id=GOOu842AUuRl6JoAABKB [info] GET /metrics
+17:57:17.698 request_id=GOOu842AUuRl6JoAABKB [info] GET /metrics - Sent 200 in 0ms
+17:57:17.700 request_id=GOOu842AUuRl6JoAABKB [info] Collected cluster metrics in 1 milliseconds
+17:57:25.390 [info] Muster[realtime@172.31.42.63|realtime_channels_us-east-1] status :converging -> :ready (members [:"realtime@172.31.42.63"])
+17:57:31.333 [info] Starting Elixir.Realtime.RateCounter for: {:channel, :joins, "realtime-dev"}
+17:57:31.339 [info] Starting Elixir.Realtime.RateCounter for: {:database, :connect, "realtime-dev"}
+17:57:31.341 project=realtime-dev external_id=realtime-dev [info] Realtime.Tenants.Connect.GetTenant executed in 0 ms
+17:57:31.341 project=realtime-dev external_id=realtime-dev error_code=DatabaseIpVersionIsIpv4 [warning] DatabaseIpVersionIsIpv4: Tenant database host 127.0.0.1 resolved to an IPv4 address
+17:57:31.352 project=realtime-dev external_id=realtime-dev error_code=DatabaseIpVersionIsIpv4 [warning] DatabaseIpVersionIsIpv4: Tenant database host 127.0.0.1 resolved to an IPv4 address
+17:57:31.352 project=realtime-dev external_id=realtime-dev [info] Realtime.Tenants.Connect.CheckConnection executed in 10 ms
+17:57:31.352 project=realtime-dev external_id=realtime-dev [info] Realtime.Tenants.Connect.ReconcileMigrations executed in 0 ms
+17:57:31.352 project=realtime-dev external_id=realtime-dev [info] Realtime.Tenants.Connect.RegisterProcess executed in 0 ms
+17:57:31.352 [info] Starting Elixir.Realtime.RateCounter for: {:channel, :events, "realtime-dev"}
+17:57:31.352 project=realtime-dev external_id=realtime-dev [info] Tenant realtime-dev is initializing: :"realtime@172.31.42.63"
+17:57:31.353 [info] Starting Elixir.Realtime.RateCounter for: {:channel, :presence_events, "realtime-dev"}
+17:57:31.353 project=realtime-dev external_id=realtime-dev [info] Creating partitions for realtime.messages
+17:57:31.358 [info] Starting replication for Broadcast Changes
+17:57:31.359 error_code=DatabaseIpVersionIsIpv4 [warning] DatabaseIpVersionIsIpv4: Tenant database host 127.0.0.1 resolved to an IPv4 address
+17:57:31.359 project=realtime-dev external_id=realtime-dev [info] Initializing connection with the status: %Realtime.Tenants.ReplicationConnection{
+  tenant_id: "realtime-dev",
+  opts: [],
+  step: :disconnected,
+  publication_name: "supabase_realtime_messages_publication",
+  replication_slot_name: "supabase_realtime_messages_replication_slot_bench",
+  output_plugin: "pgoutput",
+  proto_version: 2,
+  relations: %{},
+  buffer: [],
+  monitored_pid: #PID<0.4099.0>,
+  latency_committed_at: nil,
+  query_timeout: 240000,
+  pg_version: nil
+}
+17:57:31.362 project=realtime-dev external_id=realtime-dev [info] Checking if replication slot supabase_realtime_messages_replication_slot_bench exists
+17:57:31.365 project=realtime-dev external_id=realtime-dev [info] Check publication supabase_realtime_messages_publication for table realtime.messages exists
+17:57:31.366 project=realtime-dev external_id=realtime-dev [info] Create publication supabase_realtime_messages_publication for table realtime.messages
+17:57:31.368 project=realtime-dev external_id=realtime-dev [info] Create replication slot supabase_realtime_messages_replication_slot_bench using plugin pgoutput
+17:57:31.377 project=realtime-dev external_id=realtime-dev [info] #PID<0.4115.0> Starting stream replication for slot supabase_realtime_messages_replication_slot_bench using publication supabase_realtime_messages_publication and protocol version 2
+17:57:35.395 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+17:57:40.396 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+17:57:45.397 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+17:57:47.712 request_id=GOOu-oqFEMgUey8AARbh [info] GET /metrics
+17:57:47.713 request_id=GOOu-oqFEMgUey8AARbh [info] GET /metrics - Sent 200 in 0ms
+17:57:47.715 request_id=GOOu-oqFEMgUey8AARbh [info] Collected cluster metrics in 1 milliseconds
+17:57:50.398 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+17:57:54.467 request_id=GOOu_B0lPhH_-CwAAX7B [info] GET /admin/dashboard/home
+17:57:54.467 request_id=GOOu_B0lPhH_-CwAAX7B [warning] GET /admin/dashboard/home - Sent 401 in 0ms
+17:57:54.527 request_id=GOOu_CC1-qFMScwAAWlk [info] GET /admin/dashboard/home
+17:57:54.530 request_id=GOOu_CC1-qFMScwAAWlk [info] GET /admin/dashboard/home - Sent 200 in 3ms
+17:57:54.727 request_id=GOOu_CykdjdW2VoAAWxE [info] GET /admin/dashboard/css-16cc3c04366b654b6edc2eccc5b34d51
+17:57:54.727 request_id=GOOu_CykdjdW2VoAAWxE [info] GET /admin/dashboard/css-16cc3c04366b654b6edc2eccc5b34d51 - Sent 200 in 0ms
+17:57:54.792 request_id=GOOu_DCEQDcXHGAAAYWj [info] GET /admin/dashboard/js-ed5e7fe09c4c070b17a29394f937154e
+17:57:54.792 request_id=GOOu_DCEQDcXHGAAAYWj [info] GET /admin/dashboard/js-ed5e7fe09c4c070b17a29394f937154e - Sent 200 in 0ms
+17:57:55.107 request_id=GOOu_ENJRVkMWG0AAYtj [info] GET /favicon.ico
+17:57:55.107 request_id=GOOu_ENJRVkMWG0AAYtj [warning] GET /favicon.ico - Sent 404 in 0ms
+17:57:55.107 request_id=GOOu_ENJRVkMWG0AAYtj error_code=HttpClientError [warning] HttpClientError: Sent 404 response: Phoenix.Router.NoRouteError - no route found for GET /favicon.ico (RealtimeWeb.Router)
+17:57:55.167 [info] CONNECTED TO Phoenix.LiveView.Socket in 25µs
+  Transport: :websocket
+  Serializer: Phoenix.Socket.V2.JSONSerializer
+  Parameters: %{"_csrf_token" => "[FILTERED]", "vsn" => "[FILTERED]"}
+17:57:55.399 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+17:58:00.400 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+17:58:01.359 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+17:58:05.401 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+17:58:06.360 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+17:58:10.402 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+17:58:11.361 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+17:58:15.403 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+17:58:16.362 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+17:58:17.747 request_id=GOOvAYi7PsvEzrAAAdBC [info] GET /metrics
+17:58:17.747 request_id=GOOvAYi7PsvEzrAAAdBC [info] GET /metrics - Sent 200 in 0ms
+17:58:17.749 request_id=GOOvAYi7PsvEzrAAAdBC [info] Collected cluster metrics in 1 milliseconds
+17:58:20.404 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+17:58:21.363 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+17:58:25.405 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+17:58:26.364 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+17:58:30.406 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+17:58:31.273 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3681.0>, :long_message_queue, true}|
+ process info: {{:"$initial_call", {Forum.Partition, :init, 1}}, {:"$ancestors", [:users_forum_supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: :users_forum_partition_3, message_queue_len: 2835, total_heap_size: 171346]
+17:58:31.274 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3650.0>, :long_message_queue, true}|
+ process info: {{:"$initial_call", {Forum.Muster.Shard, :init, 1}}, {:"$ancestors", [:"realtime_channels_us-east-1_forum_shards_supervisor", :"realtime_channels_us-east-1_forum_supervisor", Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: :"realtime_channels_us-east-1_muster_shard_3", message_queue_len: 2993, total_heap_size: 173271]
+17:58:31.365 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+17:58:31.379 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3650.0>, :long_message_queue, false}|
+ process info: {{:"$initial_call", {Forum.Muster.Shard, :init, 1}}, {:"$ancestors", [:"realtime_channels_us-east-1_forum_shards_supervisor", :"realtime_channels_us-east-1_forum_supervisor", Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: :"realtime_channels_us-east-1_muster_shard_3", message_queue_len: 0, total_heap_size: 139267]
+17:58:31.382 [warning] Elixir.Realtime.ErlSysMon message: {:monitor, #PID<0.3681.0>, :long_message_queue, false}|
+ process info: {{:"$initial_call", {Forum.Partition, :init, 1}}, {:"$ancestors", [:users_forum_supervisor, Realtime.Supervisor, #PID<0.3580.0>]}} [registered_name: :users_forum_partition_3, message_queue_len: 0, total_heap_size: 139267]
+17:58:35.407 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+17:58:36.366 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+17:58:40.408 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+17:58:41.367 project=realtime-dev [info] Billing metrics: [:realtime, :rate_counter, :channel, :events]
+17:58:45.409 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+17:58:47.677 request_id=GOOvCICyorfnPaYAAegD [info] GET /metrics
+17:58:47.677 request_id=GOOvCICyorfnPaYAAegD [info] GET /metrics - Sent 200 in 0ms
+17:58:47.679 request_id=GOOvCICyorfnPaYAAegD [info] Collected cluster metrics in 1 milliseconds
+17:58:50.410 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+17:58:55.411 project=realtime-dev [info] Billing metrics: [:realtime, :connections]
+17:59:00.412 project=realtime-dev [info] Billing metrics: [:realtime, :connections]

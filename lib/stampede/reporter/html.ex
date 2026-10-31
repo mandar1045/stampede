@@ -9,6 +9,7 @@ defmodule Stampede.Reporter.HTML do
     only: [
       amount: 2,
       busy_warning: 1,
+      bytes: 1,
       decimal: 1,
       limit_headline: 1,
       milliseconds: 1,
@@ -339,8 +340,24 @@ defmodule Stampede.Reporter.HTML do
       {"Errors", integer(Map.get(run.totals, "iteration.errors", 0))}
     ]
 
-    tile_grid(tiles)
+    llm? = Map.has_key?(run.totals, "llm.tokens.output")
+    tile_grid(tiles ++ if(llm?, do: llm_tiles(metrics), else: []))
   end
+
+  # Runs against AI model servers also show what those are judged by. A
+  # second of a live run can go by without a finished request.
+  defp llm_tiles(metrics) do
+    tokens = metrics["llm.tokens.output"]
+
+    [
+      {"TTFT p95", p95(metrics["llm.ttft"])},
+      {"Inter-token p95", p95(metrics["llm.itl"])},
+      {"Tokens per second", if(tokens, do: decimal(tokens.rate), else: "–")}
+    ]
+  end
+
+  defp p95(nil), do: "–"
+  defp p95(metric), do: milliseconds(metric.p95)
 
   defp section_start(id, scenario, status) do
     [
@@ -364,6 +381,7 @@ defmodule Stampede.Reporter.HTML do
       result_tiles(result),
       busy(busy_warning(result)),
       limit(result.limit),
+      server(result.server),
       charts(result),
       metrics(metrics),
       checks(checks),
@@ -398,9 +416,10 @@ defmodule Stampede.Reporter.HTML do
           {"Errors", integer(count(metrics, "iteration.errors"))},
           {"Peak VUs", integer(result.timeline |> Enum.map(& &1.vus) |> Enum.max(fn -> 0 end))}
         ] ++
-        if metrics["iterations.dropped"],
+        if(metrics["iterations.dropped"],
           do: [{"Dropped", integer(count(metrics, "iterations.dropped"))}],
           else: []
+        ) ++ if(metrics["llm.tokens.output"], do: llm_tiles(metrics), else: [])
 
     tile_grid(tiles)
   end
@@ -419,6 +438,34 @@ defmodule Stampede.Reporter.HTML do
     plus = if up_to?, do: "+", else: ""
     unit = if by == :vus, do: " VUs", else: "/s"
     amount(value, by) <> plus <> unit
+  end
+
+  defp server(nil), do: []
+
+  defp server(server) do
+    tiles = [
+      {"Server schedulers", "#{round(server.busy * 100)}% busy"},
+      {"Server memory", bytes(server.memory)},
+      {"Server processes", integer(server.processes)},
+      {"Server run queue", integer(server.run_queue)}
+    ]
+
+    queues =
+      for %{length: length, process: process} <- server.queues do
+        [integer(length), " &middot; ", escape(process), "<br>\n"]
+      end
+
+    [
+      "<h3>Server</h3>\n",
+      ~s(<p class="meta">At its busiest: ),
+      escape(Enum.join(server.nodes, ", ")),
+      "</p>\n",
+      tile_grid(tiles),
+      if(queues != [],
+        do: [~s(<p class="meta"><strong>Longest message queues</strong><br>\n), queues, "</p>\n"],
+        else: []
+      )
+    ]
   end
 
   defp busy(nil), do: []
@@ -489,7 +536,11 @@ defmodule Stampede.Reporter.HTML do
         {label, slot, Enum.map(timeline, &(get_in(&1.metrics, [name, :rate]) || 0))}
       end
 
-    timings = for {name, %{type: :timing}} <- Enum.sort(metrics), do: name
+    # What the server timed has no seconds of its own to chart.
+    timings =
+      for {name, %{type: :timing}} <- Enum.sort(metrics),
+          not String.starts_with?(name, "server."),
+          do: name
 
     latencies =
       for name <- Enum.sort_by(timings, &(&1 != "iteration")) do
@@ -505,9 +556,34 @@ defmodule Stampede.Reporter.HTML do
       ~s(<div class="charts">\n),
       chart("VUs", result, [{"VUs", 1, Enum.map(timeline, & &1.vus)}], :count),
       chart("Iterations per second", result, iterations, :rate),
+      server_charts(result),
       latencies,
       "</div>\n"
     ]
+  end
+
+  defp server_charts(%{timeline: timeline} = result) do
+    if Enum.any?(timeline, &Map.has_key?(&1, :server)) do
+      values = fn key, scale ->
+        Enum.map(timeline, fn point ->
+          with %{^key => value} <- point[:server], do: scale.(value)
+        end)
+      end
+
+      [
+        chart(
+          "Server schedulers, % busy",
+          result,
+          [{"busy", 1, values.(:busy, &(&1 * 100))}],
+          :percent
+        ),
+        chart("Server memory, GB", result, [{"memory", 1, values.(:memory, &(&1 / 1.0e9))}], :gb),
+        chart("Server processes", result, [{"processes", 1, values.(:processes, & &1)}], :count),
+        chart("Server run queue", result, [{"run queue", 1, values.(:run_queue, & &1)}], :count)
+      ]
+    else
+      []
+    end
   end
 
   defp chart(title, result, series, unit) do
@@ -627,6 +703,8 @@ defmodule Stampede.Reporter.HTML do
   defp value(value, :ms), do: milliseconds(value)
   defp value(value, :count), do: integer(value)
   defp value(value, :rate), do: decimal(value) <> "/s"
+  defp value(value, :percent), do: "#{round(value)}%"
+  defp value(value, :gb), do: decimal(value) <> " GB"
 
   defp metrics([]), do: []
   defp metrics(metrics), do: ["<h3>Metrics</h3>\n", metrics_table(metrics)]

@@ -35,6 +35,84 @@ defmodule Stampede.HTTPTest do
     assert JSON.decode!(body)["params"] == %{"n" => 1}
   end
 
+  test "sends forms as a browser would" do
+    form = %{"user" => %{"name" => "jo", "tags" => ["a", "b"]}, "n" => 1}
+    {:ok, %{body: body}} = HTTP.post(url("/api/echo"), form: form)
+
+    assert JSON.decode!(body)["params"] == %{
+             "user" => %{"name" => "jo", "tags" => ["a", "b"]},
+             "n" => "1"
+           }
+  end
+
+  describe "cookies" do
+    defp sent_cookie(opts \\ [cookies: true]) do
+      {:ok, %{body: body}} = HTTP.get(url("/api/cookies"), opts)
+      JSON.decode!(body)["cookie"]
+    end
+
+    defp set_cookie(name, value) do
+      {:ok, %{status: 200}} =
+        HTTP.get(url("/api/cookies/set?name=#{name}&value=#{value}"), cookies: true)
+    end
+
+    test "are sent back on later requests, when asked for" do
+      set_cookie("flavour", "ginger")
+      set_cookie("size", "large")
+
+      assert sent_cookie() == "flavour=ginger; size=large"
+      assert sent_cookie([]) == ""
+    end
+
+    test "are replaced by a new value, and removed when the server deletes them" do
+      set_cookie("flavour", "ginger")
+      set_cookie("flavour", "oat")
+      set_cookie("size", "large")
+      assert sent_cookie() == "flavour=oat; size=large"
+
+      {:ok, _response} = HTTP.get(url("/api/cookies/forget?name=flavour"), cookies: true)
+      assert sent_cookie() == "size=large"
+    end
+
+    test "go alongside a cookie header of your own" do
+      set_cookie("flavour", "ginger")
+
+      assert sent_cookie(cookies: true, headers: [{"cookie", "mine=1"}]) ==
+               "mine=1; flavour=ginger"
+    end
+
+    test "belong to one VU and one host, and clear_cookies/0 forgets them" do
+      set_cookie("flavour", "ginger")
+
+      other = Task.async(fn -> sent_cookie() end)
+      assert Task.await(other) == ""
+
+      other_host = String.replace(url("/api/cookies"), "127.0.0.1", "localhost")
+      {:ok, %{body: body}} = HTTP.get(other_host, cookies: true)
+      assert JSON.decode!(body)["cookie"] == ""
+
+      assert HTTP.clear_cookies() == :ok
+      assert sent_cookie() == ""
+    end
+  end
+
+  describe "csrf_token/1" do
+    test "reads the meta tag of Phoenix's layouts" do
+      html = ~s(<head><meta charset="utf-8"><meta name="csrf-token" content="abc-1"></head>)
+      assert HTTP.csrf_token(html) == "abc-1"
+      assert HTTP.csrf_token(%{body: html}) == "abc-1"
+    end
+
+    test "reads a form's hidden input" do
+      html = ~s(<form><input type="hidden" name="_csrf_token" value="abc-2"></form>)
+      assert HTTP.csrf_token(html) == "abc-2"
+    end
+
+    test "is nil on a page with neither" do
+      assert HTTP.csrf_token("<p>nothing here</p>") == nil
+    end
+  end
+
   test "returns responses with error statuses" do
     assert {:ok, %{status: 500}} = HTTP.get(url("/api/fail"))
   end
@@ -81,7 +159,7 @@ defmodule Stampede.HTTPTest do
   end
 
   test "records requests, and responses with error statuses as errors, inside a run" do
-    result = Stampede.run(Calling, vus: 1, duration: 1_000)
+    result = Stampede.run(Calling, vus: 1, duration: 1_000, graceful_stop: 10_000)
 
     # Every iteration sends two requests as "http.request", one of them failing,
     # and a third one as "hello". The last iteration may be cut short.

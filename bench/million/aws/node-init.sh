@@ -10,12 +10,13 @@ shutdown -h +__LIFETIME__ "stampede-bench: lifetime is over"
 # The security group lets all TCP in, which is what stops AWS from tracking
 # connections (and capping how many there can be). This firewall closes what
 # must stay private instead, without tracking anything: SSH to everyone but
-# the operator, and Erlang distribution to everything outside the VPC.
+# the operator, and Erlang distribution and Ollama to everything outside the
+# VPC.
 iptables -A INPUT -i lo -j ACCEPT
 iptables -A INPUT -p tcp --dport 22 -s __OPERATOR_IP__ -j ACCEPT
 iptables -A INPUT -p tcp --dport 22 -s __VPC_CIDR__ -j ACCEPT
 iptables -A INPUT -p tcp --dport 22 -j DROP
-iptables -A INPUT -p tcp -m multiport --dports 4369,9100:9110 ! -s __VPC_CIDR__ -j DROP
+iptables -A INPUT -p tcp -m multiport --dports 4369,9100:9110,11434 ! -s __VPC_CIDR__ -j DROP
 
 # Room for a million connections.
 cat > /etc/sysctl.d/90-stampede.conf <<'CONF'
@@ -25,7 +26,7 @@ net.core.somaxconn = 65535
 net.core.netdev_max_backlog = 65535
 net.ipv4.tcp_max_syn_backlog = 65535
 net.ipv4.ip_local_port_range = 1024 65535
-net.ipv4.ip_local_reserved_ports = 4369,9100-9110
+net.ipv4.ip_local_reserved_ports = 4369,9100-9110,11434
 net.ipv4.tcp_tw_reuse = 1
 CONF
 sysctl --system

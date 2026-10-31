@@ -1,5 +1,47 @@
 # Changelog
 
+## v1.3.0 (2026-11-01)
+
+This one is about real apps. You can record yourself using your app and get a
+scenario, signing in included, and see inside the app during a run without
+changing it. Stampede can also load test AI chat APIs now, and it found new limits
+for me: stock Phoenix held 600,000 Channels users on one 4-core server, and a real
+open source Phoenix product held 50,000 users for 10 minutes on the same size of
+machine. Everything needed to run those again is in `bench/million`.
+
+  * `mix stampede.record` starts your app and records what you do in the
+    browser, then writes it as a scenario, with your clicks, forms, uploads,
+    channels, navigation and pauses, and signing in through a form. Passwords
+    and other sensitive fields become `"CHANGE_ME"`, in forms, in JSON and in
+    URLs. It's new, so it may still change
+  * `Stampede.HTTP` keeps cookies with `cookies: true`, one set per VU and per
+    host, and `Stampede.HTTP.clear_cookies/0` forgets them. `:cookies` on
+    `Stampede.LiveView.connect/2` and `Stampede.SSE` shares them, so a scenario
+    can sign in over HTTP and then open a LiveView as that user
+  * `Stampede.HTTP`'s `:form` option sends a form as a browser would, and
+    `Stampede.HTTP.csrf_token/1` reads the CSRF token out of a page
+  * A guide to watching a run in Prometheus and Grafana
+  * `Stampede.Channels.connect/2` takes a `:keep` function, for VUs in busy
+    channels that hear far more than they read
+  * `--probe app@host`, or `probe:` from code, watches the app from the inside
+    during a run, with no changes to it: scheduler use, memory, processes, run
+    queue and the longest message queues, charted in the dashboard and the
+    HTML report, and Phoenix, LiveView and Ecto timings as `server.*` metrics.
+    A `--find-limit` verdict says when the server's schedulers ran out, or
+    when it went down
+  * `Stampede.LLM` load tests AI chat APIs in OpenAI's format, such as Ollama,
+    vLLM or llama.cpp. It records time to first token, the gaps between
+    tokens, time per token and tokens per second, measured the same way as
+    `vllm bench serve`. It's new, so it may still change
+  * `Stampede.LLM.prompts_from_jsonl/2` reads conversations from benchmark
+    datasets, and `Stampede.LLM.synthetic_prompt/1` makes prompts of a given
+    length
+  * `Stampede.SSE` reads Server-Sent Events from any server, with when each
+    event arrived
+  * `mix stampede.gen.scenario --llm` generates a scenario for a model server
+  * The dashboard and the HTML report show tokens per second and time to
+    first token for runs that chat with a model server
+
 ## v1.2.0 (2026-10-29)
 
 This one answers the question I get asked most: how many users can my app

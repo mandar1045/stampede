@@ -6,7 +6,8 @@
 [![License](https://img.shields.io/hexpm/l/stampede.svg)](https://github.com/mandar1045/stampede/blob/main/LICENSE)
 
 Load testing for Phoenix that speaks Phoenix: Channels, LiveView, HTTP and
-plain WebSockets, with scenarios written in Elixir.
+plain WebSockets, with scenarios written in Elixir. It load tests AI chat APIs
+too, such as Ollama or vLLM.
 
 ![The dashboard following a run as it ramps up to 400 users and back down](assets/dashboard.gif)
 
@@ -40,7 +41,7 @@ Without Igniter, add it to your dependencies:
 ```elixir
 def deps do
   [
-    {:stampede, "~> 1.2", only: [:dev, :test]}
+    {:stampede, "~> 1.3", only: [:dev, :test]}
   ]
 end
 ```
@@ -128,38 +129,53 @@ Instead of a fixed load, it adds users a step at a time and checks your
 thresholds over each step. The first step that breaks one ends the run, and
 the summary tells you the most users that passed.
 
-I tried it on AWS: stock Phoenix on one 4-core, 32 GB server, and Stampede
-on a second machine of the same size. Every user behaves like Phoenix's
+I tried it on AWS: stock Phoenix on one 4-core, 32 GB server, and Stampede on
+three more machines of the same size. Every user behaves like Phoenix's
 JavaScript client: it joins a chat room, sends a heartbeat every 30 seconds
 and a message every 30 to 60, and stays. Each step ramps over 100 seconds:
 
 ```console
-$ mix stampede.run loadtest/channels.exs --find-limit --start 100000 --step 100000 --up-to 800000 --hold 60s
+$ mix stampede.run loadtest/channels.exs --find-limit --start 100000 --step 100000 --up-to 600000 --hold 60s
 ```
 
 ```
- 159.6s  vus: 100000  iterations: 0  errors: 0  load test busy: 16%
+ 159.6s  vus: 100000  iterations: 0  errors: 0  load test busy: 6%
    step  100,000 VUs: held
- 319.4s  vus: 200000  iterations: 0  errors: 0  load test busy: 29%
+ 319.2s  vus: 200000  iterations: 0  errors: 0  load test busy: 11%
    step  200,000 VUs: held
- 479.1s  vus: 300000  iterations: 0  errors: 0  load test busy: 42%
+ 479.8s  vus: 300000  iterations: 0  errors: 0  load test busy: 16%
    step  300,000 VUs: held
- 639.0s  vus: 400000  iterations: 0  errors: 0  load test busy: 55%
+ 639.5s  vus: 400000  iterations: 0  errors: 0  load test busy: 21%
    step  400,000 VUs: held
+ 799.1s  vus: 500000  iterations: 0  errors: 0  load test busy: 27%
+   step  500,000 VUs: held
+ 959.8s  vus: 600000  iterations: 0  errors: 0  load test busy: 31%
+   step  600,000 VUs: held
 ```
 
-400,000 users, no errors, joins in 12ms and messages in 4ms at p95. While it
-held them, the Phoenix server used 24% of its CPU and 18 GB of memory, and
-didn't log a single warning. The HTML report's steps:
+600,000 users on 4 cores, no errors, joins in 31ms and messages in 10ms at
+p95. The server held them at 76% CPU and didn't log a single warning. Here's
+the HTML report from the same run:
 
-![The steps of the 400,000-user run in the HTML report](assets/benchmark-400k.png)
+![The HTML report of the 600,000-user run](assets/benchmark-600k.png)
 
-That's where this test stops: past 400,000, the one machine running Stampede
-ran out of CPU before Phoenix did, so going further needs more load machines.
+That's about as far as this server goes, because at 600,000 its memory was
+98% full. Each connection took about 47 KB, so more memory means more users.
 
 Everything you need to run it yourself, and every number it measured, is in
 [`bench/million`](https://github.com/mandar1045/stampede/tree/main/bench/million).
 The goal is still a million.
+
+A fresh app only tells you so much, so I tried it on a real product too: an open
+source real-time server built with Phoenix, self-hosted from its official
+release, on one 4-core machine. With 100 users in each channel and every message
+going to all of them, it held **50,000 users for 10 minutes**, delivered 80.9
+million messages, and round trips stayed at 5.71ms at p95. Its own metrics counted
+the same users:
+
+![The server's own metrics during the run, holding 50,000 connected users at about 112,000 events a second](assets/realtime-50k.png)
+
+There's more on how I checked that in the [case study](guides/supabase_realtime.md).
 
 Before that, I'd tried it on my laptop: a fresh Phoenix app in production
 mode, with a LiveView page where every user loads the page, joins, clicks
@@ -191,7 +207,7 @@ in a scenario's options steps up the arrival rate instead of users.
 It's new in 1.2, so the options and the report may still change a little.
 `--badge badge.svg` writes a badge with the result, for your README:
 
-![load tested: 400,000 VUs](assets/badge-400k.svg)
+![load tested: 600,000 VUs](assets/badge-600k.svg)
 
 ## Scenarios
 
@@ -276,6 +292,43 @@ Timings have `min`, `mean`, `p50`, `p90`, `p95`, `p99` and `max`, in
 milliseconds. Checks have `failed` and `failed_rate`, and every metric has
 `count` and `rate`, per second. Percentiles stay within 1% of the exact
 value, however many samples a run collects.
+
+## Recording a session
+
+Writing a LiveView scenario by hand means looking up event names and form
+fields. Instead, you can click through your app once and let Stampede write it:
+
+```console
+$ mix stampede.record Checkout
+```
+
+That starts your app. Use it in the browser as a user would, then press Enter
+in the terminal, and you get `loadtest/checkout.exs`:
+
+```elixir
+def run(_vu) do
+  {:ok, view} = Stampede.LiveView.connect("http://localhost:4000/counter")
+  Process.sleep(1200)
+  {:ok, _reply} = Stampede.LiveView.click(view, "inc")
+  Process.sleep(1500)
+
+  {:ok, _reply} =
+    Stampede.LiveView.submit(view, "save", %{
+      "user" => %{"email" => "jo@example.com", "password" => "CHANGE_ME"}
+    })
+
+  :ok = Stampede.LiveView.close(view)
+end
+```
+
+It has your clicks, forms, uploads, channels, navigation and pauses, and signing
+in works too. Passwords, tokens and the like become `"CHANGE_ME"`, in forms and in
+URLs, so they don't end up in a file you might commit. I tried it in a real
+browser on a `phx.gen.auth` app, signing in with a password, and the scenario it
+wrote ran against the same app with no errors.
+
+Signing in isn't recorded yet, so record the pages after it and add the sign-in
+by hand. The [guide](guides/recording.md) has the details.
 
 ## In your test suite
 
@@ -390,7 +443,9 @@ photo = :crypto.strong_rand_bytes(200_000)
 
 Pages behind a login work too. `connect/2` follows redirects and keeps the
 cookies they set, so a route that signs in a test user and redirects is
-enough, and the [login guide](guides/login.md) walks through it. LiveView
+enough. Or go through the real form, since `Stampede.HTTP` keeps cookies with
+`cookies: true` and `Stampede.HTTP.csrf_token/1` finds the page's token. The
+[login guide](guides/login.md) walks through both. LiveView
 runs record `live.page`, `live.join`, `live.event`, `live.patch`,
 `live.navigate` and `live.upload`.
 
@@ -408,6 +463,77 @@ GraphQL subscription endpoint, there's `Stampede.WebSocket`:
 It answers pings and holds on to the frames it receives until `await/2`
 reads them, even after the server has closed the connection. It records
 `ws.connect`, `ws.disconnects`, `ws.messages` and `ws.messages.sent`.
+
+## AI chat APIs
+
+`Stampede.LLM` load tests anything with an OpenAI-style chat API, such as
+Ollama, vLLM or llama.cpp, written in any language:
+
+```elixir
+{:ok, reply} =
+  Stampede.LLM.chat("http://localhost:11434/v1",
+    model: "qwen2.5:0.5b",
+    messages: [%{role: "user", content: "Why is the sky blue?"}],
+    max_tokens: 128
+  )
+```
+
+It records time to first token (`llm.ttft`), the gaps between tokens
+(`llm.itl`), time per token (`llm.tpot`), the whole request (`llm.request`)
+and tokens per second (`llm.tokens.output`), and the dashboard and HTML report
+show them. `--find-limit` then tells you how many people can chat at once. On
+8 CPU cores, Ollama held 6 with a small model. Tokens never slowed down, but
+the first token did, because Ollama answers one person at a time by default.
+Setting `OLLAMA_NUM_PARALLEL=4` doubled it to 12.
+
+The [guide](guides/llm.md) has a one-file script that needs no Mix project,
+how to use realistic prompts, and how to read the result. `Stampede.SSE` is
+underneath, for any other server that streams Server-Sent Events.
+
+## Inside your app
+
+A load test on its own tells you when your app got slow, not why. With
+`--probe`, Stampede watches the app from the inside while the test runs, and
+your app doesn't need any changes. It just needs a node name and a cookie, so
+Stampede can reach it:
+
+```console
+$ elixir --name app@127.0.0.1 --cookie secret -S mix phx.server
+```
+
+```console
+$ elixir --name loader@127.0.0.1 --cookie secret -S mix stampede.run loadtest/lobby.exs --probe app@127.0.0.1
+```
+
+Here's a small run against a fresh Phoenix app, with the channel's own timing
+next to the one from outside:
+
+```
+  metric                count  rate/s    mean     p50     p90     p95      p99       max
+  channel.push           2402   36.95   521µs   498µs   728µs   837µs   1.13ms    3.26ms
+  server.channel.event   2402   36.95     1µs     1µs     2µs     2µs      3µs      19µs
+
+  server
+    app@127.0.0.1 at its busiest: schedulers 1% busy, 0.21 GB of memory, 6,505 processes, run queue 0
+```
+
+You get how busy its schedulers were, its memory, processes and run queue
+every second, charted in the dashboard and the HTML report, and its longest
+message queues. Phoenix requests, channel events, LiveView events and Ecto
+queries come back as `server.*` metrics, with percentiles, and you can set
+thresholds on them like any other metric. When a `--find-limit` step fails,
+the verdict tells you if the server's schedulers were the ones that ran out.
+
+Here's what the probe saw on the way to 600,000 users, with 1.2 million
+processes on 4 cores:
+
+![The Server section of the HTML report](assets/benchmark-server.png)
+
+A small agent runs on the app's node during the test. It stops by itself if
+the test goes away, and its code is removed afterwards. It costs a little:
+in that test, the server's CPU was about 6 points higher with the probe on.
+The [guide](guides/probe.md) covers connecting to a real deployment, and how
+to read what it finds.
 
 ## Results
 
@@ -456,7 +582,7 @@ running across a network.
 A load test can also be a plain script:
 
 ```elixir
-Mix.install([{:stampede, "~> 1.2"}])
+Mix.install([{:stampede, "~> 1.3"}])
 
 defmodule Lobby do
   use Stampede.Scenario
@@ -481,6 +607,10 @@ System.halt(if result.passed?, do: 0, else: 1)
   * [GraphQL subscriptions with Absinthe](guides/absinthe.md)
   * [Load tests in CI](guides/ci.md)
   * [Spreading the load over machines](guides/distributed.md)
+  * [Load testing AI chat APIs](guides/llm.md)
+  * [Seeing inside your app](guides/probe.md)
+  * [Watching a run in Prometheus and Grafana](guides/prometheus.md)
+  * [Recording a session](guides/recording.md)
   * [Case study: Supabase Realtime](guides/supabase_realtime.md)
 
 ## Why not k6, Locust or Artillery?
@@ -505,12 +635,9 @@ What I'm working on next:
 
   * Much bigger tests, spread over several machines, aiming for a million
     connections to one Phoenix server
-  * Metrics from inside the app shown next to the load test's own: BEAM
-    schedulers and memory, Ecto queue times, LiveView event durations
-  * Recording a session in the browser and turning it into a scenario
   * A Livebook smart cell
   * A command line tool that doesn't need Elixir installed
-  * More protocols: Socket.IO, GraphQL over WebSocket and Server-Sent Events
+  * More protocols: Socket.IO and GraphQL over WebSocket
 
 If one of these would help you, or something else is missing, say so in
 [Discussions](https://github.com/mandar1045/stampede/discussions).

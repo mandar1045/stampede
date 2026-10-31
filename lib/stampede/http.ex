@@ -22,7 +22,7 @@ defmodule Stampede.HTTP do
       status of 400 or more
   """
 
-  alias Stampede.Metrics
+  alias Stampede.{Cookies, Metrics}
 
   @type response :: %{
           status: non_neg_integer(),
@@ -65,6 +65,11 @@ defmodule Stampede.HTTP do
     * `:body` - the body, as iodata
     * `:json` - a term to send as JSON instead of a `:body`, with a
       `content-type` of `application/json` unless one is given
+    * `:form` - a map to send as a form instead of a `:body`, as a browser
+      would, with nested maps as `user[name]`
+    * `:cookies` - when `true`, sends the cookies this VU got from earlier
+      requests to the same host, and keeps the ones the response sets.
+      `Stampede.LiveView.connect/2` can use them too. Defaults to `false`.
     * `:timeout` - how long to wait for the response, in milliseconds.
       Defaults to `5_000`.
     * `:metric` - the timing to record the request as, or `nil` to record
@@ -74,11 +79,61 @@ defmodule Stampede.HTTP do
   """
   @spec request(atom(), String.t(), keyword()) :: {:ok, response()} | {:error, term()}
   def request(method, url, opts \\ []) when method in @methods and is_binary(url) do
+    stream(method, url, opts, nil)
+  end
+
+  @doc """
+  Forgets the cookies this VU got from requests with the `:cookies` option.
+
+  A VU keeps its cookies from one iteration to the next, like a person who
+  stays signed in. Call this first in `c:Stampede.Scenario.run/1` to make each
+  iteration a new visitor, which a scenario that signs in needs, since a
+  signed in user usually can't open the sign-in page.
+  """
+  @spec clear_cookies() :: :ok
+  def clear_cookies do
+    Cookies.clear()
+    :ok
+  end
+
+  @doc """
+  Returns the CSRF token in a page, which Phoenix wants back when a form is
+  posted, or `nil` when there's none. Takes a response or its body.
+
+      {:ok, page} = Stampede.HTTP.get(url, cookies: true)
+      form = %{"_csrf_token" => Stampede.HTTP.csrf_token(page), "user" => %{"email" => email}}
+      {:ok, _response} = Stampede.HTTP.post(url, cookies: true, form: form)
+
+  It looks for the `csrf-token` meta tag of Phoenix's layouts, then for a
+  hidden `_csrf_token` input in a form.
+  """
+  @spec csrf_token(response() | binary()) :: String.t() | nil
+  def csrf_token(%{body: body}), do: csrf_token(body)
+
+  def csrf_token(html) when is_binary(html) do
+    meta = ~r/<meta\s[^>]*name="csrf-token"[^>]*\scontent="([^"]*)"/
+    input = ~r/<input\s[^>]*name="_csrf_token"[^>]*\svalue="([^"]*)"/
+
+    with nil <- Regex.run(meta, html, capture: :all_but_first),
+         nil <- Regex.run(input, html, capture: :all_but_first) do
+      nil
+    else
+      [token] -> token
+    end
+  end
+
+  # Like request/3, but hands each part of the body to `fun` as it arrives,
+  # with an accumulator that ends up as the response's body. Stampede.SSE
+  # reads streams with it.
+  @doc false
+  def stream(method, url, opts, into) when method in @methods and is_binary(url) do
     opts =
       Keyword.validate!(opts,
         headers: [],
         body: nil,
         json: nil,
+        form: nil,
+        cookies: false,
         timeout: 5_000,
         metric: "http.request",
         transport_opts: []
@@ -91,31 +146,59 @@ defmodule Stampede.HTTP do
     end
 
     {headers, body} = encode_body(opts)
+    headers = if opts[:cookies], do: Cookies.add_to(headers, Cookies.get(uri.host)), else: headers
     started_at = System.monotonic_time()
-    result = send_request(%{method: method, uri: uri, headers: headers, body: body}, opts)
+    request = %{method: method, uri: uri, headers: headers, body: body, into: into}
+    result = send_request(request, opts)
+    if opts[:cookies], do: keep_cookies(uri.host, result)
     record(result, opts[:metric], started_at)
     result
   end
 
   defp encode_body(opts) do
-    case opts[:json] do
-      nil ->
+    cond do
+      opts[:json] != nil ->
+        {with_type(opts[:headers], "application/json"), JSON.encode_to_iodata!(opts[:json])}
+
+      opts[:form] != nil ->
+        {with_type(opts[:headers], "application/x-www-form-urlencoded"), encode_form(opts[:form])}
+
+      true ->
         {opts[:headers], opts[:body]}
-
-      term ->
-        has_type? =
-          Enum.any?(opts[:headers], fn {name, _value} ->
-            String.downcase(name) == "content-type"
-          end)
-
-        headers =
-          if has_type?,
-            do: opts[:headers],
-            else: [{"content-type", "application/json"} | opts[:headers]]
-
-        {headers, JSON.encode_to_iodata!(term)}
     end
   end
+
+  defp with_type(headers, type) do
+    has_type? =
+      Enum.any?(headers, fn {name, _value} -> String.downcase(name) == "content-type" end)
+
+    if has_type?, do: headers, else: [{"content-type", type} | headers]
+  end
+
+  defp keep_cookies(host, {:ok, response}) do
+    Cookies.put(host, Cookies.store(Cookies.get(host), response.headers))
+  end
+
+  defp keep_cookies(_host, {:error, _reason}), do: :ok
+
+  # Shared with Stampede.LiveView, whose forms are encoded the same way.
+  @doc false
+  def encode_form(params) do
+    params |> flatten(nil) |> URI.encode_query()
+  end
+
+  defp flatten(map, prefix) when is_map(map) do
+    Enum.flat_map(map, fn {key, value} -> flatten(value, nest(prefix, key)) end)
+  end
+
+  defp flatten(list, prefix) when is_list(list) do
+    Enum.flat_map(list, &flatten(&1, prefix <> "[]"))
+  end
+
+  defp flatten(value, prefix), do: [{prefix, to_string(value)}]
+
+  defp nest(nil, key), do: to_string(key)
+  defp nest(prefix, key), do: "#{prefix}[#{key}]"
 
   defp send_request(request, opts) do
     key =
@@ -181,7 +264,9 @@ defmodule Stampede.HTTP do
     with true <- Mint.HTTP.open?(conn),
          {:ok, conn, ref} <-
            Mint.HTTP.request(conn, method, target(request.uri), request.headers, request.body) do
-      receive_response(conn, ref, deadline, %{status: nil, headers: [], body: []})
+      body = if request.into, do: elem(request.into, 0), else: []
+      response = %{status: nil, headers: [], body: body, into: request.into}
+      receive_response(conn, ref, deadline, response)
     else
       false -> {:stale, conn}
       {:error, conn, _reason} -> {:stale, conn}
@@ -199,7 +284,7 @@ defmodule Stampede.HTTP do
           {:ok, conn, responses} ->
             case collect(responses, ref, response) do
               {:done, response} ->
-                {:ok, %{response | body: IO.iodata_to_binary(response.body)}, conn}
+                {:ok, done(response), conn}
 
               {:more, response} ->
                 receive_response(conn, ref, deadline, response)
@@ -224,8 +309,11 @@ defmodule Stampede.HTTP do
       {:headers, ^ref, headers}, {:more, response} ->
         {:more, %{response | headers: response.headers ++ headers}}
 
-      {:data, ^ref, data}, {:more, response} ->
+      {:data, ^ref, data}, {:more, %{into: nil} = response} ->
         {:more, %{response | body: [response.body | data]}}
+
+      {:data, ^ref, data}, {:more, %{into: {_acc, fun}} = response} ->
+        {:more, %{response | body: fun.(data, response.body)}}
 
       {:done, ^ref}, {:more, response} ->
         {:done, response}
@@ -234,6 +322,15 @@ defmodule Stampede.HTTP do
         acc
     end)
   end
+
+  defp done(%{into: nil} = response),
+    do: %{
+      status: response.status,
+      headers: response.headers,
+      body: IO.iodata_to_binary(response.body)
+    }
+
+  defp done(response), do: Map.delete(response, :into)
 
   defp finish(key, {:ok, response, conn}) do
     if Mint.HTTP.open?(conn), do: Process.put(key, conn), else: Mint.HTTP.close(conn)

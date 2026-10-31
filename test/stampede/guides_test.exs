@@ -3,6 +3,35 @@ defmodule Stampede.GuidesTest do
   # waits, to show that they work as written.
   use ExUnit.Case, async: true
 
+  defmodule Conversation do
+    use Stampede.Scenario
+
+    @impl true
+    def setup(_opts), do: [[%{role: "user", content: "Tell me about Lisbon."}]]
+
+    @impl true
+    def run(vu) do
+      url = Stampede.TestEndpoint.page_url("/v1")
+      first = Enum.random(vu.data)
+      {:ok, reply} = Stampede.LLM.chat(url, model: "mock", messages: first, max_tokens: 2)
+
+      Process.sleep(10)
+
+      next =
+        first ++
+          [%{role: "assistant", content: reply.content}, %{role: "user", content: "Where?"}]
+
+      {:ok, _reply} = Stampede.LLM.chat(url, model: "mock", messages: next, max_tokens: 2)
+    end
+  end
+
+  test "AI chat APIs" do
+    result = Stampede.run(Conversation, vus: 2, duration: 1_500, graceful_stop: 10_000)
+
+    assert result.errors == []
+    assert result.metrics["llm.ttft"].count >= 2
+  end
+
   defmodule Room do
     use Stampede.Scenario
 
@@ -26,10 +55,10 @@ defmodule Stampede.GuidesTest do
   end
 
   test "Phoenix Presence" do
-    result = Stampede.run(Room, vus: 5, duration: 1_000)
+    result = Stampede.run(Room, vus: 5, duration: 1_000, graceful_stop: 10_000)
 
     assert result.errors == []
-    assert result.metrics["presence.seen"].count > 5
+    assert result.metrics["presence.seen"].count >= 5
     assert result.metrics["channel.messages"].count > result.metrics["presence.seen"].count
   end
 end

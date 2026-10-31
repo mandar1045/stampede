@@ -1,7 +1,7 @@
 defmodule Stampede.MixProject do
   use Mix.Project
 
-  @version "1.2.0"
+  @version "1.3.0"
   @source_url "https://github.com/mandar1045/stampede"
 
   def project do
@@ -60,6 +60,10 @@ defmodule Stampede.MixProject do
         "guides/absinthe.md",
         "guides/ci.md",
         "guides/distributed.md",
+        "guides/llm.md",
+        "guides/probe.md",
+        "guides/prometheus.md",
+        "guides/recording.md",
         "guides/supabase_realtime.md",
         "CHANGELOG.md",
         "CONTRIBUTING.md"
@@ -67,14 +71,22 @@ defmodule Stampede.MixProject do
       groups_for_extras: [Guides: ~r"guides/"],
       assets: %{"assets" => "assets"},
       groups_for_modules: [
-        Clients: [Stampede.HTTP, Stampede.Channels, Stampede.LiveView, Stampede.WebSocket],
+        Clients: [
+          Stampede.HTTP,
+          Stampede.Channels,
+          Stampede.LiveView,
+          Stampede.WebSocket,
+          Stampede.SSE,
+          Stampede.LLM
+        ],
         "Channels protocol": [
           Stampede.Channels.Serializer,
           Stampede.Channels.Serializer.V2,
           Stampede.Channels.Serializer.V1,
           Stampede.Channels.Message
         ],
-        Results: [Stampede.Result, Stampede.Reporter, Stampede.Dashboard]
+        Results: [Stampede.Result, Stampede.Reporter, Stampede.Dashboard],
+        Recording: [Stampede.Recorder]
       ]
     ]
   end

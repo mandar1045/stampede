@@ -4,7 +4,7 @@ set -euo pipefail
 source "$(dirname "$0")/config.sh"
 
 tar czf "$STATE/code.tar.gz" -C "$HERE/../../.." --exclude=_build --exclude=deps --exclude=.state \
-  mix.exs mix.lock lib bench/million/app bench/million/load bench/million/aws/monitor.sh
+  mix.exs mix.lock lib bench/million/app bench/million/load bench/million/realtime bench/million/aws/monitor.sh
 
 deploy() {
   local role=$1 public=$2

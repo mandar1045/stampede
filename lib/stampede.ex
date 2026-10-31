@@ -151,6 +151,18 @@ defmodule Stampede do
       project. A scenario compiled to a `.beam` file is loaded on the nodes
       that miss it.
 
+    * `:probe` - the nodes of the application under test, to see what happens
+      inside it during the run, as one node or a list. This node must be able
+      to connect to them, with the same cookie. The application needs no
+      changes: an agent runs there during the run, and goes away after it.
+      The result then has how busy its schedulers were, its memory, its
+      processes, its run queue and its longest message queues, and these
+      metrics, timed by the application itself:
+      * `"server.http"` - HTTP requests, from `Plug.Telemetry`
+      * `"server.channel.join"` and `"server.channel.event"`
+      * `"server.live.mount"` and `"server.live.event"`
+      * `"server.ecto.query"` and `"server.ecto.queue"`, for every Ecto repo
+
     * `:progress` - prints the number of VUs, iterations and errors every
       second. Defaults to `false`.
 

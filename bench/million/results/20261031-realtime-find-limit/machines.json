@@ -1,0 +1,30 @@
+[
+    {
+        "id": "i-0bdf4eb49c5019f0b",
+        "type": "r7g.xlarge",
+        "zone": "ap-south-1a",
+        "started": "2026-10-31T17:35:04+00:00",
+        "arch": "arm64"
+    },
+    {
+        "id": "i-0533a86316264d05f",
+        "type": "r7g.xlarge",
+        "zone": "ap-south-1a",
+        "started": "2026-10-31T17:35:04+00:00",
+        "arch": "arm64"
+    },
+    {
+        "id": "i-01455fc84f1217b3d",
+        "type": "r7g.xlarge",
+        "zone": "ap-south-1a",
+        "started": "2026-10-31T17:35:04+00:00",
+        "arch": "arm64"
+    },
+    {
+        "id": "i-0ba15ff029f89ae57",
+        "type": "r7g.xlarge",
+        "zone": "ap-south-1a",
+        "started": "2026-10-31T17:35:02+00:00",
+        "arch": "arm64"
+    }
+]

@@ -1,0 +1,621 @@
+defmodule Stampede.Recorder do
+  @moduledoc """
+  Records what a person does in a Phoenix app, to turn it into a scenario.
+
+  The easiest way in is `mix stampede.record`. From code:
+
+      {:ok, recorder} = Stampede.Recorder.start()
+      # Click through the app in a browser.
+      steps = Stampede.Recorder.stop(recorder)
+      File.write!("loadtest/checkout.exs", Stampede.Recorder.to_scenario(steps, MyApp.Load.Checkout))
+
+  It runs in the same VM as the app, and records from LiveView's and Phoenix's
+  telemetry: pages opened, live navigation, patches, clicks, forms, file uploads
+  and Channels, with the time between them as pauses. Requests to controllers
+  are recorded too, with the forms and JSON they send, so signing in through a
+  form works. See the [recording guide](recording.html).
+
+  Fields that look sensitive, such as passwords and tokens, are replaced with
+  `"CHANGE_ME"`, in forms, in JSON, in Channels messages and in URLs, so they
+  don't end up in a file you might commit. Other values are kept as they were typed.
+  Uploaded files aren't kept, only their name, size and type.
+  """
+
+  use GenServer
+
+  @events [
+    [:phoenix, :live_view, :mount, :stop],
+    [:phoenix, :live_view, :handle_params, :stop],
+    [:phoenix, :live_view, :handle_event, :stop],
+    [:phoenix, :live_component, :handle_event, :stop],
+    [:phoenix, :router_dispatch, :stop],
+    [:phoenix, :channel_joined],
+    [:phoenix, :channel_handled_in]
+  ]
+
+  # Topics of LiveView, its uploads and live reload, not of the app's channels.
+  @internal_topics ["lv:", "lvu:", "phoenix:"]
+
+  @sensitive ~r/pass|secret|token|card|cvv|ssn|api.?key/i
+  @dropped ~w(_csrf_token _target _method)
+  @placeholder "CHANGE_ME"
+
+  # Pauses shorter than this are the app's own speed, and longer ones are
+  # someone getting a coffee.
+  @min_pause 100
+  @max_pause 30_000
+  # An event this close before a page change caused it.
+  @caused_by 1_500
+  # Changes this close together are someone typing.
+  @typing 2_000
+
+  # Requests that change something, which need the session they came from.
+  @changing ~w(POST PUT PATCH DELETE)
+
+  @typedoc "One thing the person did, with `:at` in milliseconds."
+  @type step :: map()
+
+  @doc "Starts recording."
+  @spec start() :: {:ok, pid()}
+  def start, do: GenServer.start(__MODULE__, nil)
+
+  @doc "Stops recording, and returns the steps recorded."
+  @spec stop(pid()) :: [step()]
+  def stop(recorder), do: GenServer.call(recorder, :stop)
+
+  @doc """
+  Writes `steps` as the source code of a scenario named `module`.
+  """
+  @spec to_scenario([step()], module() | String.t()) :: String.t()
+  def to_scenario(steps, module) do
+    name = if is_atom(module), do: inspect(module), else: module
+    steps = compact(steps)
+
+    source = """
+    defmodule #{name} do
+      use Stampede.Scenario
+
+      # Recorded with mix stampede.record. A VU does what you did, with the
+      # same pauses. This ramps up to 50 VUs over 30 seconds, holds them for a
+      # minute and ramps down.
+      @impl true
+      def options do
+        [
+          stages: [{[second: 30], 50}, {[minute: 1], 50}, {[second: 10], 0}],
+          thresholds: [{#{inspect(metric(steps))}, p95: 500}, {"iteration.errors", count: 0}]
+        ]
+      end
+
+      @impl true
+      def run(_vu) do
+    #{body(steps)}
+      end
+    end
+    """
+
+    IO.iodata_to_binary([Code.format_string!(source), "\n"])
+  end
+
+  @impl true
+  def init(nil) do
+    id = {__MODULE__, self()}
+    :telemetry.attach_many(id, @events, &__MODULE__.handle_telemetry/4, self())
+    {:ok, %{id: id, raw: []}}
+  end
+
+  @impl true
+  def handle_call(:stop, _from, state) do
+    :telemetry.detach(state.id)
+    {:stop, :normal, state.raw |> Enum.reverse() |> Enum.sort_by(& &1.at) |> steps(), state}
+  end
+
+  @impl true
+  def handle_info({:raw, raw}, state), do: {:noreply, %{state | raw: [raw | state.raw]}}
+
+  @doc false
+  def handle_telemetry(event, _measurements, metadata, recorder) do
+    case raw(event, metadata) do
+      nil -> :ok
+      raw -> send(recorder, {:raw, Map.put(raw, :at, System.monotonic_time(:millisecond))})
+    end
+  end
+
+  # The page and its data are read before a socket connects too, which is the
+  # same page again, so only connected root views count.
+  defp raw([:phoenix, :live_view, :mount, :stop], %{socket: socket, uri: uri}) do
+    if root?(socket) do
+      %{kind: :page, transport: socket.transport_pid, root: socket.root_pid, uri: uri}
+    end
+  end
+
+  defp raw([:phoenix, :live_view, :handle_params, :stop], %{socket: socket, uri: uri}) do
+    if root?(socket), do: %{kind: :params, root: socket.root_pid, uri: uri}
+  end
+
+  defp raw([:phoenix, :live_view, :handle_event, :stop], metadata) do
+    %{socket: socket, event: event, params: params} = metadata
+
+    if root?(socket) do
+      %{
+        kind: :event,
+        root: socket.root_pid,
+        event: event,
+        params: params,
+        target: nil,
+        uploads: uploads(socket)
+      }
+    end
+  end
+
+  defp raw([:phoenix, :live_component, :handle_event, :stop], metadata) do
+    %{socket: socket, event: event, params: params} = metadata
+    target = socket.assigns.myself.cid
+
+    %{
+      kind: :event,
+      root: socket.root_pid,
+      event: event,
+      params: params,
+      target: target,
+      uploads: uploads(socket)
+    }
+  end
+
+  defp raw([:phoenix, :router_dispatch, :stop], %{plug: Phoenix.LiveView.Plug}), do: nil
+
+  defp raw([:phoenix, :router_dispatch, :stop], %{conn: conn}) do
+    %{
+      kind: :http,
+      method: conn.method,
+      url: request_url(conn),
+      status: conn.status,
+      from: header(conn, "referer"),
+      csrf_header?: header(conn, "x-csrf-token") != nil,
+      sent: sent(conn)
+    }
+  end
+
+  defp raw([:phoenix, :channel_joined], %{socket: socket, params: params, result: :ok}) do
+    if app_topic?(socket.topic) do
+      %{
+        kind: :join,
+        transport: socket.transport_pid,
+        url: socket_url(socket),
+        topic: socket.topic,
+        params: params
+      }
+    end
+  end
+
+  defp raw([:phoenix, :channel_handled_in], %{socket: socket, event: event, params: params}) do
+    if app_topic?(socket.topic) do
+      %{kind: :push, topic: socket.topic, event: event, params: params}
+    end
+  end
+
+  defp raw(_event, _metadata), do: nil
+
+  defp app_topic?(topic), do: not String.starts_with?(topic, @internal_topics)
+
+  defp socket_url(socket) do
+    {path, _handler, _opts} =
+      List.keyfind(socket.endpoint.__sockets__(), socket.handler, 1, {"/socket", nil, nil})
+
+    socket.endpoint.url()
+    |> String.replace_prefix("http", "ws")
+    |> Kernel.<>(path)
+  end
+
+  # What's selected for upload, as the socket's own records of it.
+  defp uploads(socket) do
+    for {name, %{entries: entries}} <- Map.get(socket.assigns, :uploads, %{}),
+        entry <- entries do
+      %{
+        ref: {name, entry.ref},
+        name: Atom.to_string(name),
+        file: %{name: entry.client_name, size: entry.client_size, type: entry.client_type}
+      }
+    end
+  end
+
+  defp header(conn, name) do
+    with {^name, value} <- List.keyfind(conn.req_headers, name, 0), do: value
+  end
+
+  # Without Plug.Parsers, or with a file in it, the body can't be replayed.
+  defp sent(%{body_params: %{__struct__: _unfetched}}), do: :unknown
+
+  defp sent(conn) do
+    case header(conn, "content-type") do
+      "application/x-www-form-urlencoded" <> _charset -> {:form, conn.body_params}
+      "application/json" <> _charset -> {:json, conn.body_params}
+      nil -> :nothing
+      _other -> :unknown
+    end
+  end
+
+  defp request_url(conn) do
+    url = "#{conn.scheme}://#{conn.host}:#{conn.port}#{conn.request_path}"
+    if conn.query_string == "", do: url, else: "#{url}?#{conn.query_string}"
+  end
+
+  defp root?(socket) do
+    socket.transport_pid != nil and socket.parent_pid == nil
+  end
+
+  # Works out what each thing that happened was, from what happened before.
+  defp steps(raw) do
+    start = %{steps: [], transport: nil, root: nil, uri: nil, sockets: %{}, files: MapSet.new()}
+
+    raw
+    |> Enum.reduce(start, &step/2)
+    |> Map.fetch!(:steps)
+    |> Enum.reverse()
+  end
+
+  defp step(%{kind: :page} = raw, state) do
+    kind = if raw.transport == state.transport, do: :navigate, else: :open
+    state = %{state | transport: raw.transport, root: raw.root, uri: raw.uri}
+    add(state, %{kind: kind, url: redact_url(raw.uri), at: raw.at})
+  end
+
+  defp step(%{kind: :params, root: root, uri: uri}, %{root: root, uri: uri} = state), do: state
+
+  defp step(%{kind: :params, root: root} = raw, %{root: root} = state) do
+    add(%{state | uri: raw.uri}, %{kind: :patch, url: redact_url(raw.uri), at: raw.at})
+  end
+
+  defp step(%{kind: :event, root: root} = raw, %{root: root} = state) do
+    state
+    |> add_uploads(raw)
+    |> add(%{
+      kind: event_kind(raw.params),
+      event: raw.event,
+      params: clean(raw.params),
+      target: raw.target,
+      at: raw.at
+    })
+  end
+
+  defp step(%{kind: :http} = raw, state) do
+    add(state, %{
+      kind: :http,
+      method: raw.method,
+      url: redact_url(raw.url),
+      status: raw.status,
+      from: (raw.from && redact_url(raw.from)) || last_page(state),
+      csrf: csrf(raw),
+      sent: clean_sent(raw.sent),
+      at: raw.at
+    })
+  end
+
+  defp step(%{kind: :join} = raw, state) do
+    state =
+      if Map.has_key?(state.sockets, raw.transport) do
+        state
+      else
+        state = put_in(state.sockets[raw.transport], raw.url)
+        add(state, %{kind: :channel, url: raw.url, at: raw.at})
+      end
+
+    add(state, %{kind: :join, topic: raw.topic, params: clean(raw.params), at: raw.at})
+  end
+
+  defp step(%{kind: :push} = raw, state) do
+    params = if is_map(raw.params), do: clean(raw.params), else: %{}
+    add(state, %{kind: :push, topic: raw.topic, event: raw.event, params: params, at: raw.at})
+  end
+
+  defp step(_other_view, state), do: state
+
+  defp add(state, step), do: %{state | steps: [step | state.steps]}
+
+  # Where a request came from, when the browser didn't say.
+  defp last_page(state) do
+    Enum.find_value(state.steps, fn
+      %{kind: kind, url: url} when kind in [:open, :navigate, :patch] -> url
+      %{kind: :http, method: "GET", url: url} -> url
+      _other -> nil
+    end)
+  end
+
+  defp csrf(%{sent: {_type, %{"_csrf_token" => _token}}}), do: :body
+  defp csrf(%{csrf_header?: true}), do: :header
+  defp csrf(_raw), do: nil
+
+  defp clean_sent({type, params}), do: {type, clean(params)}
+  defp clean_sent(nothing_or_unknown), do: nothing_or_unknown
+
+  # A file shows up in the socket on the first event after it's picked, and
+  # stays until it's used, so each one is only added once. It goes before that
+  # event, which may need the file to be there.
+  defp add_uploads(state, raw) do
+    new = Enum.reject(raw.uploads, &MapSet.member?(state.files, &1.ref))
+
+    new
+    |> Enum.group_by(& &1.name, & &1.file)
+    |> Enum.reduce(state, fn {name, files}, state ->
+      add(state, %{kind: :upload, name: name, files: files, target: raw.target, at: raw.at})
+    end)
+    |> Map.update!(:files, &Enum.into(new, &1, fn file -> file.ref end))
+  end
+
+  # Typing sends a change for every key. Those are real work for the server, so
+  # they stay, as one step that repeats the last change as many times.
+  defp compact(steps) do
+    steps
+    |> Enum.chunk_while(
+      nil,
+      fn
+        step, nil ->
+          {:cont, typing(step)}
+
+        %{kind: :change, event: event} = step, %{kind: :change, event: event, last: last} = run
+        when step.at - last <= @typing ->
+          {:cont, %{run | params: step.params, last: step.at, count: run.count + 1}}
+
+        step, run ->
+          {:cont, run, typing(step)}
+      end,
+      fn
+        nil -> {:cont, nil}
+        run -> {:cont, run, nil}
+      end
+    )
+  end
+
+  defp typing(step), do: Map.merge(step, %{last: step.at, count: 1})
+
+  # LiveView's browser side tells them apart when it sends them, in ways that
+  # show in the params: a form's change says what changed, a click has a
+  # value, and a submit is just the form's fields.
+  defp event_kind(%{"_target" => _target}), do: :change
+  defp event_kind(params) when map_size(params) == 0, do: :click
+  defp event_kind(%{"value" => _value}), do: :click
+  defp event_kind(_params), do: :submit
+
+  defp clean(params) do
+    params
+    |> Enum.reject(fn {key, value} -> dropped?(key) or (key == "value" and value == "") end)
+    |> Map.new(fn {key, value} -> {key, redact(key, value)} end)
+  end
+
+  defp dropped?(key), do: key in @dropped or String.starts_with?(key, "_unused_")
+
+  defp redact(key, value) do
+    cond do
+      Regex.match?(@sensitive, key) -> @placeholder
+      is_map(value) -> clean(value)
+      is_list(value) -> Enum.map(value, &redact(key, &1))
+      true -> value
+    end
+  end
+
+  defp redact_url(url) do
+    uri = URI.parse(url)
+
+    case uri.query do
+      nil ->
+        url
+
+      query ->
+        pairs = for {key, value} <- URI.query_decoder(query), do: {key, redact(key, value)}
+        URI.to_string(%{uri | query: URI.encode_query(pairs)})
+    end
+  end
+
+  defp metric(steps) do
+    kinds = Enum.map(steps, & &1.kind)
+
+    cond do
+      :open in kinds -> "live.join"
+      :join in kinds -> "channel.join"
+      true -> "http.request"
+    end
+  end
+
+  defp body(steps) do
+    cookies? = Enum.any?(steps, &changes?/1)
+    start = %{open?: false, previous: nil, cast?: false, cookies?: cookies?}
+
+    steps
+    |> Enum.chunk_every(2, 1, [nil])
+    |> Enum.flat_map_reduce(start, fn [step, next], state ->
+      lines = lines(step, next, state)
+      {lines, %{state | open?: open?(step, state), previous: step, cast?: cast?(step, state)}}
+    end)
+    |> then(fn {lines, state} -> lines ++ if(state.open?, do: [close()], else: []) end)
+    |> then(&if(cookies?, do: new_visitor() ++ &1, else: &1))
+    |> Enum.join("\n")
+  end
+
+  defp new_visitor do
+    ["# A new visitor each time, or they'd still be signed in.", "Stampede.HTTP.clear_cookies()"]
+  end
+
+  defp changes?(%{kind: :http, method: method, sent: sent}) do
+    method in @changing and sent != :unknown
+  end
+
+  defp changes?(_step), do: false
+
+  defp cookies(%{cookies?: true}), do: ", cookies: true"
+  defp cookies(_state), do: ""
+
+  # Apps answer a wrong password with a redirect too, and connect/2 would follow
+  # it to the sign-in page, so a failed sign-in only shows here.
+  defp opened(step, %{cookies?: true}), do: "{:ok, %{url: #{inspect(step.url)}} = view}"
+  defp opened(_step, _state), do: "{:ok, view}"
+
+  defp open?(%{kind: :open}, _state), do: true
+  defp open?(_step, state), do: state.open?
+
+  defp cast?(%{kind: :push}, _state), do: true
+  defp cast?(_step, state), do: state.cast?
+
+  defp close, do: ":ok = Stampede.LiveView.close(view)"
+
+  defp lines(step, next, state) do
+    pause(step, state.previous) ++ code(step, next, state)
+  end
+
+  defp pause(_step, nil), do: []
+
+  defp pause(step, previous) do
+    sleep(step.at - previous.last)
+  end
+
+  defp sleep(gap) when gap < @min_pause, do: []
+  defp sleep(gap), do: ["Process.sleep(#{inspect(gap |> min(@max_pause) |> round_to(100))})"]
+
+  defp round_to(value, step), do: div(value + div(step, 2), step) * step
+
+  defp code(%{kind: :open} = step, _next, state) do
+    close = if state.open?, do: [close()], else: []
+
+    close ++
+      [
+        "#{opened(step, state)} = Stampede.LiveView.connect(#{inspect(step.url)}#{cookies(state)})"
+      ]
+  end
+
+  defp code(%{kind: :navigate} = step, _next, _state) do
+    ["{:ok, view} = Stampede.LiveView.navigate(view, #{inspect(path(step.url))})"]
+  end
+
+  defp code(%{kind: :patch} = step, _next, _state) do
+    ["{:ok, view} = Stampede.LiveView.patch(view, #{inspect(path(step.url))})"]
+  end
+
+  defp code(%{kind: :http, method: "GET"} = step, _next, state) do
+    response = if state.cookies?, do: "%{status: #{step.status}}", else: "_response"
+    ["{:ok, #{response}} = Stampede.HTTP.get(#{inspect(step.url)}#{cookies(state)})"]
+  end
+
+  defp code(%{kind: :http} = step, _next, _state) do
+    if changes?(step) do
+      page(step) ++ change_me(step) ++ ["{:ok, %{status: #{step.status}}} = #{request(step)}"]
+    else
+      ["# #{step.method} #{step.url} happened here. Add it by hand, if the rest needs it."]
+    end
+  end
+
+  defp code(%{kind: :channel} = step, _next, _state) do
+    ["{:ok, socket} = Stampede.Channels.connect(#{inspect(step.url)})"]
+  end
+
+  defp code(%{kind: :join} = step, _next, _state) do
+    params = literal(step.params)
+    ["{:ok, _reply} = Stampede.Channels.join(socket, #{inspect(step.topic)}, #{params})"]
+  end
+
+  defp code(%{kind: :push} = step, _next, state) do
+    note =
+      if state.cast?,
+        do: [],
+        else: ["# cast doesn't wait for a reply. If this event replies, push/5 times it."]
+
+    params = literal(step.params)
+
+    note ++
+      [
+        "Stampede.Channels.cast(socket, #{inspect(step.topic)}, #{inspect(step.event)}, #{params})"
+      ]
+  end
+
+  defp code(%{kind: :upload} = step, _next, state) do
+    files =
+      Enum.map_join(step.files, ", ", fn file ->
+        "%{name: #{inspect(file.name)}, content: :crypto.strong_rand_bytes(#{file.size}), " <>
+          "type: #{inspect(file.type)}}"
+      end)
+
+    target = if step.target, do: ", target: #{step.target}", else: ""
+    upload = ":ok = Stampede.LiveView.upload(view, #{inspect(step.name)}, [#{files}]#{target})"
+    if state.open?, do: [upload], else: []
+  end
+
+  defp code(%{count: count} = step, _next, state) when count > 1 do
+    pause = sleep(div(step.last - step.at, count - 1))
+    call = "{:ok, _reply} = #{event_call(step)}"
+
+    if state.open? do
+      ["# You typed here, which sent #{count} changes."] ++
+        ["for _change <- 1..#{count} do"] ++ pause ++ [call, "end"]
+    else
+      []
+    end
+  end
+
+  defp code(step, next, state) do
+    if state.open?, do: [result(step, next) <> " = " <> event_call(step)], else: []
+  end
+
+  # The token has to come from this session, so the page it was on comes first.
+  defp page(%{csrf: nil}), do: []
+  defp page(%{from: nil}), do: []
+  defp page(step), do: ["{:ok, page} = Stampede.HTTP.get(#{inspect(step.from)}, cookies: true)"]
+
+  defp change_me(step) do
+    if inspect(step.sent) =~ @placeholder,
+      do: ["# Put real values where it says #{@placeholder}, or this will be turned down."],
+      else: []
+  end
+
+  defp request(step) do
+    options = ["cookies: true"] ++ csrf_header(step) ++ sent_option(step)
+    url = inspect(step.url)
+    "Stampede.HTTP.#{String.downcase(step.method)}(#{url}, #{Enum.join(options, ", ")})"
+  end
+
+  defp csrf_header(%{csrf: :header, from: from}) when from != nil do
+    [~s|headers: [{"x-csrf-token", Stampede.HTTP.csrf_token(page)}]|]
+  end
+
+  defp csrf_header(_step), do: []
+
+  defp sent_option(%{sent: :nothing}), do: []
+
+  # Plug puts JSON that isn't an object under "_json".
+  defp sent_option(%{sent: {:json, %{"_json" => term} = params}}) when map_size(params) == 1 do
+    ["json: #{literal(term)}"]
+  end
+
+  defp sent_option(%{sent: {type, params}, csrf: :body, from: from}) when from != nil do
+    {:%{}, meta, pairs} = Macro.escape(params)
+    token = quote(do: Stampede.HTTP.csrf_token(page))
+    ["#{type}: #{Macro.to_string({:%{}, meta, [{"_csrf_token", token} | pairs]})}"]
+  end
+
+  defp sent_option(%{sent: {type, params}}), do: ["#{type}: #{literal(params)}"]
+
+  defp literal(term), do: Macro.to_string(Macro.escape(term))
+
+  defp event_call(step) do
+    "Stampede.LiveView.#{step.kind}(view, #{Enum.join(event_arguments(step), ", ")})"
+  end
+
+  defp event_arguments(step) do
+    params =
+      if step.kind == :click and step.params == %{} and step.target == nil,
+        do: [],
+        else: [literal(step.params)]
+
+    target = if step.target, do: ["target: #{step.target}"], else: []
+    [inspect(step.event)] ++ params ++ target
+  end
+
+  # An event that sends the person to another page doesn't get a reply. Its
+  # result says where to go, and the next step goes there.
+  defp result(step, %{kind: kind, at: at}) when kind in [:navigate, :patch, :open, :http] do
+    if at - step.at <= @caused_by, do: "_result", else: "{:ok, _reply}"
+  end
+
+  defp result(_step, _next), do: "{:ok, _reply}"
+
+  defp path(url) do
+    uri = URI.parse(url)
+    if uri.query, do: "#{uri.path}?#{uri.query}", else: uri.path || "/"
+  end
+end
