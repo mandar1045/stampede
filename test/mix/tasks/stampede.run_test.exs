@@ -101,6 +101,19 @@ defmodule Mix.Tasks.Stampede.RunTest do
     assert File.read!(badge) =~ ~s(aria-label="load tested: 2+ VUs")
   end
 
+  test "watches the app's nodes with --probe", %{tmp_dir: tmp_dir} do
+    path =
+      write_scenario!(tmp_dir, "Probed", """
+        @impl true
+        def run(_vu), do: Process.sleep(20)
+      """)
+
+    args = ["--vus", "1", "--duration", "1500ms", "--probe", to_string(node()), path]
+    output = capture_io(fn -> Mix.Tasks.Stampede.Run.run(args) end)
+
+    assert output =~ ~r/\n  server\n    .* at its busiest: schedulers \d+% busy, /
+  end
+
   test "raises on invalid arguments", %{tmp_dir: tmp_dir} do
     assert_raise Mix.Error, ~r/Expected a scenario file/, fn -> Mix.Tasks.Stampede.Run.run([]) end
 

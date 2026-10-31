@@ -436,6 +436,43 @@ The [guide](guides/llm.md) has a one-file script that needs no Mix project,
 how to use realistic prompts, and how to read the result. `Stampede.SSE` is
 underneath, for any other server that streams Server-Sent Events.
 
+## Inside your app
+
+A load test on its own tells you when your app got slow, not why. With
+`--probe`, Stampede watches the app from the inside while the test runs, and
+your app doesn't need any changes. It just needs a node name and a cookie, so
+Stampede can reach it:
+
+```console
+$ elixir --name app@127.0.0.1 --cookie secret -S mix phx.server
+```
+
+```console
+$ elixir --name loader@127.0.0.1 --cookie secret -S mix stampede.run loadtest/lobby.exs --probe app@127.0.0.1
+```
+
+Here's a small run against a fresh Phoenix app, with the channel's own timing
+next to the one from outside:
+
+```
+  metric                count  rate/s    mean     p50     p90     p95      p99       max
+  channel.push           2402   36.95   521µs   498µs   728µs   837µs   1.13ms    3.26ms
+  server.channel.event   2402   36.95     1µs     1µs     2µs     2µs      3µs      19µs
+
+  server
+    app@127.0.0.1 at its busiest: schedulers 1% busy, 0.21 GB of memory, 6,505 processes, run queue 0
+```
+
+You get how busy its schedulers were, its memory, processes and run queue
+every second, charted in the dashboard and the HTML report, and its longest
+message queues. Phoenix requests, channel events, LiveView events and Ecto
+queries come back as `server.*` metrics, with percentiles, and you can set
+thresholds on them like any other metric. When a `--find-limit` step fails,
+the verdict tells you if the server's schedulers were the ones that ran out.
+
+A small agent runs on the app's node during the test. It stops by itself if
+the test goes away, and its code is removed afterwards.
+
 ## Results
 
 `Stampede.run/2` returns a `Stampede.Result` with a summary of every metric
@@ -533,8 +570,6 @@ What I'm working on next:
 
   * Much bigger tests, spread over several machines, aiming for a million
     connections to one Phoenix server
-  * Metrics from inside the app shown next to the load test's own: BEAM
-    schedulers and memory, Ecto queue times, LiveView event durations
   * Recording a session in the browser and turning it into a scenario
   * A Livebook smart cell
   * A command line tool that doesn't need Elixir installed

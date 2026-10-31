@@ -19,6 +19,7 @@ defmodule Stampede.Reporter do
       "#{inspect(result.scenario)} ran for #{seconds(result.duration)}\n",
       metrics(metrics, checks),
       checks(checks),
+      server(result.server),
       busy(busy_warning(result)),
       limit(result.limit),
       thresholds(result.thresholds),
@@ -110,6 +111,26 @@ defmodule Stampede.Reporter do
     ["\n  checks\n" | lines]
   end
 
+  defp server(nil), do: []
+
+  defp server(server) do
+    queues =
+      for %{length: length, process: process} <- server.queues do
+        "      #{integer(length)}  #{process}\n"
+      end
+
+    [
+      "\n  server\n    #{Enum.join(server.nodes, ", ")} at its busiest: schedulers ",
+      "#{percent(server.busy)} busy, #{bytes(server.memory)} of memory, ",
+      "#{integer(server.processes)} processes, run queue #{integer(server.run_queue)}\n",
+      if(queues != [], do: ["    longest message queues\n" | queues], else: [])
+    ]
+  end
+
+  # Shared with the HTML report.
+  @doc false
+  def bytes(bytes), do: "#{decimal(bytes / 1_000_000_000)} GB"
+
   defp busy(nil), do: []
   defp busy(warning), do: ["\n  warning\n    ", warning, "\n"]
 
@@ -189,6 +210,9 @@ defmodule Stampede.Reporter do
         headline <>
           ". The load test was #{percent(busy)} busy at that step, so the limit may be " <>
           "its own rather than the server's"
+
+      %{server_busy: busy} when busy >= @busy ->
+        headline <> ". The server's schedulers were #{percent(busy)} busy at that step"
 
       _passed_or_not_busy ->
         headline

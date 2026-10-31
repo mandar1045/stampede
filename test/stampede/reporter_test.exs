@@ -84,6 +84,7 @@ defmodule Stampede.ReporterTest do
              "duration" => 1_000,
              "passed?" => false,
              "limit" => nil,
+             "server" => nil,
              "metrics" => %{
                "status is 200" => %{
                  "type" => "check",
@@ -161,6 +162,52 @@ defmodule Stampede.ReporterTest do
     assert html =~ "** (RuntimeError) &lt;script&gt;"
     refute html =~ "<b> &"
     assert length(String.split(html, "<script")) == 2
+  end
+
+  test "shows what the server looked like at its busiest" do
+    server = %{busy: 0.42, memory: 18_100_000_000, processes: 800_123, run_queue: 3}
+
+    result = %Result{
+      scenario: Lobby,
+      duration: 2_000,
+      timeline: [
+        %{at: 1_000, vus: 1, busy: 0.1, metrics: %{}, server: server},
+        %{at: 2_000, vus: 1, busy: 0.1, metrics: %{}}
+      ],
+      server:
+        Map.merge(server, %{
+          nodes: ["app@10.0.0.1"],
+          queues: [%{length: 1_204, process: "Phoenix.PubSub"}]
+        })
+    }
+
+    summary = Reporter.format(result)
+
+    assert summary =~
+             "\n  server\n    app@10.0.0.1 at its busiest: schedulers 42% busy, 18.10 GB of " <>
+               "memory, 800,123 processes, run queue 3\n"
+
+    assert summary =~ "longest message queues\n      1,204  Phoenix.PubSub\n"
+
+    html = Reporter.to_html(result)
+    assert html =~ "<h3>Server</h3>"
+    assert html =~ "<span>Server schedulers</span><strong>42% busy</strong>"
+    assert html =~ "<span>Server memory</span><strong>18.10 GB</strong>"
+    assert html =~ "1,204 &middot; Phoenix.PubSub"
+    assert html =~ ~s(<b>Server processes</b>)
+  end
+
+  test "says when the server was the one out of CPU at the limit" do
+    thresholds = [%{metric: "x", stat: :p95, value: 2_000.0, limit: 1_000, passed?: false}]
+    step = %{target: 500, busy: 0.4, server_busy: 0.97, passed?: false, thresholds: thresholds}
+
+    result = %Result{
+      scenario: Lobby,
+      duration: 1_000,
+      limit: %{by: :vus, value: 400, failed: step, up_to?: false, min: nil, steps: [step]}
+    }
+
+    assert Reporter.format(result) =~ "The server's schedulers were 97% busy at that step"
   end
 
   test "warns when the load test was too busy to trust its timings" do

@@ -25,9 +25,17 @@ defmodule Stampede.Result do
       load that passed as `:value`, `:by` (`:vus` or `:rate`), the step that
       failed as `:failed`, whether it got `:up_to?` the most it was asked to
       try without failing, and every step checked as `:steps`. Each step has
-      its `:target`, the `:from` and `:to` of its hold, in milliseconds, and
-      the `:metrics` and `:thresholds` of that hold, and whether it
-      `:passed?`. `nil` for other runs.
+      its `:target`, the `:from` and `:to` of the step, ramp included, in
+      milliseconds, the `:metrics` and `:thresholds` of that time, whether
+      it `:passed?`, and how `:busy` the load test and the server
+      (`:server_busy`, with `:probe`) were at most, from 0 to 1. `nil` for
+      other runs.
+    * `:server` - for a run with `:probe`, what the application's nodes
+      looked like at their peak: the `:nodes`, how `:busy` their schedulers
+      were, from 0 to 1, their `:memory` in bytes, their `:processes`, their
+      `:run_queue`, and the longest message `:queues` seen. `nil` for other
+      runs. Each second in the `:timeline` also has a `:server` with those
+      numbers.
 
   Rates are per second.
   """
@@ -40,7 +48,8 @@ defmodule Stampede.Result do
     thresholds: [],
     errors: [],
     passed?: true,
-    limit: nil
+    limit: nil,
+    server: nil
   ]
 
   @type t :: %__MODULE__{
@@ -48,12 +57,19 @@ defmodule Stampede.Result do
           duration: non_neg_integer(),
           metrics: %{optional(String.t()) => map()},
           timeline: [
-            %{at: non_neg_integer(), vus: non_neg_integer(), busy: float(), metrics: map()}
+            %{
+              required(:at) => non_neg_integer(),
+              required(:vus) => non_neg_integer(),
+              required(:busy) => float(),
+              required(:metrics) => map(),
+              optional(:server) => map()
+            }
           ],
           thresholds: [map()],
           errors: [%{message: String.t(), count: pos_integer()}],
           passed?: boolean(),
-          limit: map() | nil
+          limit: map() | nil,
+          server: map() | nil
         }
 
   @doc false
