@@ -32,7 +32,8 @@ defmodule Stampede.ProbeTest do
 
     assert result.metrics["server.channel.join"].count >= 2
     assert result.metrics["server.channel.event"].count >= 2
-    assert result.metrics["server.channel.event"].p95 > 0
+    # A ping can take under a microsecond, which rounds down to 0, but a join can't.
+    assert result.metrics["server.channel.join"].p95 > 0
     assert result.metrics["channel.push"].count > 0
   end
 
