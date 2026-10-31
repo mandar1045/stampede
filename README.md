@@ -9,7 +9,7 @@ Load testing for Phoenix that speaks Phoenix: Channels, LiveView, HTTP and
 plain WebSockets, with scenarios written in Elixir. It load tests AI chat APIs
 too, such as Ollama or vLLM.
 
-![The dashboard following a real run, sped up, as it ramps up to 50,000 users and holds them for 10 minutes](assets/readme/dashboard-50k.gif)
+![The dashboard following a real run, sped up, as it ramps up to 50,000 users and holds them for 10 minutes](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/dashboard-50k.gif)
 
 | Tested on one 4-core, 32 GB machine | It held |
 |---|---|
@@ -162,7 +162,7 @@ in a scenario's options steps up the arrival rate instead of users.
 It's new in 1.2, so the options and the report may still change a little.
 `--badge badge.svg` writes a badge with the result, for your README:
 
-![load tested: 600,000 VUs](assets/badge-600k.svg)
+![load tested: 600,000 VUs](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/badge-600k.svg)
 
 ### 600,000 users on stock Phoenix
 
@@ -194,7 +194,7 @@ $ mix stampede.run loadtest/channels.exs --find-limit --start 100000 --step 1000
 p95. The server held them at 76% CPU and didn't log a single warning. Here's
 the HTML report from the same run:
 
-![The HTML report of the 600,000-user run](assets/benchmark-600k.png)
+![The HTML report of the 600,000-user run](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/benchmark-600k.png)
 
 That's about as far as this server goes, because at 600,000 its memory was
 98% full. Each connection took about 47 KB, so more memory means more users.
@@ -215,17 +215,17 @@ A load test saying it did well doesn't prove much, so I checked it against
 things that don't come from Stampede. These are all real recordings from that
 run, sped up:
 
-![The server's own metrics in Grafana, climbing to 50,000 connected users and about 112,000 events a second, then holding](assets/readme/grafana-50k.gif)
+![The server's own metrics in Grafana, climbing to 50,000 connected users and about 112,000 events a second, then holding](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/grafana-50k.gif)
 
 The server's own metrics, in Grafana. It counted 50,001 users: the 50,000, plus
 one real browser.
 
-![A real browser client, subscribed and receiving the load test's messages during the run](assets/readme/real-browser.gif)
+![A real browser client, subscribed and receiving the load test's messages during the run](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/real-browser.gif)
 
 A real client in Firefox, not Stampede, in the same channel as the load test. They
 received each other's messages.
 
-![Phoenix LiveDashboard inside the server, climbing to 50,020 ports and about 100,000 processes on a 4-core Arm machine](assets/readme/livedashboard-ramp.gif)
+![Phoenix LiveDashboard inside the server, climbing to 50,020 ports and about 100,000 processes on a 4-core Arm machine](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/livedashboard-ramp.gif)
 
 Phoenix LiveDashboard, inside the server: 4 schedulers on Arm, climbing to 50,020
 ports and about 100,000 processes.
@@ -242,7 +242,7 @@ and the
 [real browser](https://github.com/mandar1045/stampede/blob/main/bench/million/results/20261031-realtime-hold-50k/videos/real-browser.mp4).
 
 It's one workload, on public channels with no TLS, so the
-[case study](guides/supabase_realtime.md) has what it doesn't show, and how to run
+[case study](https://stampede.hexdocs.pm/supabase_realtime.html) has what it doesn't show, and how to run
 it yourself.
 
 ### 12,000 LiveView users on my laptop
@@ -279,7 +279,7 @@ $ mix stampede.record SignIn
 That starts your app. Use it in the browser as a user would, then press Enter
 in the terminal. Here it's recording a sign-in on a `phx.gen.auth` app:
 
-![Signing in to a phx.gen.auth app in Firefox while Stampede records it](assets/readme/sign-in.gif)
+![Signing in to a phx.gen.auth app in Firefox while Stampede records it](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/sign-in.gif)
 
 And this is the `run/1` it wrote to `loadtest/sign_in.exs`:
 
@@ -329,7 +329,7 @@ a wrong password shows up as an error. Passwords, tokens and the like become
 commit. I tried it in a real browser on a `phx.gen.auth` app, and the scenario it
 wrote ran against the same app with no errors.
 
-The [guide](guides/recording.md) has the details.
+The [guide](https://stampede.hexdocs.pm/recording.html) has the details.
 
 ## Inside your app
 
@@ -368,12 +368,12 @@ the verdict tells you if the server's schedulers were the ones that ran out.
 Here's what the probe saw on the way to 600,000 users, with 1.2 million
 processes on 4 cores:
 
-![The Server section of the HTML report](assets/benchmark-server.png)
+![The Server section of the HTML report](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/benchmark-server.png)
 
 A small agent runs on the app's node during the test. It stops by itself if
 the test goes away, and its code is removed afterwards. It costs a little:
 in that test, the server's CPU was about 6 points higher with the probe on.
-The [guide](guides/probe.md) covers connecting to a real deployment, and how
+The [guide](https://stampede.hexdocs.pm/probe.html) covers connecting to a real deployment, and how
 to read what it finds.
 
 ## Phoenix Channels
@@ -395,8 +395,8 @@ It records `ws.connect`, `ws.disconnects`, `channel.join`, `channel.push`,
 kind of request. A push to a channel that crashes fails right away with
 `{:error, :channel_crashed}`, instead of waiting for its timeout.
 
-[Phoenix Presence](guides/presence.md) and
-[Absinthe subscriptions](guides/absinthe.md) both run over channels, and
+[Phoenix Presence](https://stampede.hexdocs.pm/presence.html) and
+[Absinthe subscriptions](https://stampede.hexdocs.pm/absinthe.html) both run over channels, and
 each has a guide.
 
 ## LiveView
@@ -438,7 +438,7 @@ Pages behind a login work too. `connect/2` follows redirects and keeps the
 cookies they set, so a route that signs in a test user and redirects is
 enough. Or go through the real form, since `Stampede.HTTP` keeps cookies with
 `cookies: true` and `Stampede.HTTP.csrf_token/1` finds the page's token. The
-[login guide](guides/login.md) walks through both. LiveView
+[login guide](https://stampede.hexdocs.pm/login.html) walks through both. LiveView
 runs record `live.page`, `live.join`, `live.event`, `live.patch`,
 `live.navigate` and `live.upload`.
 
@@ -494,7 +494,7 @@ show them. `--find-limit` then tells you how many people can chat at once. On
 the first token did, because Ollama answers one person at a time by default.
 Setting `OLLAMA_NUM_PARALLEL=4` doubled it to 12.
 
-The [guide](guides/llm.md) has a one-file script that needs no Mix project,
+The [guide](https://stampede.hexdocs.pm/llm.html) has a one-file script that needs no Mix project,
 how to use realistic prompts, and how to read the result. `Stampede.SSE` is
 underneath, for any other server that streams Server-Sent Events.
 
@@ -659,7 +659,7 @@ $ elixir --sname loader --cookie load -S mix stampede.run loadtest/lobby.exs --n
 
 VUs and rates are split evenly, and the metrics merged as if it all ran on
 one machine. From code, pass `nodes: [node() | Node.list()]`. The
-[guide](guides/distributed.md) covers the limits of a single machine and
+[guide](https://stampede.hexdocs.pm/distributed.html) covers the limits of a single machine and
 running across a network.
 
 ## Without a Mix project
@@ -687,16 +687,16 @@ System.halt(if result.passed?, do: 0, else: 1)
 
 ## Guides
 
-  * [Pages behind a login](guides/login.md)
-  * [Phoenix Presence](guides/presence.md)
-  * [GraphQL subscriptions with Absinthe](guides/absinthe.md)
-  * [Load tests in CI](guides/ci.md)
-  * [Spreading the load over machines](guides/distributed.md)
-  * [Load testing AI chat APIs](guides/llm.md)
-  * [Seeing inside your app](guides/probe.md)
-  * [Watching a run in Prometheus and Grafana](guides/prometheus.md)
-  * [Recording a session](guides/recording.md)
-  * [Case study: Supabase Realtime](guides/supabase_realtime.md)
+  * [Pages behind a login](https://stampede.hexdocs.pm/login.html)
+  * [Phoenix Presence](https://stampede.hexdocs.pm/presence.html)
+  * [GraphQL subscriptions with Absinthe](https://stampede.hexdocs.pm/absinthe.html)
+  * [Load tests in CI](https://stampede.hexdocs.pm/ci.html)
+  * [Spreading the load over machines](https://stampede.hexdocs.pm/distributed.html)
+  * [Load testing AI chat APIs](https://stampede.hexdocs.pm/llm.html)
+  * [Seeing inside your app](https://stampede.hexdocs.pm/probe.html)
+  * [Watching a run in Prometheus and Grafana](https://stampede.hexdocs.pm/prometheus.html)
+  * [Recording a session](https://stampede.hexdocs.pm/recording.html)
+  * [Case study: Supabase Realtime](https://stampede.hexdocs.pm/supabase_realtime.html)
 
 ## Why not k6, Locust or Artillery?
 
@@ -710,7 +710,7 @@ reuse your own modules and test data in them.
 ## Status
 
 Stampede is young. I've used it to load test a real-world Phoenix server
-(there's a [case study](guides/supabase_realtime.md) with the numbers), and its
+(there's a [case study](https://stampede.hexdocs.pm/supabase_realtime.html) with the numbers), and its
 test suite runs real load tests against a Phoenix app on every change. Still,
 expect rough edges, and please tell me when you hit one.
 
@@ -731,7 +731,7 @@ If one of these would help you, or something else is missing, say so in
 
 Bug reports go in the issues, questions and ideas in
 [Discussions](https://github.com/mandar1045/stampede/discussions). If you'd
-like to work on Stampede itself, [CONTRIBUTING.md](CONTRIBUTING.md) explains
+like to work on Stampede itself, [CONTRIBUTING.md](https://github.com/mandar1045/stampede/blob/main/CONTRIBUTING.md) explains
 how to get set up.
 
 ## License

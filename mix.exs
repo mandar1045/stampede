@@ -1,7 +1,7 @@
 defmodule Stampede.MixProject do
   use Mix.Project
 
-  @version "1.3.0"
+  @version "1.3.1"
   @source_url "https://github.com/mandar1045/stampede"
 
   def project do
@@ -53,9 +53,6 @@ defmodule Stampede.MixProject do
     [
       main: "readme",
       source_ref: "v#{@version}",
-      # The EPUB would carry every README GIF a second time, and Hex limits docs
-      # to 8 MB.
-      formatters: ["html", "markdown"],
       extras: [
         "README.md",
         "guides/login.md",
@@ -72,7 +69,6 @@ defmodule Stampede.MixProject do
         "CONTRIBUTING.md"
       ],
       groups_for_extras: [Guides: ~r"guides/"],
-      assets: %{"assets" => "assets"},
       groups_for_modules: [
         Clients: [
           Stampede.HTTP,

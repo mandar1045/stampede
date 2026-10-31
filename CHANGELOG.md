@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.3.1 (2026-11-01)
+
+  * The README's images and links now work on hex.pm, not just on GitHub
+  * The README no longer says that signing in isn't recorded, because it is
+
 ## v1.3.0 (2026-11-01)
 
 This one is about real apps. You can record yourself using your app and get a
