@@ -10,17 +10,14 @@ defmodule Stampede.Recorder do
       File.write!("loadtest/checkout.exs", Stampede.Recorder.to_scenario(steps, MyApp.Load.Checkout))
 
   It runs in the same VM as the app, and records from LiveView's and Phoenix's
-  telemetry: pages opened, live navigation, patches, clicks and forms, with the
-  time between them as pauses. Plain GET requests are recorded too.
+  telemetry: pages opened, live navigation, patches, clicks, forms, file uploads
+  and Channels, with the time between them as pauses. Plain GET requests are
+  recorded too. See the [recording guide](recording.html).
 
   Fields that look sensitive, such as passwords and tokens, are replaced with
-  `"CHANGE_ME"`, so they don't end up in a file you might commit. Other form
-  values are kept as they were typed.
-
-  Not recorded yet: file uploads and Channels. Other HTTP requests, such as a
-  POST to a sign-in page, show up as comments in the scenario to fill in by
-  hand. Pages behind a login need the
-  [login guide](login.html).
+  `"CHANGE_ME"`, in forms, in Channels messages and in URLs, so they don't end
+  up in a file you might commit. Other values are kept as they were typed.
+  Uploaded files aren't kept, only their name, size and type.
   """
 
   use GenServer
@@ -30,8 +27,13 @@ defmodule Stampede.Recorder do
     [:phoenix, :live_view, :handle_params, :stop],
     [:phoenix, :live_view, :handle_event, :stop],
     [:phoenix, :live_component, :handle_event, :stop],
-    [:phoenix, :router_dispatch, :stop]
+    [:phoenix, :router_dispatch, :stop],
+    [:phoenix, :channel_joined],
+    [:phoenix, :channel_handled_in]
   ]
+
+  # Topics of LiveView, its uploads and live reload, not of the app's channels.
+  @internal_topics ["lv:", "lvu:", "phoenix:"]
 
   @sensitive ~r/pass|secret|token|card|cvv|ssn|api.?key/i
   @dropped ~w(_csrf_token _target)
@@ -43,6 +45,8 @@ defmodule Stampede.Recorder do
   @max_pause 30_000
   # An event this close before a page change caused it.
   @caused_by 1_500
+  # Changes this close together are someone typing.
+  @typing 2_000
 
   @typedoc "One thing the person did, with `:at` in milliseconds."
   @type step :: map()
@@ -61,6 +65,7 @@ defmodule Stampede.Recorder do
   @spec to_scenario([step()], module() | String.t()) :: String.t()
   def to_scenario(steps, module) do
     name = if is_atom(module), do: inspect(module), else: module
+    steps = compact(steps)
 
     source = """
     defmodule #{name} do
@@ -127,14 +132,29 @@ defmodule Stampede.Recorder do
     %{socket: socket, event: event, params: params} = metadata
 
     if root?(socket) do
-      %{kind: :event, root: socket.root_pid, event: event, params: params, target: nil}
+      %{
+        kind: :event,
+        root: socket.root_pid,
+        event: event,
+        params: params,
+        target: nil,
+        uploads: uploads(socket)
+      }
     end
   end
 
   defp raw([:phoenix, :live_component, :handle_event, :stop], metadata) do
     %{socket: socket, event: event, params: params} = metadata
     target = socket.assigns.myself.cid
-    %{kind: :event, root: socket.root_pid, event: event, params: params, target: target}
+
+    %{
+      kind: :event,
+      root: socket.root_pid,
+      event: event,
+      params: params,
+      target: target,
+      uploads: uploads(socket)
+    }
   end
 
   defp raw([:phoenix, :router_dispatch, :stop], %{plug: Phoenix.LiveView.Plug}), do: nil
@@ -143,7 +163,48 @@ defmodule Stampede.Recorder do
     %{kind: :http, method: conn.method, url: request_url(conn)}
   end
 
+  defp raw([:phoenix, :channel_joined], %{socket: socket, params: params, result: :ok}) do
+    if app_topic?(socket.topic) do
+      %{
+        kind: :join,
+        transport: socket.transport_pid,
+        url: socket_url(socket),
+        topic: socket.topic,
+        params: params
+      }
+    end
+  end
+
+  defp raw([:phoenix, :channel_handled_in], %{socket: socket, event: event, params: params}) do
+    if app_topic?(socket.topic) do
+      %{kind: :push, topic: socket.topic, event: event, params: params}
+    end
+  end
+
   defp raw(_event, _metadata), do: nil
+
+  defp app_topic?(topic), do: not String.starts_with?(topic, @internal_topics)
+
+  defp socket_url(socket) do
+    {path, _handler, _opts} =
+      List.keyfind(socket.endpoint.__sockets__(), socket.handler, 1, {"/socket", nil, nil})
+
+    socket.endpoint.url()
+    |> String.replace_prefix("http", "ws")
+    |> Kernel.<>(path)
+  end
+
+  # What's selected for upload, as the socket's own records of it.
+  defp uploads(socket) do
+    for {name, %{entries: entries}} <- Map.get(socket.assigns, :uploads, %{}),
+        entry <- entries do
+      %{
+        ref: {name, entry.ref},
+        name: Atom.to_string(name),
+        file: %{name: entry.client_name, size: entry.client_size, type: entry.client_type}
+      }
+    end
+  end
 
   defp request_url(conn) do
     url = "#{conn.scheme}://#{conn.host}:#{conn.port}#{conn.request_path}"
@@ -156,7 +217,7 @@ defmodule Stampede.Recorder do
 
   # Works out what each thing that happened was, from what happened before.
   defp steps(raw) do
-    start = %{steps: [], transport: nil, root: nil, uri: nil}
+    start = %{steps: [], transport: nil, root: nil, uri: nil, sockets: %{}, files: MapSet.new()}
 
     raw
     |> Enum.reduce(start, &step/2)
@@ -167,17 +228,19 @@ defmodule Stampede.Recorder do
   defp step(%{kind: :page} = raw, state) do
     kind = if raw.transport == state.transport, do: :navigate, else: :open
     state = %{state | transport: raw.transport, root: raw.root, uri: raw.uri}
-    add(state, %{kind: kind, url: raw.uri, at: raw.at})
+    add(state, %{kind: kind, url: redact_url(raw.uri), at: raw.at})
   end
 
   defp step(%{kind: :params, root: root, uri: uri}, %{root: root, uri: uri} = state), do: state
 
   defp step(%{kind: :params, root: root} = raw, %{root: root} = state) do
-    add(%{state | uri: raw.uri}, %{kind: :patch, url: raw.uri, at: raw.at})
+    add(%{state | uri: raw.uri}, %{kind: :patch, url: redact_url(raw.uri), at: raw.at})
   end
 
   defp step(%{kind: :event, root: root} = raw, %{root: root} = state) do
-    add(state, %{
+    state
+    |> add_uploads(raw)
+    |> add(%{
       kind: event_kind(raw.params),
       event: raw.event,
       params: clean(raw.params),
@@ -187,12 +250,69 @@ defmodule Stampede.Recorder do
   end
 
   defp step(%{kind: :http} = raw, state) do
-    add(state, %{kind: :http, method: raw.method, url: raw.url, at: raw.at})
+    add(state, %{kind: :http, method: raw.method, url: redact_url(raw.url), at: raw.at})
+  end
+
+  defp step(%{kind: :join} = raw, state) do
+    state =
+      if Map.has_key?(state.sockets, raw.transport) do
+        state
+      else
+        state = put_in(state.sockets[raw.transport], raw.url)
+        add(state, %{kind: :channel, url: raw.url, at: raw.at})
+      end
+
+    add(state, %{kind: :join, topic: raw.topic, params: clean(raw.params), at: raw.at})
+  end
+
+  defp step(%{kind: :push} = raw, state) do
+    params = if is_map(raw.params), do: clean(raw.params), else: %{}
+    add(state, %{kind: :push, topic: raw.topic, event: raw.event, params: params, at: raw.at})
   end
 
   defp step(_other_view, state), do: state
 
   defp add(state, step), do: %{state | steps: [step | state.steps]}
+
+  # A file shows up in the socket on the first event after it's picked, and
+  # stays until it's used, so each one is only added once. It goes before that
+  # event, which may need the file to be there.
+  defp add_uploads(state, raw) do
+    new = Enum.reject(raw.uploads, &MapSet.member?(state.files, &1.ref))
+
+    new
+    |> Enum.group_by(& &1.name, & &1.file)
+    |> Enum.reduce(state, fn {name, files}, state ->
+      add(state, %{kind: :upload, name: name, files: files, target: raw.target, at: raw.at})
+    end)
+    |> Map.update!(:files, &Enum.into(new, &1, fn file -> file.ref end))
+  end
+
+  # Typing sends a change for every key. Those are real work for the server, so
+  # they stay, as one step that repeats the last change as many times.
+  defp compact(steps) do
+    steps
+    |> Enum.chunk_while(
+      nil,
+      fn
+        step, nil ->
+          {:cont, typing(step)}
+
+        %{kind: :change, event: event} = step, %{kind: :change, event: event, last: last} = run
+        when step.at - last <= @typing ->
+          {:cont, %{run | params: step.params, last: step.at, count: run.count + 1}}
+
+        step, run ->
+          {:cont, run, typing(step)}
+      end,
+      fn
+        nil -> {:cont, nil}
+        run -> {:cont, run, nil}
+      end
+    )
+  end
+
+  defp typing(step), do: Map.merge(step, %{last: step.at, count: 1})
 
   # LiveView's browser side tells them apart when it sends them, in ways that
   # show in the params: a form's change says what changed, a click has a
@@ -207,7 +327,7 @@ defmodule Stampede.Recorder do
     |> Enum.reject(fn {key, value} -> dropped?(key) or (key == "value" and value == "") end)
     |> Map.new(fn
       {key, value} when is_map(value) -> {key, clean(value)}
-      {key, _value} when is_binary(key) and key != "" -> {key, redact(key, params[key])}
+      {key, value} -> {key, redact(key, value)}
     end)
   end
 
@@ -217,15 +337,36 @@ defmodule Stampede.Recorder do
     if Regex.match?(@sensitive, key), do: @placeholder, else: value
   end
 
+  defp redact_url(url) do
+    uri = URI.parse(url)
+
+    case uri.query do
+      nil ->
+        url
+
+      query ->
+        pairs = for {key, value} <- URI.query_decoder(query), do: {key, redact(key, value)}
+        URI.to_string(%{uri | query: URI.encode_query(pairs)})
+    end
+  end
+
   defp metric(steps) do
-    if Enum.any?(steps, &(&1.kind == :open)), do: "live.join", else: "http.request"
+    kinds = Enum.map(steps, & &1.kind)
+
+    cond do
+      :open in kinds -> "live.join"
+      :join in kinds -> "channel.join"
+      true -> "http.request"
+    end
   end
 
   defp body(steps) do
     steps
     |> Enum.chunk_every(2, 1, [nil])
-    |> Enum.flat_map_reduce(%{open?: false, previous: nil}, fn [step, next], state ->
-      {lines(step, next, state), %{state | open?: open?(step, state), previous: step}}
+    |> Enum.flat_map_reduce(%{open?: false, previous: nil, cast?: false}, fn [step, next],
+                                                                             state ->
+      lines = lines(step, next, state)
+      {lines, %{state | open?: open?(step, state), previous: step, cast?: cast?(step, state)}}
     end)
     |> then(fn {lines, state} -> lines ++ if(state.open?, do: [close()], else: []) end)
     |> Enum.join("\n")
@@ -233,6 +374,9 @@ defmodule Stampede.Recorder do
 
   defp open?(%{kind: :open}, _state), do: true
   defp open?(_step, state), do: state.open?
+
+  defp cast?(%{kind: :push}, _state), do: true
+  defp cast?(_step, state), do: state.cast?
 
   defp close, do: ":ok = Stampede.LiveView.close(view)"
 
@@ -243,11 +387,11 @@ defmodule Stampede.Recorder do
   defp pause(_step, nil), do: []
 
   defp pause(step, previous) do
-    case step.at - previous.at do
-      gap when gap < @min_pause -> []
-      gap -> ["Process.sleep(#{inspect(gap |> min(@max_pause) |> round_to(100))})"]
-    end
+    sleep(step.at - previous.last)
   end
+
+  defp sleep(gap) when gap < @min_pause, do: []
+  defp sleep(gap), do: ["Process.sleep(#{inspect(gap |> min(@max_pause) |> round_to(100))})"]
 
   defp round_to(value, step), do: div(value + div(step, 2), step) * step
 
@@ -272,21 +416,66 @@ defmodule Stampede.Recorder do
     ["# #{step.method} #{step.url} happened here. Add it by hand, if the rest needs it."]
   end
 
-  defp code(step, next, state) do
+  defp code(%{kind: :channel} = step, _next, _state) do
+    ["{:ok, socket} = Stampede.Channels.connect(#{inspect(step.url)})"]
+  end
+
+  defp code(%{kind: :join} = step, _next, _state) do
+    params = Macro.to_string(Macro.escape(step.params))
+    ["{:ok, _reply} = Stampede.Channels.join(socket, #{inspect(step.topic)}, #{params})"]
+  end
+
+  defp code(%{kind: :push} = step, _next, state) do
+    note =
+      if state.cast?,
+        do: [],
+        else: ["# cast doesn't wait for a reply. If this event replies, push/5 times it."]
+
+    params = Macro.to_string(Macro.escape(step.params))
+
+    note ++
+      [
+        "Stampede.Channels.cast(socket, #{inspect(step.topic)}, #{inspect(step.event)}, #{params})"
+      ]
+  end
+
+  defp code(%{kind: :upload} = step, _next, state) do
+    files =
+      Enum.map_join(step.files, ", ", fn file ->
+        "%{name: #{inspect(file.name)}, content: :crypto.strong_rand_bytes(#{file.size}), " <>
+          "type: #{inspect(file.type)}}"
+      end)
+
+    target = if step.target, do: ", target: #{step.target}", else: ""
+    upload = ":ok = Stampede.LiveView.upload(view, #{inspect(step.name)}, [#{files}]#{target})"
+    if state.open?, do: [upload], else: []
+  end
+
+  defp code(%{count: count} = step, _next, state) when count > 1 do
+    pause = sleep(div(step.last - step.at, count - 1))
+    call = "{:ok, _reply} = #{event_call(step)}"
+
     if state.open? do
-      arguments = Enum.join(event_arguments(step), ", ")
-      call = "Stampede.LiveView.#{step.kind}(view, #{arguments})"
-      [result(step, next) <> " = " <> call]
+      ["# You typed here, which sent #{count} changes."] ++
+        ["for _change <- 1..#{count} do"] ++ pause ++ [call, "end"]
     else
       []
     end
+  end
+
+  defp code(step, next, state) do
+    if state.open?, do: [result(step, next) <> " = " <> event_call(step)], else: []
+  end
+
+  defp event_call(step) do
+    "Stampede.LiveView.#{step.kind}(view, #{Enum.join(event_arguments(step), ", ")})"
   end
 
   defp event_arguments(step) do
     params =
       if step.kind == :click and step.params == %{} and step.target == nil,
         do: [],
-        else: [inspect(step.params, limit: :infinity, printable_limit: :infinity)]
+        else: [Macro.to_string(Macro.escape(step.params))]
 
     target = if step.target, do: ["target: #{step.target}"], else: []
     [inspect(step.event)] ++ params ++ target

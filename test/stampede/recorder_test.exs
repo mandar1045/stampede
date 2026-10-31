@@ -115,6 +115,104 @@ defmodule Stampede.RecorderTest do
     assert scenario =~ "Process.sleep(30000)"
   end
 
+  test "keeps secrets out of URLs" do
+    steps =
+      record(fn ->
+        {:ok, view} = LiveView.connect(url("/counter?token=abc123&page=1"))
+        {:ok, view} = LiveView.patch(view, "/counter?page=2&api_key=abc456")
+        :ok = LiveView.close(view)
+        {:ok, _response} = Stampede.HTTP.get(url("/plain?password=abc789"))
+      end)
+
+    scenario = Recorder.to_scenario(steps, Urls)
+
+    refute scenario =~ "abc"
+    assert scenario =~ "token=CHANGE_ME&page=1"
+    assert scenario =~ "page=2&api_key=CHANGE_ME"
+    assert scenario =~ "password=CHANGE_ME"
+  end
+
+  test "turns typing into a loop, with as many changes" do
+    change = fn at, email ->
+      %{kind: :change, event: "validate", params: %{"email" => email}, target: nil, at: at}
+    end
+
+    steps = [
+      %{kind: :open, url: "http://localhost/a", at: 0},
+      change.(1_000, "j"),
+      change.(1_300, "jo"),
+      change.(1_600, "jo@"),
+      %{kind: :submit, event: "save", params: %{"email" => "jo@"}, target: nil, at: 3_000}
+    ]
+
+    scenario = Recorder.to_scenario(steps, Typing)
+
+    assert scenario =~ "# You typed here, which sent 3 changes."
+    assert scenario =~ "for _change <- 1..3 do"
+    assert scenario =~ "Process.sleep(300)"
+    assert scenario =~ ~s(%{"email" => "jo@"})
+    refute scenario =~ ~s(%{"email" => "jo"})
+    assert scenario =~ "Process.sleep(1400)"
+  end
+
+  test "records uploads by their name, size and type, not their content" do
+    photo = %{name: "me.png", content: "secret pixels", type: "image/png"}
+
+    steps =
+      record(fn ->
+        {:ok, view} = LiveView.connect(url("/upload"))
+        :ok = LiveView.upload(view, "avatar", [photo])
+        {:ok, _reply} = LiveView.submit(view, "save", %{"title" => "Hi"})
+        :ok = LiveView.close(view)
+      end)
+
+    assert kinds(steps) == [:open, :upload, :submit]
+    assert [_, %{name: "avatar", files: [%{name: "me.png", size: 13}]}, _] = steps
+
+    source = Recorder.to_scenario(steps, Stampede.RecorderTest.Uploaded)
+    refute source =~ "secret pixels"
+    assert source =~ ":crypto.strong_rand_bytes(13)"
+
+    [{module, _binary}] = Code.compile_string(source)
+    result = Stampede.run(module, stages: nil, vus: 1, duration: 500)
+
+    assert result.errors == []
+    assert result.metrics["live.upload"].count >= 1
+  end
+
+  test "records Channels, without LiveView's own" do
+    steps =
+      record(fn ->
+        {:ok, view} = LiveView.connect(url("/counter"))
+        :ok = LiveView.close(view)
+        {:ok, socket} = Stampede.Channels.connect(Stampede.TestEndpoint.socket_url())
+
+        {:ok, _reply} =
+          Stampede.Channels.join(socket, "room:lobby", %{"token" => "abc", "a" => 1})
+
+        {:ok, _reply} =
+          Stampede.Channels.push(socket, "room:lobby", "ping", %{"password" => "abc"})
+      end)
+
+    assert kinds(steps) == [:open, :channel, :join, :push]
+
+    source = Recorder.to_scenario(steps, Stampede.RecorderTest.Chatting)
+    refute source =~ "abc"
+    assert source =~ ~s(Stampede.Channels.join(socket, "room:lobby")
+    assert source =~ ~s("token" => "CHANGE_ME")
+    assert source =~ "cast doesn't wait for a reply"
+
+    # The endpoint's configured port isn't the one the test server got.
+    source =
+      Regex.replace(~r/ws:\/\/[^"]+/, source, Stampede.TestEndpoint.socket_url(), global: true)
+
+    [{module, _binary}] = Code.compile_string(source)
+    result = Stampede.run(module, stages: nil, vus: 1, duration: 500)
+
+    assert result.errors == []
+    assert result.metrics["channel.join"].count >= 1
+  end
+
   # Records a session, then runs what it wrote against the same app.
   test "writes a scenario that does the same thing" do
     steps =

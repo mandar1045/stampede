@@ -62,6 +62,7 @@ defmodule Stampede.MixProject do
         "guides/distributed.md",
         "guides/llm.md",
         "guides/probe.md",
+        "guides/recording.md",
         "guides/supabase_realtime.md",
         "CHANGELOG.md",
         "CONTRIBUTING.md"

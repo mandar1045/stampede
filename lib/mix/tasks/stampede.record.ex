@@ -13,7 +13,8 @@ defmodule Mix.Tasks.Stampede.Record do
   `mix stampede.run`.
 
   Passwords and other fields that look sensitive are replaced with
-  `"CHANGE_ME"`. See `Stampede.Recorder` for what's recorded and what isn't.
+  `"CHANGE_ME"`. The [recording guide](recording.html) has what's recorded and
+  what isn't.
 
   ## Options
 

@@ -310,11 +310,13 @@ def run(_vu) do
 end
 ```
 
-It has your clicks, forms, navigation and pauses. Passwords, tokens and the like
-become `"CHANGE_ME"`, so they don't end up in a file you might commit. File
-uploads aren't recorded yet, and a POST to a sign-in page shows up as a comment
-for you to fill in, so pages behind a login still need the
-[login guide](guides/login.md).
+It has your clicks, forms, uploads, channels, navigation and pauses. Passwords,
+tokens and the like become `"CHANGE_ME"`, in forms and in URLs, so they don't end
+up in a file you might commit. I tried it with a real browser, and the scenario
+it wrote ran against the same app with no errors.
+
+Signing in isn't recorded yet, so record the pages after it and add the sign-in
+by hand. The [guide](guides/recording.md) has the details.
 
 ## In your test suite
 
@@ -593,6 +595,7 @@ System.halt(if result.passed?, do: 0, else: 1)
   * [Spreading the load over machines](guides/distributed.md)
   * [Load testing AI chat APIs](guides/llm.md)
   * [Seeing inside your app](guides/probe.md)
+  * [Recording a session](guides/recording.md)
   * [Case study: Supabase Realtime](guides/supabase_realtime.md)
 
 ## Why not k6, Locust or Artillery?
