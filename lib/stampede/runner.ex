@@ -106,6 +106,8 @@ defmodule Stampede.Runner do
           printer: printer,
           probes: probes,
           server: %{},
+          server_rows: %{},
+          lost: [],
           queues: [],
           named?: named?,
           limit: run.limit,
@@ -130,7 +132,8 @@ defmodule Stampede.Runner do
         Process.flag(:priority, priority)
       end
 
-    server_rows = Probe.stop(probes)
+    lost_rows = state.server_rows |> Map.take(state.lost) |> Map.values()
+    server_rows = lost_rows ++ Probe.stop(Map.drop(probes, state.lost), state.server_rows)
     duration = state.finals |> Enum.map(& &1.duration) |> Enum.max()
 
     summary =
@@ -148,7 +151,7 @@ defmodule Stampede.Runner do
         Enum.reverse(state.timeline)
       )
       |> with_limit(state.limit)
-      |> Map.put(:server, Probe.summary(probes, state.timeline, state.queues))
+      |> Map.put(:server, Probe.summary(probes, state.timeline, state.queues, state.lost))
 
     measurements = %{duration: System.monotonic_time() - started_at}
 
@@ -304,6 +307,15 @@ defmodule Stampede.Runner do
       {:probe_queues, pid, queues} when is_map_key(probes, pid) ->
         collect(%{state | queues: queues ++ state.queues})
 
+      {:probe_rows, pid, rows} when is_map_key(probes, pid) ->
+        collect(put_in(state.server_rows[pid], rows))
+
+      # The app went down, which is worth knowing, so the run goes on to show
+      # what that did.
+      {:DOWN, _monitor, :process, pid, _reason} when is_map_key(probes, pid) ->
+        server = Map.delete(state.server, pid)
+        collect(%{state | server: server, lost: [pid | state.lost]})
+
       {:done, pid, final} when is_map_key(running, pid) ->
         {{_node, monitor}, running} = Map.pop!(running, pid)
         Process.demonitor(monitor, [:flush])
@@ -392,7 +404,7 @@ defmodule Stampede.Runner do
        when not is_map_key(state, :wrapped) do
     server_busy = state.server |> Map.values() |> Enum.map(& &1.busy) |> Enum.max(fn -> 0.0 end)
 
-    case Limit.add_second(limit, entry.at, entry.rows, entry.busy, server_busy) do
+    case Limit.add_second(limit, entry.at, entry.rows, entry.busy, server_busy, state.lost != []) do
       {:continue, new_limit} ->
         print_step(state, limit, new_limit)
         %{state | limit: new_limit}

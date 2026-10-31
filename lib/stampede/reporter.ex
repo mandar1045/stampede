@@ -123,9 +123,15 @@ defmodule Stampede.Reporter do
       "\n  server\n    #{Enum.join(server.nodes, ", ")} at its busiest: schedulers ",
       "#{percent(server.busy)} busy, #{bytes(server.memory)} of memory, ",
       "#{integer(server.processes)} processes, run queue #{integer(server.run_queue)}\n",
+      lost(server),
       if(queues != [], do: ["    longest message queues\n" | queues], else: [])
     ]
   end
+
+  defp lost(%{lost: [_ | _] = lost}),
+    do: "    went down during the run: #{Enum.join(lost, ", ")}\n"
+
+  defp lost(_server), do: []
 
   # Shared with the HTML report.
   @doc false
@@ -206,6 +212,10 @@ defmodule Stampede.Reporter do
         else: headline
 
     case limit.failed do
+      # Everything else that step can say comes from the server being gone.
+      %{server_lost?: true} ->
+        headline <> ". The server went down during that step"
+
       %{busy: busy} when busy >= @busy ->
         headline <>
           ". The load test was #{percent(busy)} busy at that step, so the limit may be " <>

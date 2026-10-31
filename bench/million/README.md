@@ -2,8 +2,8 @@
 
 This is everything I use to load test a single Phoenix server with hundreds of
 thousands of connections on AWS, so you can check my numbers or run it
-yourself. The goal is a million. The first real run, on a 4-core server,
-held **400,000** with no errors. The [results](#results) are below.
+yourself. The goal is a million. So far, one 4-core server has held
+**600,000** with no errors. The [results](#results) are below.
 
   * [`app/`](app/) is the app under test: a fresh `mix phx.new` app with a
     channel and a LiveView page.
@@ -25,8 +25,8 @@ For a million, one server and four load machines, in the same AWS zone:
 | Load, ×4 | r7g.xlarge | 4 | 32 GB | $0.15/h each |
 
 That's about $1.80 an hour. A Channels run and a LiveView run, with setup,
-take under two hours. My AWS account only allowed 8 vCPUs so far, so the
-first run used two r7g.xlarge machines instead (see [Results](#results)).
+take under two hours. My AWS account allows 16 vCPUs so far, so the runs below
+use smaller machines (see [Results](#results)).
 
 Why these sizes: on my laptop, a held Channels connection took 42 KB on the
 Phoenix side and 23 KB on Stampede's. A LiveView user took about 105 KB and
@@ -91,6 +91,52 @@ The AI model server runs are in the
 [guide](https://github.com/mandar1045/stampede/blob/main/guides/llm.md#a-real-run),
 with their results here too, in `20261031-ollama-1-slot` and
 `20261031-ollama-4-slots`.
+
+### 600,000 Channels users on a 4-core server (October 31, 2026)
+
+Four r7g.xlarge machines in Mumbai (4 Graviton vCPUs and 32 GB each): one for
+Phoenix 1.8.16 with Bandit, and three for Stampede. Everything else is the
+same as in the 400,000 run below: the same app, the same users that behave
+like Phoenix's JavaScript client, and the same rules for passing a step.
+
+```console
+$ ZONE=ap-south-1a SERVER_TYPE=r7g.xlarge LOADERS=3 SOURCE_IPS=14 ./up.sh
+$ ./deploy.sh
+$ NO_PROBE=1 STEP_RAMP=100 ./run.sh channels 0 0 0 --find-limit --start 100000 --step 100000 --up-to 600000 --hold 60s
+```
+
+| Users | Join p95 | Message p95 | Errors | Server CPU | Server memory |
+|---:|---:|---:|---:|---:|---:|
+| 100,000 | 9.05ms | 0.98ms | 0 | 13% | 5 GB |
+| 200,000 | 6.31ms | 1.50ms | 0 | 32% | 10 GB |
+| 300,000 | 6.84ms | 1.75ms | 0 | 41% | 14 GB |
+| 400,000 | 4.32ms | 1.75ms | 0 | 58% | 19 GB |
+| 500,000 | 13.23ms | 3.61ms | 0 | 70% | 23 GB |
+| **600,000** | **30.65ms** | **9.80ms** | **0** | **76%** | **28 GB** |
+
+CPU and memory are while each step held. The load machines were never the
+limit this time, at 31% busy at most. Memory was: at 600,000 the machine had
+98% of its memory in use, so this is about the ceiling for 32 GB. Each
+connection took about 47 KB.
+
+I ran it three times, and I want to be straight about all three:
+
+| Run | Probe | Result | Server CPU at 400k |
+|---|---|---|---:|
+| [`20261031-no-probe`](results/20261031-no-probe) | off | held 600,000 | 58% |
+| [`20261031-probe-limited-scan`](results/20261031-probe-limited-scan) | on | held 600,000 | 64% |
+| [`20261031-probe-full-scan`](results/20261031-probe-full-scan) | on, an earlier version | held 500,000, then the kernel killed the app for using too much memory at about 598,000 | 48% |
+
+The crash came with an earlier version of the probe, which asked every process
+for its message queue every 10 seconds. I replaced that with asking only the
+named processes and a small sample. The two runs since both held 600,000, but
+at 98% memory there isn't much room, so another crash wouldn't surprise me.
+
+Comparing the two 600,000 runs, the probe costs about 6 points of CPU. I can't
+yet explain why the server's CPU is higher than in the 400,000 run below, which
+was 24% with one load machine and no probe, or why the crashed run shows the
+lowest CPU here. The probe isn't the reason for the first one, since the
+no-probe run shows it too.
 
 ### 400,000 Channels users on a 4-core server (October 29, 2026)
 

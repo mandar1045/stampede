@@ -36,6 +36,16 @@ defmodule Stampede.ProbeTest do
     assert result.metrics["channel.push"].count > 0
   end
 
+  test "takes thresholds on what the app timed" do
+    thresholds = [{"server.channel.event", p95: 60_000}, {"server.channel.join", count: 0}]
+
+    result =
+      Stampede.run(Lobby, vus: 1, duration: 1_500, probe: node(), thresholds: thresholds)
+
+    assert [%{passed?: true}, %{metric: "server.channel.join", passed?: false}] =
+             result.thresholds
+  end
+
   defmodule Repo do
     def config, do: [telemetry_prefix: [:my, :repo]]
   end
@@ -112,7 +122,16 @@ defmodule Stampede.ProbeTest do
       # Elixir, but neither Stampede nor telemetry, like an app we know
       # nothing about.
       :ok = :erpc.call(node, :code, :add_paths, [[:code.lib_dir(:elixir) ++ ~c"/ebin"]])
-      on_exit(fn -> :peer.stop(peer) end)
+
+      on_exit(fn ->
+        try do
+          :peer.stop(peer)
+        catch
+          # The test that takes the node down has already stopped it.
+          :exit, _reason -> :ok
+        end
+      end)
+
       %{peer: node}
     end
 
@@ -125,6 +144,18 @@ defmodule Stampede.ProbeTest do
       assert result.server.processes > 0
       assert :erpc.call(peer, :code, :is_loaded, [Stampede.Metrics]) == false
       assert :erpc.call(peer, :code, :is_loaded, [Stampede.Probe.Agent]) == false
+    end
+
+    test "notices when the app's node goes down, and keeps what it timed", %{peer: peer} do
+      Task.start(fn ->
+        Process.sleep(1_500)
+        :erpc.cast(peer, :erlang, :halt, [])
+      end)
+
+      result = Stampede.run(Observed, vus: 1, duration: 2_500, probe: peer)
+
+      assert result.server.lost == [Atom.to_string(peer)]
+      assert result.server.nodes == [Atom.to_string(peer)]
     end
 
     test "its agent stops by itself when the run goes away", %{peer: peer} do

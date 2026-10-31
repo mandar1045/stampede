@@ -20,6 +20,7 @@ defmodule Stampede.Limit do
     rows: %{},
     busy: 0.0,
     server_busy: 0.0,
+    server_lost?: false,
     steps: []
   ]
 
@@ -90,16 +91,17 @@ defmodule Stampede.Limit do
 
   # Takes the counts of the second that ended `to` milliseconds into the run,
   # which belong to the step it ends in, and how busy the load test and the
-  # server were. Returns {:stop, limit} once a step failed or the last one
-  # passed.
-  def add_second(%__MODULE__{} = limit, to, rows, busy, server_busy) do
+  # server were, and whether the server went down. Returns {:stop, limit} once
+  # a step failed or the last one passed.
+  def add_second(%__MODULE__{} = limit, to, rows, busy, server_busy, server_lost?) do
     {_step_from, step_to} = window(limit, limit.index)
 
     limit = %{
       limit
       | rows: Map.merge(limit.rows, rows, fn _key, a, b -> a + b end),
         busy: max(limit.busy, busy),
-        server_busy: max(limit.server_busy, server_busy)
+        server_busy: max(limit.server_busy, server_busy),
+        server_lost?: limit.server_lost? or server_lost?
     }
 
     if to >= step_to - @slack, do: check(limit), else: {:continue, limit}
@@ -118,7 +120,8 @@ defmodule Stampede.Limit do
       thresholds: thresholds,
       passed?: Enum.all?(thresholds, & &1.passed?),
       busy: limit.busy,
-      server_busy: limit.server_busy
+      server_busy: limit.server_busy,
+      server_lost?: limit.server_lost?
     }
 
     limit = %{

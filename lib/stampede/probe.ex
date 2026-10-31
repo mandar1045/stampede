@@ -29,34 +29,39 @@ defmodule Stampede.Probe do
     end)
   end
 
-  # Stops the agents and returns the rows of what they timed.
-  def stop(probes) do
+  # Stops the agents and returns the rows of what they timed. An app that
+  # crashed during the run can't answer, so `latest` has the last rows each
+  # agent sent.
+  def stop(probes, latest \\ %{}) do
     for {pid, probe} <- probes do
       send(pid, :stop)
-      rows = await_rows(pid, probe.monitor)
+      rows = await_rows(pid, probe.monitor, Map.get(latest, pid, []))
       unload(probe)
       rows
     end
   end
 
-  defp await_rows(pid, monitor) do
+  defp await_rows(pid, monitor, latest) do
     receive do
       {:probe, ^pid, _sample} ->
-        await_rows(pid, monitor)
+        await_rows(pid, monitor, latest)
 
       {:probe_queues, ^pid, _queues} ->
-        await_rows(pid, monitor)
+        await_rows(pid, monitor, latest)
+
+      {:probe_rows, ^pid, rows} ->
+        await_rows(pid, monitor, rows)
 
       {:probe_done, ^pid, rows} ->
         Process.demonitor(monitor, [:flush])
         rows
 
       {:DOWN, ^monitor, :process, ^pid, _reason} ->
-        []
+        latest
     after
       @stop_timeout ->
         Process.demonitor(monitor, [:flush])
-        []
+        latest
     end
   end
 
@@ -72,13 +77,16 @@ defmodule Stampede.Probe do
   end
 
   # What the agents saw over a whole run, at its peak.
-  def summary(probes, _timeline, _queues) when map_size(probes) == 0, do: nil
+  def summary(probes, timeline, queues, lost \\ [])
 
-  def summary(probes, timeline, queues) do
+  def summary(probes, _timeline, _queues, _lost) when map_size(probes) == 0, do: nil
+
+  def summary(probes, timeline, queues, lost) do
     samples = for %{server: server} <- timeline, do: server
 
     %{
       nodes: probes |> Map.values() |> Enum.map(&Atom.to_string(&1.node)) |> Enum.sort(),
+      lost: lost |> Enum.map(&Atom.to_string(probes[&1].node)) |> Enum.sort(),
       busy: peak(samples, :busy),
       memory: peak(samples, :memory),
       processes: peak(samples, :processes),
@@ -143,9 +151,13 @@ defmodule Stampede.Probe.Agent do
   alias Stampede.Metrics
 
   @interval 1_000
-  # Going through every process takes a while on a busy node, so it's only
-  # done every so often, in a process that doesn't compete with the app's.
+  # Asking a process for its queue wakes it, so on a node with a process per
+  # connection, a full scan wakes them all, and costs the app real CPU. Past
+  # this many, it only asks the named ones, where bottlenecks usually are,
+  # such as a PubSub or a pool, and a few others picked at random.
   @scan_every 10
+  @scan_all_up_to 20_000
+  @scan_sample 1_000
   @long_queue 100
 
   @timings %{
@@ -212,13 +224,14 @@ defmodule Stampede.Probe.Agent do
   defp scan(%{ticks: ticks} = state) when rem(ticks, @scan_every) == 1 do
     agent = self()
     spawn(fn -> send(agent, {:queues, longest_queues()}) end)
+    send(state.controller, {:probe_rows, self(), Metrics.rows(state.table)})
     state
   end
 
   defp scan(state), do: state
 
   defp longest_queues do
-    Process.list()
+    processes_to_scan()
     |> Enum.flat_map(fn pid ->
       case Process.info(pid, :message_queue_len) do
         {:message_queue_len, length} when length >= @long_queue -> [{length, pid}]
@@ -228,6 +241,15 @@ defmodule Stampede.Probe.Agent do
     |> Enum.sort(:desc)
     |> Enum.take(5)
     |> Enum.map(fn {length, pid} -> %{length: length, process: describe(pid)} end)
+  end
+
+  defp processes_to_scan do
+    if :erlang.system_info(:process_count) <= @scan_all_up_to do
+      Process.list()
+    else
+      named = for name <- Process.registered(), pid = Process.whereis(name), do: pid
+      Enum.uniq(named ++ Enum.take_random(Process.list(), @scan_sample))
+    end
   end
 
   defp describe(pid) do

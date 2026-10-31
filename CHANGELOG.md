@@ -6,7 +6,8 @@
     during a run, with no changes to it: scheduler use, memory, processes, run
     queue and the longest message queues, charted in the dashboard and the
     HTML report, and Phoenix, LiveView and Ecto timings as `server.*` metrics.
-    A `--find-limit` verdict says when the server's schedulers ran out
+    A `--find-limit` verdict says when the server's schedulers ran out, or
+    when it went down
   * `Stampede.LLM` load tests AI chat APIs in OpenAI's format, such as Ollama,
     vLLM or llama.cpp. It records time to first token, the gaps between
     tokens, time per token and tokens per second, measured the same way as

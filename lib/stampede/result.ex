@@ -31,7 +31,8 @@ defmodule Stampede.Result do
       (`:server_busy`, with `:probe`) were at most, from 0 to 1. `nil` for
       other runs.
     * `:server` - for a run with `:probe`, what the application's nodes
-      looked like at their peak: the `:nodes`, how `:busy` their schedulers
+      looked like at their peak: the `:nodes`, those `:lost` during the run
+      because they went down, how `:busy` their schedulers
       were, from 0 to 1, their `:memory` in bytes, their `:processes`, their
       `:run_queue`, and the longest message `:queues` seen. `nil` for other
       runs. Each second in the `:timeline` also has a `:server` with those

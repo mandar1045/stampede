@@ -210,6 +210,39 @@ defmodule Stampede.ReporterTest do
     assert Reporter.format(result) =~ "The server's schedulers were 97% busy at that step"
   end
 
+  test "says when the server went down, whatever else that step looks like" do
+    thresholds = [%{metric: "x", stat: :count, value: 9, limit: 0, passed?: false}]
+
+    step = %{
+      target: 600,
+      busy: 1.0,
+      server_busy: 0.5,
+      server_lost?: true,
+      passed?: false,
+      thresholds: thresholds
+    }
+
+    result = %Result{
+      scenario: Lobby,
+      duration: 1_000,
+      limit: %{by: :vus, value: 500, failed: step, up_to?: false, min: nil, steps: [step]},
+      server: %{
+        nodes: ["app@a"],
+        lost: ["app@a"],
+        busy: 0.5,
+        memory: 1_000_000_000,
+        processes: 10,
+        run_queue: 0,
+        queues: []
+      }
+    }
+
+    summary = Reporter.format(result)
+    assert summary =~ "The server went down during that step"
+    refute summary =~ "may be its own"
+    assert summary =~ "went down during the run: app@a"
+  end
+
   test "warns when the load test was too busy to trust its timings" do
     point = fn busy -> %{at: 1_000, vus: 1, busy: busy, metrics: %{}} end
 

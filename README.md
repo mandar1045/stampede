@@ -129,34 +129,38 @@ Instead of a fixed load, it adds users a step at a time and checks your
 thresholds over each step. The first step that breaks one ends the run, and
 the summary tells you the most users that passed.
 
-I tried it on AWS: stock Phoenix on one 4-core, 32 GB server, and Stampede
-on a second machine of the same size. Every user behaves like Phoenix's
+I tried it on AWS: stock Phoenix on one 4-core, 32 GB server, and Stampede on
+three more machines of the same size. Every user behaves like Phoenix's
 JavaScript client: it joins a chat room, sends a heartbeat every 30 seconds
 and a message every 30 to 60, and stays. Each step ramps over 100 seconds:
 
 ```console
-$ mix stampede.run loadtest/channels.exs --find-limit --start 100000 --step 100000 --up-to 800000 --hold 60s
+$ mix stampede.run loadtest/channels.exs --find-limit --start 100000 --step 100000 --up-to 600000 --hold 60s
 ```
 
 ```
- 159.6s  vus: 100000  iterations: 0  errors: 0  load test busy: 16%
+ 159.6s  vus: 100000  iterations: 0  errors: 0  load test busy: 6%
    step  100,000 VUs: held
- 319.4s  vus: 200000  iterations: 0  errors: 0  load test busy: 29%
+ 319.2s  vus: 200000  iterations: 0  errors: 0  load test busy: 11%
    step  200,000 VUs: held
- 479.1s  vus: 300000  iterations: 0  errors: 0  load test busy: 42%
+ 479.8s  vus: 300000  iterations: 0  errors: 0  load test busy: 16%
    step  300,000 VUs: held
- 639.0s  vus: 400000  iterations: 0  errors: 0  load test busy: 55%
+ 639.5s  vus: 400000  iterations: 0  errors: 0  load test busy: 21%
    step  400,000 VUs: held
+ 799.1s  vus: 500000  iterations: 0  errors: 0  load test busy: 27%
+   step  500,000 VUs: held
+ 959.8s  vus: 600000  iterations: 0  errors: 0  load test busy: 31%
+   step  600,000 VUs: held
 ```
 
-400,000 users, no errors, joins in 12ms and messages in 4ms at p95. While it
-held them, the Phoenix server used 24% of its CPU and 18 GB of memory, and
-didn't log a single warning. The HTML report's steps:
+600,000 users on 4 cores, no errors, joins in 31ms and messages in 10ms at
+p95. The server held them at 76% CPU and didn't log a single warning. Here's
+the HTML report from the same run:
 
-![The steps of the 400,000-user run in the HTML report](assets/benchmark-400k.png)
+![The HTML report of the 600,000-user run](assets/benchmark-600k.png)
 
-That's where this test stops: past 400,000, the one machine running Stampede
-ran out of CPU before Phoenix did, so going further needs more load machines.
+That's about as far as this server goes, because at 600,000 its memory was
+98% full. Each connection took about 47 KB, so more memory means more users.
 
 Everything you need to run it yourself, and every number it measured, is in
 [`bench/million`](https://github.com/mandar1045/stampede/tree/main/bench/million).
@@ -192,7 +196,7 @@ in a scenario's options steps up the arrival rate instead of users.
 It's new in 1.2, so the options and the report may still change a little.
 `--badge badge.svg` writes a badge with the result, for your README:
 
-![load tested: 400,000 VUs](assets/badge-400k.svg)
+![load tested: 600,000 VUs](assets/badge-600k.svg)
 
 ## Scenarios
 
@@ -470,8 +474,16 @@ queries come back as `server.*` metrics, with percentiles, and you can set
 thresholds on them like any other metric. When a `--find-limit` step fails,
 the verdict tells you if the server's schedulers were the ones that ran out.
 
+Here's what the probe saw on the way to 600,000 users, with 1.2 million
+processes on 4 cores:
+
+![The Server section of the HTML report](assets/benchmark-server.png)
+
 A small agent runs on the app's node during the test. It stops by itself if
-the test goes away, and its code is removed afterwards.
+the test goes away, and its code is removed afterwards. It costs a little:
+in that test, the server's CPU was about 6 points higher with the probe on.
+The [guide](guides/probe.md) covers connecting to a real deployment, and how
+to read what it finds.
 
 ## Results
 
@@ -546,6 +558,7 @@ System.halt(if result.passed?, do: 0, else: 1)
   * [Load tests in CI](guides/ci.md)
   * [Spreading the load over machines](guides/distributed.md)
   * [Load testing AI chat APIs](guides/llm.md)
+  * [Seeing inside your app](guides/probe.md)
   * [Case study: Supabase Realtime](guides/supabase_realtime.md)
 
 ## Why not k6, Locust or Artillery?
