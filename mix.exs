@@ -53,6 +53,9 @@ defmodule Stampede.MixProject do
     [
       main: "readme",
       source_ref: "v#{@version}",
+      # The EPUB would carry every README GIF a second time, and Hex limits docs
+      # to 8 MB.
+      formatters: ["html", "markdown"],
       extras: [
         "README.md",
         "guides/login.md",
