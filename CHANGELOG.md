@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+  * `mix stampede.record` starts your app and records what you do in the
+    browser, then writes it as a scenario, with your clicks, forms, navigation
+    and pauses. Passwords and other sensitive fields become `"CHANGE_ME"`.
+    It's new, so it may still change
   * `--probe app@host`, or `probe:` from code, watches the app from the inside
     during a run, with no changes to it: scheduler use, memory, processes, run
     queue and the longest message queues, charted in the dashboard and the

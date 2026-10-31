@@ -83,7 +83,8 @@ defmodule Stampede.MixProject do
           Stampede.Channels.Serializer.V1,
           Stampede.Channels.Message
         ],
-        Results: [Stampede.Result, Stampede.Reporter, Stampede.Dashboard]
+        Results: [Stampede.Result, Stampede.Reporter, Stampede.Dashboard],
+        Recording: [Stampede.Recorder]
       ]
     ]
   end

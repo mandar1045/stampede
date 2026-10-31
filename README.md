@@ -282,6 +282,40 @@ milliseconds. Checks have `failed` and `failed_rate`, and every metric has
 `count` and `rate`, per second. Percentiles stay within 1% of the exact
 value, however many samples a run collects.
 
+## Recording a session
+
+Writing a LiveView scenario by hand means looking up event names and form
+fields. Instead, you can click through your app once and let Stampede write it:
+
+```console
+$ mix stampede.record Checkout
+```
+
+That starts your app. Use it in the browser as a user would, then press Enter
+in the terminal, and you get `loadtest/checkout.exs`:
+
+```elixir
+def run(_vu) do
+  {:ok, view} = Stampede.LiveView.connect("http://localhost:4000/counter")
+  Process.sleep(1200)
+  {:ok, _reply} = Stampede.LiveView.click(view, "inc")
+  Process.sleep(1500)
+
+  {:ok, _reply} =
+    Stampede.LiveView.submit(view, "save", %{
+      "user" => %{"email" => "jo@example.com", "password" => "CHANGE_ME"}
+    })
+
+  :ok = Stampede.LiveView.close(view)
+end
+```
+
+It has your clicks, forms, navigation and pauses. Passwords, tokens and the like
+become `"CHANGE_ME"`, so they don't end up in a file you might commit. File
+uploads aren't recorded yet, and a POST to a sign-in page shows up as a comment
+for you to fill in, so pages behind a login still need the
+[login guide](guides/login.md).
+
 ## In your test suite
 
 If you'd rather keep load tests with your other tests, `Stampede.ExUnit`
@@ -583,7 +617,6 @@ What I'm working on next:
 
   * Much bigger tests, spread over several machines, aiming for a million
     connections to one Phoenix server
-  * Recording a session in the browser and turning it into a scenario
   * A Livebook smart cell
   * A command line tool that doesn't need Elixir installed
   * More protocols: Socket.IO and GraphQL over WebSocket
