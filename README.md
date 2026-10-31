@@ -9,7 +9,7 @@ Load testing for Phoenix that speaks Phoenix: Channels, LiveView, HTTP and
 plain WebSockets, with scenarios written in Elixir. It load tests AI chat APIs
 too, such as Ollama or vLLM.
 
-![The dashboard following a run as it ramps up to 400 users and back down](assets/dashboard.gif)
+![The dashboard following a real run, sped up, as it ramps up to 50,000 users and holds them for 10 minutes](assets/dashboard.gif)
 
 ## Why I built this
 
