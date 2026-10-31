@@ -16,12 +16,12 @@ defmodule Mix.Tasks.Stampede.Gen.ScenarioTest do
 
   # Compiles a generated scenario, and runs it for a moment against the test
   # server to show that it works as generated.
-  defp run!(path) do
+  defp run!(path, duration \\ 300) do
     contents = File.read!(path)
     assert IO.iodata_to_binary([Code.format_string!(contents), "\n"]) == contents
 
     [{module, _binary}] = Code.compile_string(contents, path)
-    Stampede.run(module, stages: nil, vus: 1, duration: 300)
+    Stampede.run(module, stages: nil, vus: 1, duration: duration)
   end
 
   test "generates an HTTP scenario named after the application", %{tmp_dir: tmp_dir} do
@@ -90,6 +90,15 @@ defmodule Mix.Tasks.Stampede.Gen.ScenarioTest do
     generate!(tmp_dir, ["Again", "--force"])
 
     assert File.read!(path) =~ "defmodule Stampede.Load.Again do"
+  end
+
+  test "generates a scenario for an AI model server", %{tmp_dir: tmp_dir} do
+    generate!(tmp_dir, ["Chat", "--llm", "--url", Stampede.TestEndpoint.page_url("/v1")])
+
+    result = run!(Path.join(tmp_dir, "loadtest/chat.exs"), 1_500)
+    assert result.errors == []
+    assert result.metrics["llm.ttft"].count > 0
+    assert result.metrics["llm.tokens.output"].count >= 100
   end
 
   test "raises on invalid arguments" do

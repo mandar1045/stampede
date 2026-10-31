@@ -6,7 +6,8 @@
 [![License](https://img.shields.io/hexpm/l/stampede.svg)](https://github.com/mandar1045/stampede/blob/main/LICENSE)
 
 Load testing for Phoenix that speaks Phoenix: Channels, LiveView, HTTP and
-plain WebSockets, with scenarios written in Elixir.
+plain WebSockets, with scenarios written in Elixir. It load tests AI chat APIs
+too, such as Ollama or vLLM.
 
 ![The dashboard following a run as it ramps up to 400 users and back down](assets/dashboard.gif)
 
@@ -409,6 +410,32 @@ It answers pings and holds on to the frames it receives until `await/2`
 reads them, even after the server has closed the connection. It records
 `ws.connect`, `ws.disconnects`, `ws.messages` and `ws.messages.sent`.
 
+## AI chat APIs
+
+`Stampede.LLM` load tests anything with an OpenAI-style chat API, such as
+Ollama, vLLM or llama.cpp, written in any language:
+
+```elixir
+{:ok, reply} =
+  Stampede.LLM.chat("http://localhost:11434/v1",
+    model: "qwen2.5:0.5b",
+    messages: [%{role: "user", content: "Why is the sky blue?"}],
+    max_tokens: 128
+  )
+```
+
+It records time to first token (`llm.ttft`), the gaps between tokens
+(`llm.itl`), time per token (`llm.tpot`), the whole request (`llm.request`)
+and tokens per second (`llm.tokens.output`), and the dashboard and HTML report
+show them. `--find-limit` then tells you how many people can chat at once. On
+8 CPU cores, Ollama held 6 with a small model. Tokens never slowed down, but
+the first token did, because Ollama answers one person at a time by default.
+Setting `OLLAMA_NUM_PARALLEL=4` doubled it to 12.
+
+The [guide](guides/llm.md) has a one-file script that needs no Mix project,
+how to use realistic prompts, and how to read the result. `Stampede.SSE` is
+underneath, for any other server that streams Server-Sent Events.
+
 ## Results
 
 `Stampede.run/2` returns a `Stampede.Result` with a summary of every metric
@@ -481,6 +508,7 @@ System.halt(if result.passed?, do: 0, else: 1)
   * [GraphQL subscriptions with Absinthe](guides/absinthe.md)
   * [Load tests in CI](guides/ci.md)
   * [Spreading the load over machines](guides/distributed.md)
+  * [Load testing AI chat APIs](guides/llm.md)
   * [Case study: Supabase Realtime](guides/supabase_realtime.md)
 
 ## Why not k6, Locust or Artillery?
@@ -510,7 +538,7 @@ What I'm working on next:
   * Recording a session in the browser and turning it into a scenario
   * A Livebook smart cell
   * A command line tool that doesn't need Elixir installed
-  * More protocols: Socket.IO, GraphQL over WebSocket and Server-Sent Events
+  * More protocols: Socket.IO and GraphQL over WebSocket
 
 If one of these would help you, or something else is missing, say so in
 [Discussions](https://github.com/mandar1045/stampede/discussions).

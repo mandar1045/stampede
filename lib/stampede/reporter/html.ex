@@ -339,8 +339,24 @@ defmodule Stampede.Reporter.HTML do
       {"Errors", integer(Map.get(run.totals, "iteration.errors", 0))}
     ]
 
-    tile_grid(tiles)
+    llm? = Map.has_key?(run.totals, "llm.tokens.output")
+    tile_grid(tiles ++ if(llm?, do: llm_tiles(metrics), else: []))
   end
+
+  # Runs against AI model servers also show what those are judged by. A
+  # second of a live run can go by without a finished request.
+  defp llm_tiles(metrics) do
+    tokens = metrics["llm.tokens.output"]
+
+    [
+      {"TTFT p95", p95(metrics["llm.ttft"])},
+      {"Inter-token p95", p95(metrics["llm.itl"])},
+      {"Tokens per second", if(tokens, do: decimal(tokens.rate), else: "–")}
+    ]
+  end
+
+  defp p95(nil), do: "–"
+  defp p95(metric), do: milliseconds(metric.p95)
 
   defp section_start(id, scenario, status) do
     [
@@ -398,9 +414,10 @@ defmodule Stampede.Reporter.HTML do
           {"Errors", integer(count(metrics, "iteration.errors"))},
           {"Peak VUs", integer(result.timeline |> Enum.map(& &1.vus) |> Enum.max(fn -> 0 end))}
         ] ++
-        if metrics["iterations.dropped"],
+        if(metrics["iterations.dropped"],
           do: [{"Dropped", integer(count(metrics, "iterations.dropped"))}],
           else: []
+        ) ++ if(metrics["llm.tokens.output"], do: llm_tiles(metrics), else: [])
 
     tile_grid(tiles)
   end

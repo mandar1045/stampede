@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+  * `Stampede.LLM` load tests AI chat APIs in OpenAI's format, such as Ollama,
+    vLLM or llama.cpp. It records time to first token, the gaps between
+    tokens, time per token and tokens per second, measured the same way as
+    `vllm bench serve`. It's new, so it may still change
+  * `Stampede.LLM.prompts_from_jsonl/2` reads conversations from benchmark
+    datasets, and `Stampede.LLM.synthetic_prompt/1` makes prompts of a given
+    length
+  * `Stampede.SSE` reads Server-Sent Events from any server, with when each
+    event arrived
+  * `mix stampede.gen.scenario --llm` generates a scenario for a model server
+  * The dashboard and the HTML report show tokens per second and time to
+    first token for runs that chat with a model server
+
 ## v1.2.0 (2026-10-29)
 
 This one answers the question I get asked most: how many users can my app

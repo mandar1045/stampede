@@ -74,6 +74,14 @@ defmodule Stampede.HTTP do
   """
   @spec request(atom(), String.t(), keyword()) :: {:ok, response()} | {:error, term()}
   def request(method, url, opts \\ []) when method in @methods and is_binary(url) do
+    stream(method, url, opts, nil)
+  end
+
+  # Like request/3, but hands each part of the body to `fun` as it arrives,
+  # with an accumulator that ends up as the response's body. Stampede.SSE
+  # reads streams with it.
+  @doc false
+  def stream(method, url, opts, into) when method in @methods and is_binary(url) do
     opts =
       Keyword.validate!(opts,
         headers: [],
@@ -92,7 +100,8 @@ defmodule Stampede.HTTP do
 
     {headers, body} = encode_body(opts)
     started_at = System.monotonic_time()
-    result = send_request(%{method: method, uri: uri, headers: headers, body: body}, opts)
+    request = %{method: method, uri: uri, headers: headers, body: body, into: into}
+    result = send_request(request, opts)
     record(result, opts[:metric], started_at)
     result
   end
@@ -181,7 +190,9 @@ defmodule Stampede.HTTP do
     with true <- Mint.HTTP.open?(conn),
          {:ok, conn, ref} <-
            Mint.HTTP.request(conn, method, target(request.uri), request.headers, request.body) do
-      receive_response(conn, ref, deadline, %{status: nil, headers: [], body: []})
+      body = if request.into, do: elem(request.into, 0), else: []
+      response = %{status: nil, headers: [], body: body, into: request.into}
+      receive_response(conn, ref, deadline, response)
     else
       false -> {:stale, conn}
       {:error, conn, _reason} -> {:stale, conn}
@@ -199,7 +210,7 @@ defmodule Stampede.HTTP do
           {:ok, conn, responses} ->
             case collect(responses, ref, response) do
               {:done, response} ->
-                {:ok, %{response | body: IO.iodata_to_binary(response.body)}, conn}
+                {:ok, done(response), conn}
 
               {:more, response} ->
                 receive_response(conn, ref, deadline, response)
@@ -224,8 +235,11 @@ defmodule Stampede.HTTP do
       {:headers, ^ref, headers}, {:more, response} ->
         {:more, %{response | headers: response.headers ++ headers}}
 
-      {:data, ^ref, data}, {:more, response} ->
+      {:data, ^ref, data}, {:more, %{into: nil} = response} ->
         {:more, %{response | body: [response.body | data]}}
+
+      {:data, ^ref, data}, {:more, %{into: {_acc, fun}} = response} ->
+        {:more, %{response | body: fun.(data, response.body)}}
 
       {:done, ^ref}, {:more, response} ->
         {:done, response}
@@ -234,6 +248,15 @@ defmodule Stampede.HTTP do
         acc
     end)
   end
+
+  defp done(%{into: nil} = response),
+    do: %{
+      status: response.status,
+      headers: response.headers,
+      body: IO.iodata_to_binary(response.body)
+    }
+
+  defp done(response), do: Map.delete(response, :into)
 
   defp finish(key, {:ok, response, conn}) do
     if Mint.HTTP.open?(conn), do: Process.put(key, conn), else: Mint.HTTP.close(conn)

@@ -7,6 +7,7 @@ defmodule Mix.Tasks.Stampede.Gen.Scenario do
       $ mix stampede.gen.scenario Home
       $ mix stampede.gen.scenario Lobby --channels
       $ mix stampede.gen.scenario Checkout --live --url http://localhost:4000/cart
+      $ mix stampede.gen.scenario Chat --llm
 
   Writes `loadtest/home.exs`, with a module named after your application,
   such as `MyApp.Load.Home`. Run it with `mix stampede.run loadtest/home.exs`.
@@ -21,8 +22,10 @@ defmodule Mix.Tasks.Stampede.Gen.Scenario do
     * `--channels` - joins a channel and pushes to it with `Stampede.Channels`
     * `--live` - opens a LiveView with `Stampede.LiveView`
     * `--websocket` - talks to a plain WebSocket with `Stampede.WebSocket`
+    * `--llm` - chats with an AI model server with `Stampede.LLM`
     * `--url` - the URL to start from, `http://localhost:4000/` by default,
-      or the socket's URL for `--channels` and `--websocket`
+      the socket's URL for `--channels` and `--websocket`, or the API's base
+      for `--llm`, Ollama's `http://localhost:11434/v1` by default
     * `--rate` - starts iterations at a fixed rate, instead of keeping a
       number of VUs busy
     * `--force` - overwrites the file without asking
@@ -35,18 +38,20 @@ defmodule Mix.Tasks.Stampede.Gen.Scenario do
     channels: :boolean,
     live: :boolean,
     websocket: :boolean,
+    llm: :boolean,
     url: :string,
     rate: :boolean,
     force: :boolean
   ]
 
-  @kinds [:http, :channels, :live, :websocket]
+  @kinds [:http, :channels, :live, :websocket, :llm]
 
   @default_urls %{
     http: "http://localhost:4000/",
     channels: "ws://localhost:4000/socket",
     live: "http://localhost:4000/",
-    websocket: "ws://localhost:4000/ws"
+    websocket: "ws://localhost:4000/ws",
+    llm: "http://localhost:11434/v1"
   }
 
   @impl true
@@ -68,9 +73,14 @@ defmodule Mix.Tasks.Stampede.Gen.Scenario do
 
     kind =
       case Enum.filter(@kinds, &opts[&1]) do
-        [] -> :http
-        [kind] -> kind
-        _many -> Mix.raise("Expected only one of --http, --channels, --live and --websocket")
+        [] ->
+          :http
+
+        [kind] ->
+          kind
+
+        _many ->
+          Mix.raise("Expected only one of --http, --channels, --live, --websocket and --llm")
       end
 
     module = Enum.join([namespace(), Macro.camelize(name)], ".")
@@ -151,6 +161,7 @@ defmodule Mix.Tasks.Stampede.Gen.Scenario do
   defp metric(:channels), do: "channel.join"
   defp metric(:live), do: "live.join"
   defp metric(:websocket), do: "ws.connect"
+  defp metric(:llm), do: "llm.ttft"
 
   defp run(:http, url) do
     """
@@ -193,6 +204,26 @@ defmodule Mix.Tasks.Stampede.Gen.Scenario do
         # Stays on the page for a while, as a reader would, then leaves.
         Process.sleep(5_000)
         :ok = Stampede.LiveView.close(view)
+      end
+    """
+  end
+
+  defp run(:llm, url) do
+    """
+      def run(_vu) do
+        # Change the model to one your server has, such as the one you pulled
+        # with `ollama pull`.
+        {:ok, reply} =
+          Stampede.LLM.chat(#{inspect(url)},
+            model: "qwen2.5:0.5b",
+            messages: [%{role: "user", content: "Why is the sky blue?"}],
+            max_tokens: 100
+          )
+
+        Stampede.check("finished", reply.finish_reason in ["stop", "length"])
+
+        # Reads the answer for a while, as a person would.
+        Process.sleep(1_000)
       end
     """
   end

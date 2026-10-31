@@ -37,6 +37,15 @@ defmodule Stampede.TestRouter do
     get "/fail", Stampede.TestApiController, :fail
     get "/close", Stampede.TestApiController, :close
     get "/echo-socket", Stampede.TestApiController, :echo_socket
+    get "/events", Stampede.TestEventsController, :steady
+    post "/events", Stampede.TestEventsController, :steady
+    get "/events/tricky", Stampede.TestEventsController, :tricky
+    get "/events/broken", Stampede.TestEventsController, :broken
+    get "/events/limited", Stampede.TestEventsController, :limited
+  end
+
+  scope "/v1" do
+    post "/chat/completions", Stampede.TestLLMController, :chat
   end
 
   defp put_visitor(conn, _opts) do

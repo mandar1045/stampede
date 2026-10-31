@@ -87,6 +87,11 @@ EventBridge schedule terminates them all 5 minutes later in case one can't.
 
 ## Results
 
+The AI model server runs are in the
+[guide](https://github.com/mandar1045/stampede/blob/main/guides/llm.md#a-real-run),
+with their results here too, in `20261031-ollama-1-slot` and
+`20261031-ollama-4-slots`.
+
 ### 400,000 Channels users on a 4-core server (October 29, 2026)
 
 Two r7g.xlarge machines in Mumbai (4 Graviton vCPUs and 32 GB each): one for

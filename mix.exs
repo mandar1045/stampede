@@ -60,6 +60,7 @@ defmodule Stampede.MixProject do
         "guides/absinthe.md",
         "guides/ci.md",
         "guides/distributed.md",
+        "guides/llm.md",
         "guides/supabase_realtime.md",
         "CHANGELOG.md",
         "CONTRIBUTING.md"
@@ -67,7 +68,14 @@ defmodule Stampede.MixProject do
       groups_for_extras: [Guides: ~r"guides/"],
       assets: %{"assets" => "assets"},
       groups_for_modules: [
-        Clients: [Stampede.HTTP, Stampede.Channels, Stampede.LiveView, Stampede.WebSocket],
+        Clients: [
+          Stampede.HTTP,
+          Stampede.Channels,
+          Stampede.LiveView,
+          Stampede.WebSocket,
+          Stampede.SSE,
+          Stampede.LLM
+        ],
         "Channels protocol": [
           Stampede.Channels.Serializer,
           Stampede.Channels.Serializer.V2,
