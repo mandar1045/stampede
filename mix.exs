@@ -1,7 +1,7 @@
 defmodule Stampede.MixProject do
   use Mix.Project
 
-  @version "1.3.1"
+  @version "1.3.2"
   @source_url "https://github.com/mandar1045/stampede"
 
   def project do

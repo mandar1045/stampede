@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.3.2 (2026-11-04)
+
+  * The README has the newest result: one 16-core Phoenix server held
+    2,000,000 users with no errors
+
 ## v1.3.1 (2026-11-01)
 
   * The README's images and links now work on hex.pm, not just on GitHub
