@@ -2,8 +2,9 @@
 
 This is everything I use to load test a single Phoenix server with hundreds of
 thousands of connections on AWS, so you can check my numbers or run it
-yourself. The goal is a million. So far, one 4-core server has held
-**600,000** with no errors. The [results](#results) are below.
+yourself. The goal was a million. One 16-core server has now held
+**2,000,000** with no errors, and a 4-core one held 600,000. The
+[results](#results) are below.
 
   * [`app/`](app/) is the app under test: a fresh `mix phx.new` app with a
     channel and a LiveView page.
@@ -21,16 +22,16 @@ yourself. The goal is a million. So far, one 4-core server has held
 
 ## The setup
 
-For a million, one server and four load machines, in the same AWS zone:
+For two million, one server and eight load machines, in the same AWS zone:
 
 | | Instance | vCPUs | Memory | On demand, Mumbai |
 |---|---|---:|---:|---:|
-| Server | r7g.8xlarge | 32 | 256 GB | $1.20/h |
-| Load, ×4 | r7g.xlarge | 4 | 32 GB | $0.15/h each |
+| Server | r7g.4xlarge | 16 | 128 GB | about $0.60/h |
+| Load, ×8 | r7g.xlarge | 4 | 32 GB | about $0.15/h each |
 
-That's about $1.80 an hour. A Channels run and a LiveView run, with setup,
-take under two hours. My AWS account allows 16 vCPUs so far, so the runs below
-use smaller machines (see [Results](#results)).
+That's about $1.80 an hour, and the 2,000,000 run took about an hour with
+setup. It uses 48 vCPUs, which is what my AWS account allows. The earlier runs
+below used smaller machines.
 
 Why these sizes: on my laptop, a held Channels connection took 42 KB on the
 Phoenix side and 23 KB on Stampede's. A LiveView user took about 105 KB and
@@ -90,6 +91,46 @@ EventBridge schedule terminates them all 5 minutes later in case one can't.
 `./status.sh` lists what's running.
 
 ## Results
+
+### 2,000,000 Channels users on a 16-core server (November 4, 2026)
+
+One r7g.4xlarge (16 Graviton cores, 128 GB) running the stock app, and eight
+r7g.xlarge for the load, each connecting from 14 extra private addresses. Every
+user joins `room:lobby`, sends a heartbeat every 30 seconds and a message every
+30 to 60, like Phoenix's JavaScript client, and stays.
+
+```console
+$ ZONE=ap-south-1a SERVER_TYPE=r7g.4xlarge LOADER_TYPE=r7g.xlarge LOADERS=8 SOURCE_IPS=14 ./up.sh
+$ ./deploy.sh
+$ PROOF=1 STEP_RAMP=250 ./run.sh channels 0 0 0 --find-limit --start 1000000 --step 250000 --up-to 3000000 --hold 60s
+```
+
+[`20261104-1051-channels-0`](results/20261104-1051-channels-0):
+
+| Users | Server CPU | Server memory | |
+|---:|---:|---:|---|
+| 1,000,000 | 37–48% | 52 GB | held |
+| 1,250,000 | 47–52% | 64 GB | held |
+| 1,500,000 | 54–60% | 77 GB | held |
+| 1,750,000 | 67–71% | 90 GB | held |
+| **2,000,000** | **78–84%** | **103 GB** | **held** |
+| 2,250,000 | out of CPU | | failed |
+
+Every step up to 2,000,000 passed with joins and messages under 1 second at p95
+and no errors. The first error came at 2,067,672 users, while ramping to
+2,250,000, as the server's CPU reached 96%. That step failed, and I stopped the
+run while it was failing, so its log ends without Stampede's final summary.
+The steps and their verdicts are in [`run.log`](results/20261104-1051-channels-0/run.log).
+
+Memory came to about 51 KB a user, everything on the machine included, so CPU
+was the limit, not memory. The kernel's own count of established connections,
+every 10 seconds, is in
+[`sockets.log`](results/20261104-1051-channels-0/sockets.log). AWS's connection
+tracking allowance was never exceeded, and the load machines were 39% busy at
+2,000,000.
+
+`PROOF=1` is new: it adds the live dashboard to the run, records it as a video,
+logs the server's socket counts and records the terminal.
 
 ### 50,000 Supabase Realtime users on a 4-core server (October 31, 2026)
 

@@ -9,12 +9,13 @@ Load testing for Phoenix that speaks Phoenix: Channels, LiveView, HTTP and
 plain WebSockets, with scenarios written in Elixir. It load tests AI chat APIs
 too, such as Ollama or vLLM.
 
-![The dashboard following a real run, sped up, as it ramps up to 50,000 users and holds them for 10 minutes](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/dashboard-50k.gif)
+![The dashboard following a real run, sped up, as one Phoenix server climbs to 2,000,000 users with 0 errors](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/dashboard-2m.gif)
 
-| Tested on one 4-core, 32 GB machine | It held |
-|---|---|
-| Stock Phoenix, with Channels | **600,000 users** |
-| A real open source Phoenix product, with 100 users in each channel | **50,000 users for 10 minutes**, with 80.9 million messages delivered |
+| What I load tested | On one machine | It held |
+|---|---|---|
+| Stock Phoenix, with Channels | 16 cores, 128 GB | **2,000,000 users** |
+| Stock Phoenix, with Channels | 4 cores, 32 GB | **600,000 users** |
+| A real open source Phoenix product, with 100 users in each channel | 4 cores, 32 GB | **50,000 users for 10 minutes**, with 80.9 million messages delivered |
 
 What it does for you:
 
@@ -162,7 +163,53 @@ in a scenario's options steps up the arrival rate instead of users.
 It's new in 1.2, so the options and the report may still change a little.
 `--badge badge.svg` writes a badge with the result, for your README:
 
-![load tested: 600,000 VUs](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/badge-600k.svg)
+![load tested: 2,000,000 VUs](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/badge-2m.svg)
+
+### 2,000,000 users on stock Phoenix
+
+I tried it on AWS: stock Phoenix on one 16-core, 128 GB server, and Stampede on
+eight smaller machines. Every user behaves like Phoenix's JavaScript client: it
+joins a chat room, sends a heartbeat every 30 seconds and a message every 30 to
+60, and stays. The load went up 250,000 users at a time, and a step only passed
+with joins and messages under 1 second at p95 and no errors:
+
+```console
+$ mix stampede.run loadtest/channels.exs --find-limit --start 1000000 --step 250000 --up-to 3000000 --hold 60s
+```
+
+```
+ 309.2s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+   step  1,000,000 VUs: held
+ 619.3s  vus: 1250000  iterations: 0  errors: 0  load test busy: 25%
+   step  1,250,000 VUs: held
+ 929.5s  vus: 1500000  iterations: 0  errors: 0  load test busy: 29%
+   step  1,500,000 VUs: held
+1239.6s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+   step  1,750,000 VUs: held
+1549.0s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+   step  2,000,000 VUs: held
+```
+
+| Users | Server CPU | Server memory |
+|---:|---:|---:|
+| 1,000,000 | 37–48% | 52 GB |
+| 1,250,000 | 47–52% | 64 GB |
+| 1,500,000 | 54–60% | 77 GB |
+| 1,750,000 | 67–71% | 90 GB |
+| **2,000,000** | **78–84%** | **103 GB** |
+
+Two million users on one server, every one of them sending heartbeats and
+messages, and no errors. Memory came to about 51 KB a user, so it was the CPU
+that set the limit: two million users send well over 100,000 heartbeats and
+messages a second. This is the dashboard at the end of the 2,000,000 step:
+
+![The dashboard at 2,000,000 users, with the server's own CPU, memory and processes](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/benchmark-2m.png)
+
+The best-known Phoenix number is the core team's 2 million connections from
+2015, on a 40-core machine, where each connection joined a channel and then sat
+idle. This was 16 cores, with every user active. Ten years of Phoenix and the
+BEAM in one comparison, even if the hardware and versions make it far from a
+strict one.
 
 ### 600,000 users on stock Phoenix
 
@@ -199,9 +246,8 @@ the HTML report from the same run:
 That's about as far as this server goes, because at 600,000 its memory was
 98% full. Each connection took about 47 KB, so more memory means more users.
 
-Everything you need to run it yourself, and every number it measured, is in
+Everything you need to run these yourself, and every number they measured, is in
 [`bench/million`](https://github.com/mandar1045/stampede/tree/main/bench/million).
-The goal is still a million.
 
 ### 50,000 users on a real product
 
@@ -718,8 +764,7 @@ expect rough edges, and please tell me when you hit one.
 
 What I'm working on next:
 
-  * Much bigger tests, spread over several machines, aiming for a million
-    connections to one Phoenix server
+  * LiveView at the same scale as Channels
   * A Livebook smart cell
   * A command line tool that doesn't need Elixir installed
   * More protocols: Socket.IO and GraphQL over WebSocket

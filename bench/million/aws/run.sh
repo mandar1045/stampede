@@ -76,6 +76,17 @@ for loader in "${loaders[@]:1}"; do
 done
 sleep 15
 
+# PROOF=1 also keeps proof as it runs: the kernel's socket and memory counts on the
+# server, a video of the live dashboard, and a recording of the terminal. Videos go in
+# drafts/proof, which is private.
+proof_out="$HERE/../../../drafts/proof/$name"
+dashboard_flag=""
+if [ -n "${PROOF:-}" ]; then
+  mkdir -p "$proof_out"
+  dashboard_flag="--dashboard"
+  on "$server_public" "setsid nohup bash -c 'while :; do date -u +%FT%TZ; ss -s | sed -n 1,2p; free -m | sed -n 2p; echo; sleep 10; done' > sockets.log 2>&1 < /dev/null &"
+fi
+
 read -r _ _ public private extra <<< "${loaders[0]}"
 nodes_flag=$(IFS=,; echo "${workers[*]}")
 echo "Running $scenario: $vus VUs, ${ramp}s ramp, ${hold}s hold, from ${#loaders[@]} loaders"
@@ -85,20 +96,36 @@ on "$public" "rm -f run.log results.json report.html
   cd stampede/bench/million/load || exit 1; $load_env SOURCE_IPS=$extra SERVER=$server_private:4000 VUS=$vus RAMP=$ramp HOLD=$hold \
     setsid nohup elixir --name load@$private --cookie $cookie --erl '$erl_flags' \
     -S mix stampede.run loadtest/$scenario.exs ${nodes_flag:+--nodes $nodes_flag} \
-    $probe_flag ${stampede_args[*]} --out ~/results.json --html ~/report.html > ~/run.log 2>&1 < /dev/null &"
+    $probe_flag $dashboard_flag ${stampede_args[*]} --out ~/results.json --html ~/report.html > ~/run.log 2>&1 < /dev/null &"
 
-# Follows the run, a line every 30 seconds, until its summary is printed.
 sleep 20
-while on "$public" 'pgrep -f "[s]tampede.run" > /dev/null'; do
-  on "$public" 'tail -1 run.log'
-  sleep 30
-done
+if [ -n "${PROOF:-}" ]; then
+  ssh "${SSH_OPTS[@]}" -f -N -L 14040:127.0.0.1:4040 "ubuntu@$public"
+  "$HERE/../proof/record.py" "http://127.0.0.1:14040" "$proof_out/stampede-dashboard" "${PROOF_SECONDS:-5400}" --port 2871 --every 2 > "$proof_out/recorder.log" 2>&1 &
+  recorder=$!
+  # A real recording of the terminal, to replay with scriptreplay.
+  follow='tail -n +1 -F run.log & tailing=$!
+    while pgrep -f "[s]tampede.run" > /dev/null; do sleep 5; done
+    sleep 3; kill $tailing'
+  script -q -T "$proof_out/terminal.timing" -c "$(printf '%q ' ssh "${SSH_OPTS[@]}" "ubuntu@$public" "$follow")" \
+    "$proof_out/terminal.typescript" > /dev/null
+  kill -TERM "$recorder" 2>/dev/null; wait "$recorder" 2>/dev/null
+  pkill -f '[s]sh.*-L 14040:127.0.0.1:4040' || true
+  on "$server_public" "pkill -f '[w]hile :; do date'; true"
+  on "$server_public" 'cat sockets.log' > "$RESULTS/$name/sockets.log"
+else
+  # Follows the run, a line every 30 seconds, until its summary is printed.
+  while on "$public" 'pgrep -f "[s]tampede.run" > /dev/null'; do
+    on "$public" 'tail -1 run.log'
+    sleep 30
+  done
+fi
 on "$public" 'cat run.log' > "$RESULTS/$name/run.log"
 tail -20 "$RESULTS/$name/run.log"
 
 scp -q "${SSH_OPTS[@]}" "ubuntu@$public:results.json" "ubuntu@$public:report.html" "$RESULTS/$name/" || true
 on "$server_public" 'cat monitor.csv' > "$RESULTS/$name/server-monitor.csv"
-on "$server_public" 'tail -100 server.log' > "$RESULTS/$name/server.log"
+on "$server_public" 'tail -300 server.log' > "$RESULTS/$name/server.log"
 for loader in "${loaders[@]}"; do
   read -r _ _ public private _ <<< "$loader"
   on "$public" 'cat monitor.csv' > "$RESULTS/$name/loader-$private-monitor.csv"

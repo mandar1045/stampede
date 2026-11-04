@@ -1,0 +1,1005 @@
+2026-11-04T10:52:51Z
+Total: 178
+TCP:   12 (estab 3, closed 0, orphaned 0, timewait 0)
+Mem:          126502        1775      125127          13         572      124727
+
+2026-11-04T10:53:01Z
+Total: 17962
+TCP:   17809 (estab 17792, closed 8, orphaned 0, timewait 8)
+Mem:          126502        2438      124455          13         590      124063
+
+2026-11-04T10:53:11Z
+Total: 57959
+TCP:   57806 (estab 57789, closed 8, orphaned 0, timewait 8)
+Mem:          126502        4031      122842          13         629      122470
+
+2026-11-04T10:53:21Z
+Total: 97955
+TCP:   97802 (estab 97785, closed 8, orphaned 0, timewait 8)
+Mem:          126502        5524      121329          13         669      120977
+
+2026-11-04T10:53:31Z
+Total: 137952
+TCP:   137799 (estab 137782, closed 8, orphaned 0, timewait 8)
+Mem:          126502        7160      119674          13         708      119341
+
+2026-11-04T10:53:41Z
+Total: 177953
+TCP:   177800 (estab 177783, closed 8, orphaned 0, timewait 8)
+Mem:          126502        8981      117834          13         748      117521
+
+2026-11-04T10:53:51Z
+Total: 217956
+TCP:   217803 (estab 217786, closed 8, orphaned 0, timewait 8)
+Mem:          126502       11004      115790          13         787      115497
+
+2026-11-04T10:54:01Z
+Total: 257962
+TCP:   257801 (estab 257792, closed 0, orphaned 0, timewait 0)
+Mem:          126502       12832      113943          13         827      113669
+
+2026-11-04T10:54:11Z
+Total: 298188
+TCP:   298027 (estab 298026, closed -4, orphaned 0, timewait 0)
+Mem:          126502       14886      111861          13         866      111615
+
+2026-11-04T10:54:21Z
+Total: 338337
+TCP:   338176 (estab 338167, closed 0, orphaned 0, timewait 0)
+Mem:          126502       16921      109786          13         906      109580
+
+2026-11-04T10:54:31Z
+Total: 378356
+TCP:   378195 (estab 378187, closed 0, orphaned 0, timewait 0)
+Mem:          126502       19207      107460          13         945      107294
+
+2026-11-04T10:54:42Z
+Total: 418424
+TCP:   418260 (estab 418251, closed 0, orphaned 0, timewait 0)
+Mem:          126502       21354      105274          13         985      105148
+
+2026-11-04T10:54:52Z
+Total: 458432
+TCP:   458271 (estab 458262, closed 0, orphaned 0, timewait 0)
+Mem:          126502       23664      102924          13        1024      102837
+
+2026-11-04T10:55:02Z
+Total: 498445
+TCP:   498284 (estab 498275, closed 0, orphaned 0, timewait 0)
+Mem:          126502       25863      100685          13        1064      100638
+
+2026-11-04T10:55:12Z
+Total: 538458
+TCP:   538297 (estab 538288, closed 0, orphaned 0, timewait 0)
+Mem:          126502       27680       98829          13        1104       98821
+
+2026-11-04T10:55:22Z
+Total: 578473
+TCP:   578312 (estab 578303, closed 0, orphaned 0, timewait 0)
+Mem:          126502       29435       97035          13        1143       97067
+
+2026-11-04T10:55:32Z
+Total: 618435
+TCP:   618274 (estab 618265, closed 0, orphaned 0, timewait 0)
+Mem:          126502       30903       95527          13        1183       95598
+
+2026-11-04T10:55:42Z
+Total: 658456
+TCP:   658295 (estab 658286, closed 0, orphaned 0, timewait 0)
+Mem:          126502       32225       94166          13        1222       94276
+
+2026-11-04T10:55:52Z
+Total: 698474
+TCP:   698313 (estab 698304, closed 0, orphaned 0, timewait 0)
+Mem:          126502       33840       92511          13        1262       92661
+
+2026-11-04T10:56:02Z
+Total: 738491
+TCP:   738330 (estab 738321, closed 0, orphaned 0, timewait 0)
+Mem:          126502       35771       90541          13        1302       90731
+
+2026-11-04T10:56:12Z
+Total: 778507
+TCP:   778346 (estab 778337, closed 0, orphaned 0, timewait 0)
+Mem:          126502       37907       88365          13        1341       88594
+
+2026-11-04T10:56:22Z
+Total: 818536
+TCP:   818375 (estab 818366, closed 0, orphaned 0, timewait 0)
+Mem:          126502       40277       85956          13        1381       86225
+
+2026-11-04T10:56:32Z
+Total: 858556
+TCP:   858395 (estab 858386, closed 0, orphaned 0, timewait 0)
+Mem:          126502       42664       83529          13        1420       83838
+
+2026-11-04T10:56:42Z
+Total: 898583
+TCP:   898422 (estab 898413, closed 0, orphaned 0, timewait 0)
+Mem:          126502       45084       81069          13        1460       81417
+
+2026-11-04T10:56:52Z
+Total: 938607
+TCP:   938446 (estab 938437, closed 0, orphaned 0, timewait 0)
+Mem:          126502       47454       78660          13        1499       79048
+
+2026-11-04T10:57:02Z
+Total: 978634
+TCP:   978473 (estab 978464, closed 0, orphaned 0, timewait 0)
+Mem:          126502       49535       76539          13        1538       76966
+
+2026-11-04T10:57:12Z
+Total: 1000180
+TCP:   1000019 (estab 1000010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       50614       75439          13        1560       75887
+
+2026-11-04T10:57:22Z
+Total: 1000180
+TCP:   1000019 (estab 1000010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       51185       74867          13        1560       75316
+
+2026-11-04T10:57:32Z
+Total: 1000180
+TCP:   1000019 (estab 1000010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       51678       74374          13        1560       74823
+
+2026-11-04T10:57:42Z
+Total: 1000180
+TCP:   1000019 (estab 1000010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       52185       73868          13        1560       74316
+
+2026-11-04T10:57:52Z
+Total: 1000180
+TCP:   1000019 (estab 1000010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       52504       73549          13        1560       73997
+
+2026-11-04T10:58:02Z
+Total: 1000180
+TCP:   1000019 (estab 1000010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       52785       73268          13        1560       73717
+
+2026-11-04T10:58:12Z
+Total: 1004805
+TCP:   1004644 (estab 1004635, closed 0, orphaned 0, timewait 0)
+Mem:          126502       52933       73116          13        1564       73569
+
+2026-11-04T10:58:22Z
+Total: 1014806
+TCP:   1014645 (estab 1014636, closed 0, orphaned 0, timewait 0)
+Mem:          126502       53230       72808          13        1575       73271
+
+2026-11-04T10:58:32Z
+Total: 1024820
+TCP:   1024659 (estab 1024650, closed 0, orphaned 0, timewait 0)
+Mem:          126502       53516       72513          13        1584       72986
+
+2026-11-04T10:58:42Z
+Total: 1034820
+TCP:   1034659 (estab 1034650, closed 0, orphaned 0, timewait 0)
+Mem:          126502       53811       72207          13        1594       72690
+
+2026-11-04T10:58:52Z
+Total: 1044822
+TCP:   1044661 (estab 1044652, closed 0, orphaned 0, timewait 0)
+Mem:          126502       54078       71930          13        1604       72423
+
+2026-11-04T10:59:02Z
+Total: 1054834
+TCP:   1054673 (estab 1054664, closed 0, orphaned 0, timewait 0)
+Mem:          126502       54379       71620          13        1614       72123
+
+2026-11-04T10:59:12Z
+Total: 1064849
+TCP:   1064688 (estab 1064679, closed 0, orphaned 0, timewait 0)
+Mem:          126502       54695       71294          13        1624       71807
+
+2026-11-04T10:59:22Z
+Total: 1074850
+TCP:   1074689 (estab 1074680, closed 0, orphaned 0, timewait 0)
+Mem:          126502       55838       70141          13        1634       70664
+
+2026-11-04T10:59:32Z
+Total: 1084876
+TCP:   1084715 (estab 1084706, closed 0, orphaned 0, timewait 0)
+Mem:          126502       56534       69435          13        1644       69967
+
+2026-11-04T10:59:42Z
+Total: 1094891
+TCP:   1094730 (estab 1094721, closed 0, orphaned 0, timewait 0)
+Mem:          126502       56878       69082          13        1654       69624
+
+2026-11-04T10:59:52Z
+Total: 1104893
+TCP:   1104732 (estab 1104723, closed 0, orphaned 0, timewait 0)
+Mem:          126502       57299       68651          13        1664       69203
+
+2026-11-04T11:00:02Z
+Total: 1114895
+TCP:   1114734 (estab 1114725, closed 0, orphaned 0, timewait 0)
+Mem:          126502       57709       68231          13        1673       68793
+
+2026-11-04T11:00:12Z
+Total: 1124909
+TCP:   1124748 (estab 1124739, closed 0, orphaned 0, timewait 0)
+Mem:          126502       58034       67895          13        1683       68467
+
+2026-11-04T11:00:22Z
+Total: 1134910
+TCP:   1134749 (estab 1134740, closed 0, orphaned 0, timewait 0)
+Mem:          126502       58397       67523          13        1693       68104
+
+2026-11-04T11:00:32Z
+Total: 1144910
+TCP:   1144749 (estab 1144740, closed 0, orphaned 0, timewait 0)
+Mem:          126502       58689       67221          13        1703       67812
+
+2026-11-04T11:00:42Z
+Total: 1154917
+TCP:   1154756 (estab 1154749, closed 0, orphaned 0, timewait 0)
+Mem:          126502       58985       66914          13        1713       67516
+
+2026-11-04T11:00:52Z
+Total: 1164925
+TCP:   1164764 (estab 1164755, closed 0, orphaned 0, timewait 0)
+Mem:          126502       59211       66679          13        1723       67290
+
+2026-11-04T11:01:02Z
+Total: 1174929
+TCP:   1174768 (estab 1174759, closed 0, orphaned 0, timewait 0)
+Mem:          126502       59530       66350          13        1733       66971
+
+2026-11-04T11:01:12Z
+Total: 1184932
+TCP:   1184771 (estab 1184762, closed 0, orphaned 0, timewait 0)
+Mem:          126502       59777       66093          13        1743       66724
+
+2026-11-04T11:01:22Z
+Total: 1194932
+TCP:   1194771 (estab 1194762, closed 0, orphaned 0, timewait 0)
+Mem:          126502       61236       64625          13        1752       65265
+
+2026-11-04T11:01:32Z
+Total: 1204932
+TCP:   1204771 (estab 1204762, closed 0, orphaned 0, timewait 0)
+Mem:          126502       62301       63550          13        1762       64201
+
+2026-11-04T11:01:42Z
+Total: 1214937
+TCP:   1214774 (estab 1214765, closed 0, orphaned 0, timewait 0)
+Mem:          126502       62735       63105          13        1772       63766
+
+2026-11-04T11:01:52Z
+Total: 1224935
+TCP:   1224774 (estab 1224765, closed 0, orphaned 0, timewait 0)
+Mem:          126502       63183       62648          13        1782       63318
+
+2026-11-04T11:02:02Z
+Total: 1234936
+TCP:   1234775 (estab 1234766, closed 0, orphaned 0, timewait 0)
+Mem:          126502       63803       62018          13        1792       62698
+
+2026-11-04T11:02:12Z
+Total: 1244951
+TCP:   1244790 (estab 1244781, closed 0, orphaned 0, timewait 0)
+Mem:          126502       64280       61531          13        1802       62221
+
+2026-11-04T11:02:22Z
+Total: 1250180
+TCP:   1250019 (estab 1250010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       64584       61222          13        1807       61917
+
+2026-11-04T11:02:32Z
+Total: 1250180
+TCP:   1250019 (estab 1250010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       64741       61065          13        1807       61761
+
+2026-11-04T11:02:42Z
+Total: 1250180
+TCP:   1250019 (estab 1250010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       64832       60974          13        1807       61669
+
+2026-11-04T11:02:52Z
+Total: 1250180
+TCP:   1250019 (estab 1250010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       64908       60898          13        1807       61594
+
+2026-11-04T11:03:02Z
+Total: 1250180
+TCP:   1250019 (estab 1250010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       64933       60873          13        1807       61568
+
+2026-11-04T11:03:12Z
+Total: 1250180
+TCP:   1250019 (estab 1250010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       64986       60820          13        1807       61515
+
+2026-11-04T11:03:22Z
+Total: 1254999
+TCP:   1254838 (estab 1254829, closed 0, orphaned 0, timewait 0)
+Mem:          126502       65114       60687          13        1812       61387
+
+2026-11-04T11:03:32Z
+Total: 1265013
+TCP:   1264852 (estab 1264843, closed 0, orphaned 0, timewait 0)
+Mem:          126502       65405       60386          13        1822       61096
+
+2026-11-04T11:03:42Z
+Total: 1275023
+TCP:   1274862 (estab 1274860, closed -4, orphaned 0, timewait 0)
+Mem:          126502       65704       60078          13        1831       60797
+
+2026-11-04T11:03:52Z
+Total: 1285041
+TCP:   1284880 (estab 1284871, closed 0, orphaned 0, timewait 0)
+Mem:          126502       66621       59151          13        1841       59880
+
+2026-11-04T11:04:02Z
+Total: 1295043
+TCP:   1294882 (estab 1294873, closed 0, orphaned 0, timewait 0)
+Mem:          126502       67149       58612          13        1851       59352
+
+2026-11-04T11:04:12Z
+Total: 1305044
+TCP:   1304883 (estab 1304874, closed 0, orphaned 0, timewait 0)
+Mem:          126502       67372       58380          13        1861       59129
+
+2026-11-04T11:04:22Z
+Total: 1315046
+TCP:   1314885 (estab 1314876, closed 0, orphaned 0, timewait 0)
+Mem:          126502       67799       57943          13        1871       58702
+
+2026-11-04T11:04:32Z
+Total: 1325048
+TCP:   1324887 (estab 1324878, closed 0, orphaned 0, timewait 0)
+Mem:          126502       68453       57278          13        1881       58048
+
+2026-11-04T11:04:42Z
+Total: 1335050
+TCP:   1334889 (estab 1334880, closed 0, orphaned 0, timewait 0)
+Mem:          126502       68995       56727          13        1891       57506
+
+2026-11-04T11:04:52Z
+Total: 1345051
+TCP:   1344890 (estab 1344881, closed 0, orphaned 0, timewait 0)
+Mem:          126502       69318       56395          13        1901       57184
+
+2026-11-04T11:05:02Z
+Total: 1355054
+TCP:   1354893 (estab 1354884, closed 0, orphaned 0, timewait 0)
+Mem:          126502       69629       56073          13        1910       56872
+
+2026-11-04T11:05:12Z
+Total: 1365056
+TCP:   1364895 (estab 1364886, closed 0, orphaned 0, timewait 0)
+Mem:          126502       69986       55706          13        1920       56515
+
+2026-11-04T11:05:22Z
+Total: 1375069
+TCP:   1374908 (estab 1374899, closed 0, orphaned 0, timewait 0)
+Mem:          126502       70246       55436          13        1930       56255
+
+2026-11-04T11:05:32Z
+Total: 1385084
+TCP:   1384923 (estab 1384914, closed 0, orphaned 0, timewait 0)
+Mem:          126502       70553       55120          13        1940       55949
+
+2026-11-04T11:05:42Z
+Total: 1395086
+TCP:   1394925 (estab 1394916, closed 0, orphaned 0, timewait 0)
+Mem:          126502       70851       54812          13        1950       55650
+
+2026-11-04T11:05:52Z
+Total: 1405100
+TCP:   1404939 (estab 1404930, closed 0, orphaned 0, timewait 0)
+Mem:          126502       71935       53718          13        1960       54567
+
+2026-11-04T11:06:02Z
+Total: 1415113
+TCP:   1414952 (estab 1414943, closed 0, orphaned 0, timewait 0)
+Mem:          126502       72758       52885          13        1970       53744
+
+2026-11-04T11:06:12Z
+Total: 1425113
+TCP:   1424952 (estab 1424943, closed 0, orphaned 0, timewait 0)
+Mem:          126502       73032       52600          13        1980       53469
+
+2026-11-04T11:06:22Z
+Total: 1435113
+TCP:   1434952 (estab 1434943, closed 0, orphaned 0, timewait 0)
+Mem:          126502       73734       51888          13        1990       52767
+
+2026-11-04T11:06:32Z
+Total: 1445114
+TCP:   1444953 (estab 1444944, closed 0, orphaned 0, timewait 0)
+Mem:          126502       74599       51013          13        2000       51902
+
+2026-11-04T11:06:42Z
+Total: 1455115
+TCP:   1454954 (estab 1454945, closed 0, orphaned 0, timewait 0)
+Mem:          126502       75154       50449          13        2010       51348
+
+2026-11-04T11:06:52Z
+Total: 1465131
+TCP:   1464970 (estab 1464961, closed 0, orphaned 0, timewait 0)
+Mem:          126502       75464       50129          13        2020       51037
+
+2026-11-04T11:07:02Z
+Total: 1475131
+TCP:   1474970 (estab 1474961, closed 0, orphaned 0, timewait 0)
+Mem:          126502       75816       49767          13        2030       50685
+
+2026-11-04T11:07:12Z
+Total: 1485132
+TCP:   1484971 (estab 1484962, closed 0, orphaned 0, timewait 0)
+Mem:          126502       76201       49373          13        2039       50301
+
+2026-11-04T11:07:22Z
+Total: 1495146
+TCP:   1494985 (estab 1494976, closed 0, orphaned 0, timewait 0)
+Mem:          126502       76521       49042          13        2049       49980
+
+2026-11-04T11:07:32Z
+Total: 1500180
+TCP:   1500019 (estab 1500010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       76732       48826          13        2055       49769
+
+2026-11-04T11:07:42Z
+Total: 1500180
+TCP:   1500019 (estab 1500010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       76882       48676          13        2055       49619
+
+2026-11-04T11:07:52Z
+Total: 1500180
+TCP:   1500019 (estab 1500010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       77312       48246          13        2055       49189
+
+2026-11-04T11:08:02Z
+Total: 1500180
+TCP:   1500019 (estab 1500010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       77677       47881          13        2055       48824
+
+2026-11-04T11:08:12Z
+Total: 1500180
+TCP:   1500019 (estab 1500010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       77755       47803          13        2055       48746
+
+2026-11-04T11:08:22Z
+Total: 1500180
+TCP:   1500019 (estab 1500010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       78220       47338          13        2055       48281
+
+2026-11-04T11:08:32Z
+Total: 1505168
+TCP:   1505007 (estab 1504998, closed 0, orphaned 0, timewait 0)
+Mem:          126502       78615       46939          13        2059       47887
+
+2026-11-04T11:08:42Z
+Total: 1515207
+TCP:   1515046 (estab 1515037, closed 0, orphaned 0, timewait 0)
+Mem:          126502       78907       46636          13        2069       47594
+
+2026-11-04T11:08:52Z
+Total: 1525210
+TCP:   1525049 (estab 1525040, closed 0, orphaned 0, timewait 0)
+Mem:          126502       79314       46220          13        2079       47187
+
+2026-11-04T11:09:02Z
+Total: 1535211
+TCP:   1535050 (estab 1535041, closed 0, orphaned 0, timewait 0)
+Mem:          126502       79574       45949          13        2089       46927
+
+2026-11-04T11:09:12Z
+Total: 1545226
+TCP:   1545065 (estab 1545056, closed 0, orphaned 0, timewait 0)
+Mem:          126502       79891       45623          13        2099       46610
+
+2026-11-04T11:09:22Z
+Total: 1555225
+TCP:   1555064 (estab 1555055, closed 0, orphaned 0, timewait 0)
+Mem:          126502       80153       45351          13        2109       46348
+
+2026-11-04T11:09:32Z
+Total: 1565230
+TCP:   1565069 (estab 1565060, closed 0, orphaned 0, timewait 0)
+Mem:          126502       80418       45076          13        2119       46083
+
+2026-11-04T11:09:42Z
+Total: 1575232
+TCP:   1575071 (estab 1575062, closed 0, orphaned 0, timewait 0)
+Mem:          126502       80602       44882          13        2129       45899
+
+2026-11-04T11:09:52Z
+Total: 1585233
+TCP:   1585072 (estab 1585063, closed 0, orphaned 0, timewait 0)
+Mem:          126502       80917       44558          13        2138       45584
+
+2026-11-04T11:10:02Z
+Total: 1595234
+TCP:   1595073 (estab 1595064, closed 0, orphaned 0, timewait 0)
+Mem:          126502       81335       44130          13        2148       45166
+
+2026-11-04T11:10:12Z
+Total: 1605250
+TCP:   1605089 (estab 1605080, closed 0, orphaned 0, timewait 0)
+Mem:          126502       82348       43107          13        2158       44153
+
+2026-11-04T11:10:22Z
+Total: 1615253
+TCP:   1615092 (estab 1615083, closed 0, orphaned 0, timewait 0)
+Mem:          126502       83489       41955          13        2168       43012
+
+2026-11-04T11:10:32Z
+Total: 1625255
+TCP:   1625094 (estab 1625085, closed 0, orphaned 0, timewait 0)
+Mem:          126502       84083       41352          13        2178       42419
+
+2026-11-04T11:10:42Z
+Total: 1635257
+TCP:   1635096 (estab 1635087, closed 0, orphaned 0, timewait 0)
+Mem:          126502       84443       40982          13        2188       42058
+
+2026-11-04T11:10:52Z
+Total: 1645272
+TCP:   1645111 (estab 1645102, closed 0, orphaned 0, timewait 0)
+Mem:          126502       84814       40602          13        2197       41688
+
+2026-11-04T11:11:02Z
+Total: 1655287
+TCP:   1655126 (estab 1655117, closed 0, orphaned 0, timewait 0)
+Mem:          126502       85135       40270          13        2207       41366
+
+2026-11-04T11:11:12Z
+Total: 1665303
+TCP:   1665142 (estab 1665133, closed 0, orphaned 0, timewait 0)
+Mem:          126502       85364       40031          13        2217       41137
+
+2026-11-04T11:11:22Z
+Total: 1675305
+TCP:   1675144 (estab 1675135, closed 0, orphaned 0, timewait 0)
+Mem:          126502       85636       39749          13        2227       40865
+
+2026-11-04T11:11:32Z
+Total: 1685306
+TCP:   1685145 (estab 1685136, closed 0, orphaned 0, timewait 0)
+Mem:          126502       86140       39236          13        2237       40362
+
+2026-11-04T11:11:42Z
+Total: 1695310
+TCP:   1695149 (estab 1695140, closed 0, orphaned 0, timewait 0)
+Mem:          126502       86840       38526          13        2247       39661
+
+2026-11-04T11:11:52Z
+Total: 1705310
+TCP:   1705149 (estab 1705140, closed 0, orphaned 0, timewait 0)
+Mem:          126502       87348       38008          13        2257       39153
+
+2026-11-04T11:12:02Z
+Total: 1715323
+TCP:   1715162 (estab 1715156, closed -1, orphaned 0, timewait 0)
+Mem:          126502       87605       37741          13        2267       38896
+
+2026-11-04T11:12:12Z
+Total: 1725322
+TCP:   1725161 (estab 1725152, closed 0, orphaned 0, timewait 0)
+Mem:          126502       88469       36867          13        2277       38032
+
+2026-11-04T11:12:22Z
+Total: 1735325
+TCP:   1735164 (estab 1735155, closed 0, orphaned 0, timewait 0)
+Mem:          126502       89692       35634          13        2287       36809
+
+2026-11-04T11:12:32Z
+Total: 1745330
+TCP:   1745169 (estab 1745160, closed 0, orphaned 0, timewait 0)
+Mem:          126502       90378       34938          13        2296       36123
+
+2026-11-04T11:12:42Z
+Total: 1750180
+TCP:   1750019 (estab 1750010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       90670       34641          13        2301       35831
+
+2026-11-04T11:12:52Z
+Total: 1750180
+TCP:   1750019 (estab 1750010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       90948       34363          13        2301       35553
+
+2026-11-04T11:13:02Z
+Total: 1750180
+TCP:   1750019 (estab 1750010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       91306       34005          13        2301       35195
+
+2026-11-04T11:13:12Z
+Total: 1750180
+TCP:   1750019 (estab 1750010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       91409       33902          13        2301       35092
+
+2026-11-04T11:13:22Z
+Total: 1750180
+TCP:   1750019 (estab 1750010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       91529       33782          13        2301       34972
+
+2026-11-04T11:13:32Z
+Total: 1750180
+TCP:   1750019 (estab 1750010, closed 0, orphaned 0, timewait 0)
+Mem:          126502       91617       33694          13        2302       34884
+
+2026-11-04T11:13:42Z
+Total: 1755382
+TCP:   1755221 (estab 1755212, closed 0, orphaned 0, timewait 0)
+Mem:          126502       91724       33582          13        2306       34777
+
+2026-11-04T11:13:52Z
+Total: 1765385
+TCP:   1765224 (estab 1765215, closed 0, orphaned 0, timewait 0)
+Mem:          126502       91837       33459          13        2316       34664
+
+2026-11-04T11:14:02Z
+Total: 1775387
+TCP:   1775226 (estab 1775217, closed 0, orphaned 0, timewait 0)
+Mem:          126502       92110       33176          13        2326       34391
+
+2026-11-04T11:14:12Z
+Total: 1785396
+TCP:   1785235 (estab 1785226, closed 0, orphaned 0, timewait 0)
+Mem:          126502       92374       32903          13        2336       34127
+
+2026-11-04T11:14:22Z
+Total: 1795403
+TCP:   1795242 (estab 1795233, closed 0, orphaned 0, timewait 0)
+Mem:          126502       92546       32721          13        2346       33955
+
+2026-11-04T11:14:32Z
+Total: 1805411
+TCP:   1805250 (estab 1805241, closed 0, orphaned 0, timewait 0)
+Mem:          126502       92795       32462          13        2356       33706
+
+2026-11-04T11:14:42Z
+Total: 1815417
+TCP:   1815256 (estab 1815247, closed 0, orphaned 0, timewait 0)
+Mem:          126502       93109       32138          13        2366       33393
+
+2026-11-04T11:14:52Z
+Total: 1825426
+TCP:   1825265 (estab 1825256, closed 0, orphaned 0, timewait 0)
+Mem:          126502       94434       30803          13        2376       32067
+
+2026-11-04T11:15:02Z
+Total: 1835421
+TCP:   1835260 (estab 1835251, closed 0, orphaned 0, timewait 0)
+Mem:          126502       95181       30046          13        2385       31320
+
+2026-11-04T11:15:12Z
+Total: 1845430
+TCP:   1845269 (estab 1845260, closed 0, orphaned 0, timewait 0)
+Mem:          126502       95449       29769          13        2395       31052
+
+2026-11-04T11:15:22Z
+Total: 1855439
+TCP:   1855278 (estab 1855269, closed 0, orphaned 0, timewait 0)
+Mem:          126502       96145       29063          13        2405       30356
+
+2026-11-04T11:15:32Z
+Total: 1865446
+TCP:   1865285 (estab 1865276, closed 0, orphaned 0, timewait 0)
+Mem:          126502       96884       28314          13        2415       29617
+
+2026-11-04T11:15:42Z
+Total: 1875456
+TCP:   1875295 (estab 1875286, closed 0, orphaned 0, timewait 0)
+Mem:          126502       97330       27858          13        2425       29171
+
+2026-11-04T11:15:52Z
+Total: 1885466
+TCP:   1885305 (estab 1885296, closed 0, orphaned 0, timewait 0)
+Mem:          126502       97630       27548          13        2435       28871
+
+2026-11-04T11:16:02Z
+Total: 1895474
+TCP:   1895313 (estab 1895304, closed 0, orphaned 0, timewait 0)
+Mem:          126502       97956       27212          13        2445       28546
+
+2026-11-04T11:16:12Z
+Total: 1905484
+TCP:   1905323 (estab 1905314, closed 0, orphaned 0, timewait 0)
+Mem:          126502       98329       26830          13        2455       28173
+
+2026-11-04T11:16:22Z
+Total: 1915483
+TCP:   1915322 (estab 1915313, closed 0, orphaned 0, timewait 0)
+Mem:          126502       98554       26595          13        2464       27948
+
+2026-11-04T11:16:32Z
+Total: 1925494
+TCP:   1925333 (estab 1925324, closed 0, orphaned 0, timewait 0)
+Mem:          126502       98799       26339          13        2474       27702
+
+2026-11-04T11:16:42Z
+Total: 1935504
+TCP:   1935343 (estab 1935334, closed 0, orphaned 0, timewait 0)
+Mem:          126502       99303       25826          13        2484       27198
+
+2026-11-04T11:16:52Z
+Total: 1945515
+TCP:   1945354 (estab 1945345, closed 0, orphaned 0, timewait 0)
+Mem:          126502      100729       24389          13        2494       25772
+
+2026-11-04T11:17:02Z
+Total: 1955525
+TCP:   1955364 (estab 1955355, closed 0, orphaned 0, timewait 0)
+Mem:          126502      101525       23584          13        2504       24976
+
+2026-11-04T11:17:12Z
+Total: 1965536
+TCP:   1965375 (estab 1965366, closed 0, orphaned 0, timewait 0)
+Mem:          126502      101941       23158          13        2514       24561
+
+2026-11-04T11:17:22Z
+Total: 1975546
+TCP:   1975385 (estab 1975376, closed 0, orphaned 0, timewait 0)
+Mem:          126502      102765       22324          13        2524       23736
+
+2026-11-04T11:17:32Z
+Total: 1985542
+TCP:   1985381 (estab 1985372, closed 0, orphaned 0, timewait 0)
+Mem:          126502      103643       21436          13        2534       22858
+
+2026-11-04T11:17:42Z
+Total: 1995540
+TCP:   1995379 (estab 1995370, closed 0, orphaned 0, timewait 0)
+Mem:          126502      104163       20906          13        2543       22338
+
+2026-11-04T11:17:52Z
+Total: 2000180
+TCP:   2000019 (estab 2000010, closed 0, orphaned 0, timewait 0)
+Mem:          126502      104342       20722          13        2548       22159
+
+2026-11-04T11:18:02Z
+Total: 2000180
+TCP:   2000019 (estab 2000010, closed 0, orphaned 0, timewait 0)
+Mem:          126502      104488       20577          13        2548       22013
+
+2026-11-04T11:18:12Z
+Total: 2000180
+TCP:   2000019 (estab 2000010, closed 0, orphaned 0, timewait 0)
+Mem:          126502      104640       20425          13        2548       21862
+
+2026-11-04T11:18:22Z
+Total: 2000180
+TCP:   2000019 (estab 2000010, closed 0, orphaned 0, timewait 0)
+Mem:          126502      104790       20274          13        2549       21711
+
+2026-11-04T11:18:32Z
+Total: 2000180
+TCP:   2000019 (estab 2000010, closed 0, orphaned 0, timewait 0)
+Mem:          126502      104941       20123          13        2549       21560
+
+2026-11-04T11:18:42Z
+Total: 2000181
+TCP:   2000019 (estab 2000010, closed 0, orphaned 0, timewait 0)
+Mem:          126502      105027       20037          13        2549       21474
+
+2026-11-04T11:18:52Z
+Total: 2005588
+TCP:   2005427 (estab 2005418, closed 0, orphaned 0, timewait 0)
+Mem:          126502      105234       19826          13        2553       21268
+
+2026-11-04T11:19:02Z
+Total: 2015599
+TCP:   2015438 (estab 2015429, closed 0, orphaned 0, timewait 0)
+Mem:          126502      105484       19566          13        2563       21018
+
+2026-11-04T11:19:12Z
+Total: 2025610
+TCP:   2025449 (estab 2025440, closed 0, orphaned 0, timewait 0)
+Mem:          126502      105892       19148          13        2573       20609
+
+2026-11-04T11:19:22Z
+Total: 2035609
+TCP:   2035448 (estab 2035439, closed 0, orphaned 0, timewait 0)
+Mem:          126502      106230       18800          13        2583       20271
+
+2026-11-04T11:19:32Z
+Total: 2045619
+TCP:   2045458 (estab 2045449, closed 0, orphaned 0, timewait 0)
+Mem:          126502      106681       18347          13        2585       19821
+
+2026-11-04T11:19:42Z
+Total: 2055631
+TCP:   2055470 (estab 2055461, closed 0, orphaned 0, timewait 0)
+Mem:          126502      106862       18165          13        2586       19639
+
+2026-11-04T11:19:52Z
+Total: 2065641
+TCP:   2065480 (estab 2065471, closed 0, orphaned 0, timewait 0)
+Mem:          126502      107285       17742          13        2586       19217
+
+2026-11-04T11:20:02Z
+Total: 2082682
+TCP:   2082521 (estab 2082476, closed 36, orphaned 0, timewait 0)
+Mem:          126502      108080       16946          13        2586       18421
+
+2026-11-04T11:20:12Z
+Total: 2101968
+TCP:   2101807 (estab 2101765, closed 33, orphaned 0, timewait 0)
+Mem:          126502      108608       16418          13        2586       17893
+
+2026-11-04T11:20:22Z
+Total: 2103270
+TCP:   2103109 (estab 2103071, closed 29, orphaned 0, timewait 0)
+Mem:          126502      108838       16188          13        2587       17663
+
+2026-11-04T11:20:32Z
+Total: 2103164
+TCP:   2103003 (estab 2102959, closed 35, orphaned 0, timewait 0)
+Mem:          126502      109063       15963          13        2587       17438
+
+2026-11-04T11:20:42Z
+Total: 2103100
+TCP:   2102939 (estab 2102902, closed 28, orphaned 0, timewait 0)
+Mem:          126502      109283       15744          13        2587       17219
+
+2026-11-04T11:20:52Z
+Total: 2103011
+TCP:   2102850 (estab 2102815, closed 26, orphaned 0, timewait 0)
+Mem:          126502      109573       15454          13        2587       16929
+
+2026-11-04T11:21:02Z
+Total: 2102881
+TCP:   2102720 (estab 2102684, closed 27, orphaned 0, timewait 0)
+Mem:          126502      109733       15293          13        2587       16768
+
+2026-11-04T11:21:13Z
+Total: 2102841
+TCP:   2102680 (estab 2102272, closed 399, orphaned 0, timewait 0)
+Mem:          126502      109938       15088          13        2587       16563
+
+2026-11-04T11:21:23Z
+Total: 2102812
+TCP:   2102651 (estab 2101606, closed 1036, orphaned 0, timewait 0)
+Mem:          126502      110435       14592          13        2587       16067
+
+2026-11-04T11:21:33Z
+Total: 2102817
+TCP:   2102656 (estab 2100219, closed 2428, orphaned 0, timewait 0)
+Mem:          126502      110550       14477          13        2587       15952
+
+2026-11-04T11:21:43Z
+Total: 2102810
+TCP:   2102649 (estab 2097524, closed 5116, orphaned 0, timewait 0)
+Mem:          126502      110582       14444          13        2587       15919
+
+2026-11-04T11:21:53Z
+Total: 2102804
+TCP:   2102643 (estab 2094688, closed 7946, orphaned 0, timewait 0)
+Mem:          126502      110774       14252          13        2587       15727
+
+2026-11-04T11:22:03Z
+Total: 2102800
+TCP:   2102639 (estab 2092781, closed 9849, orphaned 0, timewait 0)
+Mem:          126502      111066       13961          13        2587       15436
+
+2026-11-04T11:22:13Z
+Total: 2102823
+TCP:   2102662 (estab 2092076, closed 10577, orphaned 0, timewait 0)
+Mem:          126502      110668       14358          13        2587       15833
+
+2026-11-04T11:22:23Z
+Total: 2102803
+TCP:   2102642 (estab 2092172, closed 10461, orphaned 0, timewait 0)
+Mem:          126502      110553       14473          13        2587       15948
+
+2026-11-04T11:22:33Z
+Total: 2102814
+TCP:   2102653 (estab 2092435, closed 10209, orphaned 0, timewait 0)
+Mem:          126502      110403       14623          13        2587       16098
+
+2026-11-04T11:22:43Z
+Total: 2102792
+TCP:   2102631 (estab 2091487, closed 11135, orphaned 0, timewait 0)
+Mem:          126502      110446       14580          13        2587       16055
+
+2026-11-04T11:22:53Z
+Total: 2102798
+TCP:   2102637 (estab 2090855, closed 11773, orphaned 0, timewait 0)
+Mem:          126502      110624       14402          13        2587       15877
+
+2026-11-04T11:23:03Z
+Total: 2102796
+TCP:   2102635 (estab 2091708, closed 10918, orphaned 0, timewait 0)
+Mem:          126502      110931       14096          13        2587       15571
+
+2026-11-04T11:23:13Z
+Total: 2102802
+TCP:   2102641 (estab 2090919, closed 11713, orphaned 0, timewait 0)
+Mem:          126502      110854       14172          13        2587       15647
+
+2026-11-04T11:23:23Z
+Total: 2102795
+TCP:   2102634 (estab 2090001, closed 12624, orphaned 0, timewait 0)
+Mem:          126502      110872       14155          13        2587       15630
+
+2026-11-04T11:23:33Z
+Total: 2102674
+TCP:   2102513 (estab 2088596, closed 13908, orphaned 0, timewait 0)
+Mem:          126502      110884       14142          13        2587       15617
+
+2026-11-04T11:23:43Z
+Total: 2095495
+TCP:   2095334 (estab 2077196, closed 18129, orphaned 0, timewait 0)
+Mem:          126502      110900       14127          13        2587       15601
+
+2026-11-04T11:23:53Z
+Total: 2051016
+TCP:   2050855 (estab 1984687, closed 66159, orphaned 0, timewait 0)
+Mem:          126502      110953       14074          13        2587       15549
+
+2026-11-04T11:24:03Z
+Total: 1602761
+TCP:   1602600 (estab 1441876, closed 160705, orphaned 10, timewait 0)
+Mem:          126502      112171       12855          13        2587       14330
+
+2026-11-04T11:24:13Z
+Total: 510979
+TCP:   510818 (estab 158824, closed 351982, orphaned 1, timewait 0)
+Mem:          126502       97533       27529          13        2550       28968
+
+2026-11-04T11:24:23Z
+Total: 124744
+TCP:   124583 (estab 44195, closed 80379, orphaned 0, timewait 0)
+Mem:          126502       91351       34524          13        1738       35150
+
+2026-11-04T11:24:33Z
+Total: 60752
+TCP:   60591 (estab 37568, closed 23014, orphaned 0, timewait 0)
+Mem:          126502       41756       85126          13         612       84746
+
+2026-11-04T11:24:43Z
+Total: 1708
+TCP:   1547 (estab 1538, closed 0, orphaned 0, timewait 0)
+Mem:          126502       15504      111385          13         596      110997
+
+2026-11-04T11:24:53Z
+Total: 1601
+TCP:   1440 (estab 1431, closed 0, orphaned 0, timewait 0)
+Mem:          126502       14863      112027          13         595      111638
+
+2026-11-04T11:25:03Z
+Total: 183
+TCP:   22 (estab 2, closed 0, orphaned 11, timewait 0)
+Mem:          126502       13834      113060          13         587      112668
+
+2026-11-04T11:25:13Z
+Total: 183
+TCP:   22 (estab 2, closed 0, orphaned 11, timewait 0)
+Mem:          126502       13620      113274          13         587      112881
+
+2026-11-04T11:25:23Z
+Total: 183
+TCP:   22 (estab 2, closed 0, orphaned 11, timewait 0)
+Mem:          126502       13621      113273          13         587      112880
+
+2026-11-04T11:25:33Z
+Total: 183
+TCP:   22 (estab 2, closed 0, orphaned 11, timewait 0)
+Mem:          126502       13622      113272          13         587      112879
+
+2026-11-04T11:25:43Z
+Total: 183
+TCP:   22 (estab 2, closed 0, orphaned 11, timewait 0)
+Mem:          126502       13623      113271          13         587      112879
+
+2026-11-04T11:25:53Z
+Total: 183
+TCP:   22 (estab 2, closed 0, orphaned 11, timewait 0)
+Mem:          126502       13623      113271          13         587      112878
+
+2026-11-04T11:26:03Z
+Total: 172
+TCP:   11 (estab 2, closed 0, orphaned 0, timewait 0)
+Mem:          126502       13623      113271          13         587      112878
+
+2026-11-04T11:26:13Z
+Total: 172
+TCP:   11 (estab 2, closed 0, orphaned 0, timewait 0)
+Mem:          126502       13623      113270          13         587      112878
+

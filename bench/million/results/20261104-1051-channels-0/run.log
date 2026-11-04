@@ -1,0 +1,1853 @@
+Dashboard at http://127.0.0.1:4040
+
+   1.0s  vus: 4046  iterations: 0  errors: 0  load test busy: 6%
+   2.0s  vus: 8086  iterations: 0  errors: 0  load test busy: 5%
+   3.0s  vus: 12126  iterations: 0  errors: 0  load test busy: 5%
+   4.0s  vus: 16166  iterations: 0  errors: 0  load test busy: 5%
+   5.1s  vus: 20206  iterations: 0  errors: 0  load test busy: 5%
+   6.1s  vus: 24246  iterations: 0  errors: 0  load test busy: 5%
+   7.1s  vus: 28286  iterations: 0  errors: 0  load test busy: 5%
+   8.1s  vus: 32326  iterations: 0  errors: 0  load test busy: 5%
+   9.1s  vus: 36366  iterations: 0  errors: 0  load test busy: 5%
+  10.1s  vus: 40406  iterations: 0  errors: 0  load test busy: 5%
+  11.1s  vus: 44446  iterations: 0  errors: 0  load test busy: 5%
+  12.1s  vus: 48486  iterations: 0  errors: 0  load test busy: 5%
+  13.1s  vus: 52526  iterations: 0  errors: 0  load test busy: 5%
+  14.1s  vus: 56566  iterations: 0  errors: 0  load test busy: 5%
+  15.2s  vus: 60606  iterations: 0  errors: 0  load test busy: 5%
+  16.2s  vus: 64646  iterations: 0  errors: 0  load test busy: 5%
+  17.2s  vus: 68686  iterations: 0  errors: 0  load test busy: 5%
+  18.2s  vus: 72726  iterations: 0  errors: 0  load test busy: 5%
+  19.2s  vus: 76767  iterations: 0  errors: 0  load test busy: 5%
+  20.2s  vus: 80807  iterations: 0  errors: 0  load test busy: 5%
+  21.2s  vus: 84847  iterations: 0  errors: 0  load test busy: 5%
+  22.2s  vus: 88887  iterations: 0  errors: 0  load test busy: 5%
+  23.2s  vus: 92927  iterations: 0  errors: 0  load test busy: 5%
+  24.2s  vus: 96967  iterations: 0  errors: 0  load test busy: 5%
+  25.3s  vus: 101007  iterations: 0  errors: 0  load test busy: 5%
+  26.3s  vus: 105047  iterations: 0  errors: 0  load test busy: 5%
+  27.3s  vus: 109087  iterations: 0  errors: 0  load test busy: 5%
+  28.3s  vus: 113127  iterations: 0  errors: 0  load test busy: 5%
+  29.3s  vus: 117167  iterations: 0  errors: 0  load test busy: 5%
+  30.3s  vus: 121207  iterations: 0  errors: 0  load test busy: 5%
+  31.3s  vus: 125248  iterations: 0  errors: 0  load test busy: 7%
+  32.3s  vus: 129288  iterations: 0  errors: 0  load test busy: 7%
+  33.3s  vus: 133328  iterations: 0  errors: 0  load test busy: 7%
+  34.3s  vus: 137368  iterations: 0  errors: 0  load test busy: 7%
+  35.4s  vus: 141408  iterations: 0  errors: 0  load test busy: 7%
+  36.4s  vus: 145448  iterations: 0  errors: 0  load test busy: 7%
+  37.4s  vus: 149489  iterations: 0  errors: 0  load test busy: 7%
+  38.4s  vus: 153529  iterations: 0  errors: 0  load test busy: 7%
+  39.4s  vus: 157570  iterations: 0  errors: 0  load test busy: 7%
+  40.4s  vus: 161611  iterations: 0  errors: 0  load test busy: 7%
+  41.4s  vus: 165652  iterations: 0  errors: 0  load test busy: 7%
+  42.4s  vus: 169692  iterations: 0  errors: 0  load test busy: 7%
+  43.4s  vus: 173733  iterations: 0  errors: 0  load test busy: 7%
+  44.4s  vus: 177773  iterations: 0  errors: 0  load test busy: 7%
+  45.5s  vus: 181813  iterations: 0  errors: 0  load test busy: 7%
+  46.5s  vus: 185853  iterations: 0  errors: 0  load test busy: 7%
+  47.5s  vus: 189894  iterations: 0  errors: 0  load test busy: 8%
+  48.5s  vus: 193934  iterations: 0  errors: 0  load test busy: 8%
+  49.5s  vus: 197975  iterations: 0  errors: 0  load test busy: 7%
+  50.5s  vus: 202018  iterations: 0  errors: 0  load test busy: 8%
+  51.5s  vus: 206058  iterations: 0  errors: 0  load test busy: 8%
+  52.5s  vus: 210098  iterations: 0  errors: 0  load test busy: 8%
+  53.5s  vus: 214141  iterations: 0  errors: 0  load test busy: 8%
+  54.5s  vus: 218181  iterations: 0  errors: 0  load test busy: 8%
+  55.6s  vus: 222221  iterations: 0  errors: 0  load test busy: 8%
+  56.6s  vus: 226264  iterations: 0  errors: 0  load test busy: 9%
+  57.6s  vus: 230305  iterations: 0  errors: 0  load test busy: 9%
+  58.6s  vus: 234345  iterations: 0  errors: 0  load test busy: 8%
+  59.6s  vus: 238385  iterations: 0  errors: 0  load test busy: 8%
+  60.6s  vus: 242425  iterations: 0  errors: 0  load test busy: 9%
+  61.6s  vus: 246466  iterations: 0  errors: 0  load test busy: 10%
+  62.6s  vus: 250508  iterations: 0  errors: 0  load test busy: 10%
+  63.6s  vus: 254548  iterations: 0  errors: 0  load test busy: 10%
+  64.7s  vus: 258590  iterations: 0  errors: 0  load test busy: 10%
+  65.7s  vus: 262631  iterations: 0  errors: 0  load test busy: 11%
+  66.7s  vus: 266671  iterations: 0  errors: 0  load test busy: 10%
+  67.7s  vus: 270713  iterations: 0  errors: 0  load test busy: 10%
+  68.7s  vus: 274753  iterations: 0  errors: 0  load test busy: 10%
+  69.7s  vus: 278794  iterations: 0  errors: 0  load test busy: 10%
+  70.7s  vus: 282835  iterations: 0  errors: 0  load test busy: 10%
+  71.7s  vus: 286877  iterations: 0  errors: 0  load test busy: 10%
+  72.7s  vus: 290918  iterations: 0  errors: 0  load test busy: 10%
+  73.8s  vus: 294960  iterations: 0  errors: 0  load test busy: 10%
+  74.8s  vus: 299001  iterations: 0  errors: 0  load test busy: 10%
+  75.8s  vus: 303043  iterations: 0  errors: 0  load test busy: 10%
+  76.8s  vus: 307085  iterations: 0  errors: 0  load test busy: 10%
+  77.8s  vus: 311125  iterations: 0  errors: 0  load test busy: 10%
+  78.8s  vus: 315167  iterations: 0  errors: 0  load test busy: 10%
+  79.8s  vus: 319209  iterations: 0  errors: 0  load test busy: 10%
+  80.8s  vus: 323250  iterations: 0  errors: 0  load test busy: 11%
+  81.8s  vus: 327293  iterations: 0  errors: 0  load test busy: 10%
+  82.8s  vus: 331334  iterations: 0  errors: 0  load test busy: 10%
+  83.9s  vus: 335376  iterations: 0  errors: 0  load test busy: 10%
+  84.9s  vus: 339419  iterations: 0  errors: 0  load test busy: 10%
+  85.9s  vus: 343461  iterations: 0  errors: 0  load test busy: 10%
+  86.9s  vus: 347501  iterations: 0  errors: 0  load test busy: 11%
+  87.9s  vus: 351543  iterations: 0  errors: 0  load test busy: 10%
+  88.9s  vus: 355585  iterations: 0  errors: 0  load test busy: 10%
+  89.9s  vus: 359627  iterations: 0  errors: 0  load test busy: 10%
+  90.9s  vus: 363669  iterations: 0  errors: 0  load test busy: 12%
+  91.9s  vus: 367710  iterations: 0  errors: 0  load test busy: 12%
+  92.9s  vus: 371753  iterations: 0  errors: 0  load test busy: 12%
+  94.0s  vus: 375795  iterations: 0  errors: 0  load test busy: 12%
+  95.0s  vus: 379838  iterations: 0  errors: 0  load test busy: 12%
+  96.0s  vus: 383880  iterations: 0  errors: 0  load test busy: 12%
+  97.0s  vus: 387922  iterations: 0  errors: 0  load test busy: 13%
+  98.0s  vus: 391963  iterations: 0  errors: 0  load test busy: 12%
+  99.0s  vus: 396008  iterations: 0  errors: 0  load test busy: 12%
+ 100.0s  vus: 400049  iterations: 0  errors: 0  load test busy: 12%
+ 101.0s  vus: 404092  iterations: 0  errors: 0  load test busy: 13%
+ 102.0s  vus: 408135  iterations: 0  errors: 0  load test busy: 12%
+ 103.1s  vus: 412176  iterations: 0  errors: 0  load test busy: 12%
+ 104.1s  vus: 416221  iterations: 0  errors: 0  load test busy: 12%
+ 105.1s  vus: 420262  iterations: 0  errors: 0  load test busy: 13%
+ 106.1s  vus: 424304  iterations: 0  errors: 0  load test busy: 12%
+ 107.1s  vus: 428344  iterations: 0  errors: 0  load test busy: 13%
+ 108.1s  vus: 432384  iterations: 0  errors: 0  load test busy: 12%
+ 109.1s  vus: 436426  iterations: 0  errors: 0  load test busy: 13%
+ 110.1s  vus: 440466  iterations: 0  errors: 0  load test busy: 13%
+ 111.1s  vus: 444506  iterations: 0  errors: 0  load test busy: 13%
+ 112.1s  vus: 448549  iterations: 0  errors: 0  load test busy: 13%
+ 113.2s  vus: 452590  iterations: 0  errors: 0  load test busy: 13%
+ 114.2s  vus: 456633  iterations: 0  errors: 0  load test busy: 13%
+ 115.2s  vus: 460676  iterations: 0  errors: 0  load test busy: 13%
+ 116.2s  vus: 464717  iterations: 0  errors: 0  load test busy: 13%
+ 117.2s  vus: 468757  iterations: 0  errors: 0  load test busy: 13%
+ 118.2s  vus: 472797  iterations: 0  errors: 0  load test busy: 13%
+ 119.2s  vus: 476838  iterations: 0  errors: 0  load test busy: 13%
+ 120.2s  vus: 480880  iterations: 0  errors: 0  load test busy: 14%
+ 121.2s  vus: 484922  iterations: 0  errors: 0  load test busy: 14%
+ 122.3s  vus: 488962  iterations: 0  errors: 0  load test busy: 14%
+ 123.3s  vus: 493004  iterations: 0  errors: 0  load test busy: 14%
+ 124.3s  vus: 497046  iterations: 0  errors: 0  load test busy: 14%
+ 125.3s  vus: 501092  iterations: 0  errors: 0  load test busy: 15%
+ 126.3s  vus: 505136  iterations: 0  errors: 0  load test busy: 14%
+ 127.3s  vus: 509176  iterations: 0  errors: 0  load test busy: 15%
+ 128.3s  vus: 513219  iterations: 0  errors: 0  load test busy: 15%
+ 129.3s  vus: 517260  iterations: 0  errors: 0  load test busy: 15%
+ 130.3s  vus: 521301  iterations: 0  errors: 0  load test busy: 15%
+ 131.3s  vus: 525342  iterations: 0  errors: 0  load test busy: 16%
+ 132.4s  vus: 529383  iterations: 0  errors: 0  load test busy: 15%
+ 133.4s  vus: 533424  iterations: 0  errors: 0  load test busy: 15%
+ 134.4s  vus: 537467  iterations: 0  errors: 0  load test busy: 15%
+ 135.4s  vus: 541510  iterations: 0  errors: 0  load test busy: 15%
+ 136.4s  vus: 545550  iterations: 0  errors: 0  load test busy: 15%
+ 137.4s  vus: 549593  iterations: 0  errors: 0  load test busy: 15%
+ 138.4s  vus: 553635  iterations: 0  errors: 0  load test busy: 16%
+ 139.4s  vus: 557677  iterations: 0  errors: 0  load test busy: 15%
+ 140.4s  vus: 561720  iterations: 0  errors: 0  load test busy: 16%
+ 141.5s  vus: 565761  iterations: 0  errors: 0  load test busy: 15%
+ 142.5s  vus: 569805  iterations: 0  errors: 0  load test busy: 15%
+ 143.5s  vus: 573848  iterations: 0  errors: 0  load test busy: 15%
+ 144.5s  vus: 577889  iterations: 0  errors: 0  load test busy: 16%
+ 145.5s  vus: 581930  iterations: 0  errors: 0  load test busy: 16%
+ 146.5s  vus: 585970  iterations: 0  errors: 0  load test busy: 16%
+ 147.5s  vus: 590012  iterations: 0  errors: 0  load test busy: 16%
+ 148.5s  vus: 594055  iterations: 0  errors: 0  load test busy: 16%
+ 149.5s  vus: 598096  iterations: 0  errors: 0  load test busy: 16%
+ 150.6s  vus: 602138  iterations: 0  errors: 0  load test busy: 17%
+ 151.6s  vus: 606181  iterations: 0  errors: 0  load test busy: 17%
+ 152.6s  vus: 610222  iterations: 0  errors: 0  load test busy: 17%
+ 153.6s  vus: 614263  iterations: 0  errors: 0  load test busy: 17%
+ 154.6s  vus: 618306  iterations: 0  errors: 0  load test busy: 18%
+ 155.6s  vus: 622350  iterations: 0  errors: 0  load test busy: 18%
+ 156.6s  vus: 626390  iterations: 0  errors: 0  load test busy: 18%
+ 157.6s  vus: 630432  iterations: 0  errors: 0  load test busy: 18%
+ 158.6s  vus: 634475  iterations: 0  errors: 0  load test busy: 18%
+ 159.7s  vus: 638518  iterations: 0  errors: 0  load test busy: 18%
+ 160.7s  vus: 642562  iterations: 0  errors: 0  load test busy: 18%
+ 161.7s  vus: 646604  iterations: 0  errors: 0  load test busy: 18%
+ 162.7s  vus: 650644  iterations: 0  errors: 0  load test busy: 18%
+ 163.7s  vus: 654688  iterations: 0  errors: 0  load test busy: 17%
+ 164.7s  vus: 658729  iterations: 0  errors: 0  load test busy: 18%
+ 165.7s  vus: 662772  iterations: 0  errors: 0  load test busy: 17%
+ 166.7s  vus: 666815  iterations: 0  errors: 0  load test busy: 18%
+ 167.7s  vus: 670859  iterations: 0  errors: 0  load test busy: 18%
+ 168.8s  vus: 674901  iterations: 0  errors: 0  load test busy: 18%
+ 169.8s  vus: 678943  iterations: 0  errors: 0  load test busy: 18%
+ 170.8s  vus: 682984  iterations: 0  errors: 0  load test busy: 18%
+ 171.8s  vus: 687027  iterations: 0  errors: 0  load test busy: 19%
+ 172.8s  vus: 691067  iterations: 0  errors: 0  load test busy: 18%
+ 173.8s  vus: 695110  iterations: 0  errors: 0  load test busy: 18%
+ 174.8s  vus: 699153  iterations: 0  errors: 0  load test busy: 18%
+ 175.8s  vus: 703194  iterations: 0  errors: 0  load test busy: 18%
+ 176.8s  vus: 707237  iterations: 0  errors: 0  load test busy: 19%
+ 177.8s  vus: 711277  iterations: 0  errors: 0  load test busy: 19%
+ 178.9s  vus: 715321  iterations: 0  errors: 0  load test busy: 19%
+ 179.9s  vus: 719363  iterations: 0  errors: 0  load test busy: 19%
+ 180.9s  vus: 723407  iterations: 0  errors: 0  load test busy: 19%
+ 181.9s  vus: 727447  iterations: 0  errors: 0  load test busy: 20%
+ 182.9s  vus: 731490  iterations: 0  errors: 0  load test busy: 19%
+ 183.9s  vus: 735534  iterations: 0  errors: 0  load test busy: 20%
+ 184.9s  vus: 739576  iterations: 0  errors: 0  load test busy: 20%
+ 185.9s  vus: 743617  iterations: 0  errors: 0  load test busy: 21%
+ 186.9s  vus: 747657  iterations: 0  errors: 0  load test busy: 20%
+ 188.0s  vus: 751700  iterations: 0  errors: 0  load test busy: 20%
+ 189.0s  vus: 755744  iterations: 0  errors: 0  load test busy: 20%
+ 190.0s  vus: 759785  iterations: 0  errors: 0  load test busy: 20%
+ 191.0s  vus: 763827  iterations: 0  errors: 0  load test busy: 21%
+ 192.0s  vus: 767868  iterations: 0  errors: 0  load test busy: 20%
+ 193.0s  vus: 771912  iterations: 0  errors: 0  load test busy: 20%
+ 194.0s  vus: 775952  iterations: 0  errors: 0  load test busy: 20%
+ 195.0s  vus: 779995  iterations: 0  errors: 0  load test busy: 20%
+ 196.0s  vus: 784037  iterations: 0  errors: 0  load test busy: 20%
+ 197.1s  vus: 788081  iterations: 0  errors: 0  load test busy: 21%
+ 198.1s  vus: 792123  iterations: 0  errors: 0  load test busy: 21%
+ 199.1s  vus: 796166  iterations: 0  errors: 0  load test busy: 21%
+ 200.1s  vus: 800208  iterations: 0  errors: 0  load test busy: 20%
+ 201.1s  vus: 804252  iterations: 0  errors: 0  load test busy: 21%
+ 202.1s  vus: 808299  iterations: 0  errors: 0  load test busy: 21%
+ 203.1s  vus: 812339  iterations: 0  errors: 0  load test busy: 21%
+ 204.1s  vus: 816383  iterations: 0  errors: 0  load test busy: 20%
+ 205.1s  vus: 820426  iterations: 0  errors: 0  load test busy: 21%
+ 206.2s  vus: 824468  iterations: 0  errors: 0  load test busy: 21%
+ 207.2s  vus: 828511  iterations: 0  errors: 0  load test busy: 21%
+ 208.2s  vus: 832554  iterations: 0  errors: 0  load test busy: 21%
+ 209.2s  vus: 836598  iterations: 0  errors: 0  load test busy: 21%
+ 210.2s  vus: 840638  iterations: 0  errors: 0  load test busy: 21%
+ 211.2s  vus: 844682  iterations: 0  errors: 0  load test busy: 22%
+ 212.2s  vus: 848725  iterations: 0  errors: 0  load test busy: 23%
+ 213.2s  vus: 852767  iterations: 0  errors: 0  load test busy: 22%
+ 214.2s  vus: 856809  iterations: 0  errors: 0  load test busy: 23%
+ 215.2s  vus: 860853  iterations: 0  errors: 0  load test busy: 22%
+ 216.3s  vus: 864896  iterations: 0  errors: 0  load test busy: 23%
+ 217.3s  vus: 868940  iterations: 0  errors: 0  load test busy: 23%
+ 218.3s  vus: 872983  iterations: 0  errors: 0  load test busy: 22%
+ 219.3s  vus: 877026  iterations: 0  errors: 0  load test busy: 22%
+ 220.3s  vus: 881068  iterations: 0  errors: 0  load test busy: 23%
+ 221.3s  vus: 885111  iterations: 0  errors: 0  load test busy: 23%
+ 222.3s  vus: 889156  iterations: 0  errors: 0  load test busy: 22%
+ 223.3s  vus: 893200  iterations: 0  errors: 0  load test busy: 23%
+ 224.3s  vus: 897240  iterations: 0  errors: 0  load test busy: 23%
+ 225.4s  vus: 901282  iterations: 0  errors: 0  load test busy: 22%
+ 226.4s  vus: 905323  iterations: 0  errors: 0  load test busy: 22%
+ 227.4s  vus: 909363  iterations: 0  errors: 0  load test busy: 23%
+ 228.4s  vus: 913404  iterations: 0  errors: 0  load test busy: 22%
+ 229.4s  vus: 917445  iterations: 0  errors: 0  load test busy: 24%
+ 230.4s  vus: 921488  iterations: 0  errors: 0  load test busy: 23%
+ 231.4s  vus: 925534  iterations: 0  errors: 0  load test busy: 23%
+ 232.4s  vus: 929581  iterations: 0  errors: 0  load test busy: 24%
+ 233.4s  vus: 933626  iterations: 0  errors: 0  load test busy: 23%
+ 234.5s  vus: 937669  iterations: 0  errors: 0  load test busy: 23%
+ 235.5s  vus: 941710  iterations: 0  errors: 0  load test busy: 25%
+ 236.5s  vus: 945754  iterations: 0  errors: 0  load test busy: 23%
+ 237.5s  vus: 949794  iterations: 0  errors: 0  load test busy: 25%
+ 238.5s  vus: 953839  iterations: 0  errors: 0  load test busy: 24%
+ 239.5s  vus: 957882  iterations: 0  errors: 0  load test busy: 23%
+ 240.5s  vus: 961926  iterations: 0  errors: 0  load test busy: 25%
+ 241.5s  vus: 965968  iterations: 0  errors: 0  load test busy: 26%
+ 242.5s  vus: 970014  iterations: 0  errors: 0  load test busy: 25%
+ 243.5s  vus: 974056  iterations: 0  errors: 0  load test busy: 25%
+ 244.6s  vus: 978099  iterations: 0  errors: 0  load test busy: 25%
+ 245.6s  vus: 982141  iterations: 0  errors: 0  load test busy: 26%
+ 246.6s  vus: 986186  iterations: 0  errors: 0  load test busy: 26%
+ 247.6s  vus: 990226  iterations: 0  errors: 0  load test busy: 25%
+ 248.6s  vus: 994271  iterations: 0  errors: 0  load test busy: 26%
+ 249.6s  vus: 998313  iterations: 0  errors: 0  load test busy: 25%
+ 250.6s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 251.6s  vus: 1000000  iterations: 0  errors: 0  load test busy: 19%
+ 252.6s  vus: 1000000  iterations: 0  errors: 0  load test busy: 20%
+ 253.7s  vus: 1000000  iterations: 0  errors: 0  load test busy: 21%
+ 254.7s  vus: 1000000  iterations: 0  errors: 0  load test busy: 20%
+ 255.7s  vus: 1000000  iterations: 0  errors: 0  load test busy: 21%
+ 256.7s  vus: 1000000  iterations: 0  errors: 0  load test busy: 20%
+ 257.7s  vus: 1000000  iterations: 0  errors: 0  load test busy: 20%
+ 258.7s  vus: 1000000  iterations: 0  errors: 0  load test busy: 20%
+ 259.7s  vus: 1000000  iterations: 0  errors: 0  load test busy: 20%
+ 260.7s  vus: 1000000  iterations: 0  errors: 0  load test busy: 21%
+ 261.7s  vus: 1000000  iterations: 0  errors: 0  load test busy: 21%
+ 262.7s  vus: 1000000  iterations: 0  errors: 0  load test busy: 21%
+ 263.8s  vus: 1000000  iterations: 0  errors: 0  load test busy: 20%
+ 264.8s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 265.8s  vus: 1000000  iterations: 0  errors: 0  load test busy: 20%
+ 266.8s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 267.8s  vus: 1000000  iterations: 0  errors: 0  load test busy: 21%
+ 268.8s  vus: 1000000  iterations: 0  errors: 0  load test busy: 21%
+ 269.8s  vus: 1000000  iterations: 0  errors: 0  load test busy: 21%
+ 270.8s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 271.8s  vus: 1000000  iterations: 0  errors: 0  load test busy: 23%
+ 272.8s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 273.9s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 274.9s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 275.9s  vus: 1000000  iterations: 0  errors: 0  load test busy: 23%
+ 276.9s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 277.9s  vus: 1000000  iterations: 0  errors: 0  load test busy: 23%
+ 278.9s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 279.9s  vus: 1000000  iterations: 0  errors: 0  load test busy: 23%
+ 280.9s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 281.9s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 282.9s  vus: 1000000  iterations: 0  errors: 0  load test busy: 23%
+ 284.0s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 285.0s  vus: 1000000  iterations: 0  errors: 0  load test busy: 21%
+ 286.0s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 287.0s  vus: 1000000  iterations: 0  errors: 0  load test busy: 21%
+ 288.0s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 289.0s  vus: 1000000  iterations: 0  errors: 0  load test busy: 21%
+ 290.0s  vus: 1000000  iterations: 0  errors: 0  load test busy: 20%
+ 291.0s  vus: 1000000  iterations: 0  errors: 0  load test busy: 23%
+ 292.0s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 293.0s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 294.1s  vus: 1000000  iterations: 0  errors: 0  load test busy: 21%
+ 295.1s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 296.1s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 297.1s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 298.1s  vus: 1000000  iterations: 0  errors: 0  load test busy: 21%
+ 299.1s  vus: 1000000  iterations: 0  errors: 0  load test busy: 21%
+ 300.1s  vus: 1000000  iterations: 0  errors: 0  load test busy: 21%
+ 301.1s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 302.1s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 303.1s  vus: 1000000  iterations: 0  errors: 0  load test busy: 23%
+ 304.2s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 305.2s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 306.2s  vus: 1000000  iterations: 0  errors: 0  load test busy: 24%
+ 307.2s  vus: 1000000  iterations: 0  errors: 0  load test busy: 23%
+ 308.2s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+ 309.2s  vus: 1000000  iterations: 0  errors: 0  load test busy: 22%
+   step  1,000,000 VUs: held
+ 310.2s  vus: 1000181  iterations: 0  errors: 0  load test busy: 22%
+ 311.2s  vus: 1001191  iterations: 0  errors: 0  load test busy: 23%
+ 312.2s  vus: 1002200  iterations: 0  errors: 0  load test busy: 22%
+ 313.2s  vus: 1003211  iterations: 0  errors: 0  load test busy: 22%
+ 314.3s  vus: 1004221  iterations: 0  errors: 0  load test busy: 23%
+ 315.3s  vus: 1005231  iterations: 0  errors: 0  load test busy: 23%
+ 316.3s  vus: 1006242  iterations: 0  errors: 0  load test busy: 22%
+ 317.3s  vus: 1007253  iterations: 0  errors: 0  load test busy: 22%
+ 318.3s  vus: 1008262  iterations: 0  errors: 0  load test busy: 23%
+ 319.3s  vus: 1009271  iterations: 0  errors: 0  load test busy: 23%
+ 320.3s  vus: 1010282  iterations: 0  errors: 0  load test busy: 22%
+ 321.3s  vus: 1011293  iterations: 0  errors: 0  load test busy: 23%
+ 322.3s  vus: 1012302  iterations: 0  errors: 0  load test busy: 23%
+ 323.3s  vus: 1013312  iterations: 0  errors: 0  load test busy: 22%
+ 324.4s  vus: 1014324  iterations: 0  errors: 0  load test busy: 23%
+ 325.4s  vus: 1015333  iterations: 0  errors: 0  load test busy: 23%
+ 326.4s  vus: 1016343  iterations: 0  errors: 0  load test busy: 23%
+ 327.4s  vus: 1017353  iterations: 0  errors: 0  load test busy: 23%
+ 328.4s  vus: 1018364  iterations: 0  errors: 0  load test busy: 22%
+ 329.4s  vus: 1019374  iterations: 0  errors: 0  load test busy: 23%
+ 330.4s  vus: 1020384  iterations: 0  errors: 0  load test busy: 23%
+ 331.4s  vus: 1021394  iterations: 0  errors: 0  load test busy: 25%
+ 332.4s  vus: 1022405  iterations: 0  errors: 0  load test busy: 23%
+ 333.4s  vus: 1023414  iterations: 0  errors: 0  load test busy: 25%
+ 334.5s  vus: 1024425  iterations: 0  errors: 0  load test busy: 25%
+ 335.5s  vus: 1025435  iterations: 0  errors: 0  load test busy: 24%
+ 336.5s  vus: 1026446  iterations: 0  errors: 0  load test busy: 22%
+ 337.5s  vus: 1027454  iterations: 0  errors: 0  load test busy: 21%
+ 338.5s  vus: 1028465  iterations: 0  errors: 0  load test busy: 21%
+ 339.5s  vus: 1029476  iterations: 0  errors: 0  load test busy: 21%
+ 340.5s  vus: 1030486  iterations: 0  errors: 0  load test busy: 21%
+ 341.5s  vus: 1031496  iterations: 0  errors: 0  load test busy: 20%
+ 342.5s  vus: 1032505  iterations: 0  errors: 0  load test busy: 20%
+ 343.6s  vus: 1033518  iterations: 0  errors: 0  load test busy: 20%
+ 344.6s  vus: 1034527  iterations: 0  errors: 0  load test busy: 21%
+ 345.6s  vus: 1035536  iterations: 0  errors: 0  load test busy: 21%
+ 346.6s  vus: 1036546  iterations: 0  errors: 0  load test busy: 21%
+ 347.6s  vus: 1037559  iterations: 0  errors: 0  load test busy: 20%
+ 348.6s  vus: 1038567  iterations: 0  errors: 0  load test busy: 20%
+ 349.6s  vus: 1039577  iterations: 0  errors: 0  load test busy: 21%
+ 350.6s  vus: 1040588  iterations: 0  errors: 0  load test busy: 21%
+ 351.6s  vus: 1041599  iterations: 0  errors: 0  load test busy: 21%
+ 352.6s  vus: 1042608  iterations: 0  errors: 0  load test busy: 21%
+ 353.7s  vus: 1043618  iterations: 0  errors: 0  load test busy: 20%
+ 354.7s  vus: 1044630  iterations: 0  errors: 0  load test busy: 21%
+ 355.7s  vus: 1045639  iterations: 0  errors: 0  load test busy: 21%
+ 356.7s  vus: 1046649  iterations: 0  errors: 0  load test busy: 21%
+ 357.7s  vus: 1047658  iterations: 0  errors: 0  load test busy: 21%
+ 358.7s  vus: 1048670  iterations: 0  errors: 0  load test busy: 21%
+ 359.7s  vus: 1049680  iterations: 0  errors: 0  load test busy: 21%
+ 360.7s  vus: 1050689  iterations: 0  errors: 0  load test busy: 21%
+ 361.7s  vus: 1051699  iterations: 0  errors: 0  load test busy: 22%
+ 362.7s  vus: 1052711  iterations: 0  errors: 0  load test busy: 22%
+ 363.8s  vus: 1053721  iterations: 0  errors: 0  load test busy: 22%
+ 364.8s  vus: 1054731  iterations: 0  errors: 0  load test busy: 22%
+ 365.8s  vus: 1055741  iterations: 0  errors: 0  load test busy: 22%
+ 366.8s  vus: 1056751  iterations: 0  errors: 0  load test busy: 22%
+ 367.8s  vus: 1057762  iterations: 0  errors: 0  load test busy: 21%
+ 368.8s  vus: 1058772  iterations: 0  errors: 0  load test busy: 22%
+ 369.8s  vus: 1059782  iterations: 0  errors: 0  load test busy: 22%
+ 370.8s  vus: 1060793  iterations: 0  errors: 0  load test busy: 21%
+ 371.8s  vus: 1061802  iterations: 0  errors: 0  load test busy: 21%
+ 372.8s  vus: 1062813  iterations: 0  errors: 0  load test busy: 21%
+ 373.9s  vus: 1063823  iterations: 0  errors: 0  load test busy: 21%
+ 374.9s  vus: 1064833  iterations: 0  errors: 0  load test busy: 21%
+ 375.9s  vus: 1065843  iterations: 0  errors: 0  load test busy: 21%
+ 376.9s  vus: 1066853  iterations: 0  errors: 0  load test busy: 21%
+ 377.9s  vus: 1067863  iterations: 0  errors: 0  load test busy: 21%
+ 378.9s  vus: 1068874  iterations: 0  errors: 0  load test busy: 21%
+ 379.9s  vus: 1069884  iterations: 0  errors: 0  load test busy: 21%
+ 380.9s  vus: 1070894  iterations: 0  errors: 0  load test busy: 21%
+ 381.9s  vus: 1071905  iterations: 0  errors: 0  load test busy: 21%
+ 382.9s  vus: 1072916  iterations: 0  errors: 0  load test busy: 21%
+ 384.0s  vus: 1073924  iterations: 0  errors: 0  load test busy: 21%
+ 385.0s  vus: 1074936  iterations: 0  errors: 0  load test busy: 21%
+ 386.0s  vus: 1075945  iterations: 0  errors: 0  load test busy: 21%
+ 387.0s  vus: 1076956  iterations: 0  errors: 0  load test busy: 21%
+ 388.0s  vus: 1077966  iterations: 0  errors: 0  load test busy: 21%
+ 389.0s  vus: 1078977  iterations: 0  errors: 0  load test busy: 21%
+ 390.0s  vus: 1079987  iterations: 0  errors: 0  load test busy: 21%
+ 391.0s  vus: 1080996  iterations: 0  errors: 0  load test busy: 22%
+ 392.0s  vus: 1082007  iterations: 0  errors: 0  load test busy: 22%
+ 393.1s  vus: 1083018  iterations: 0  errors: 0  load test busy: 22%
+ 394.1s  vus: 1084028  iterations: 0  errors: 0  load test busy: 22%
+ 395.1s  vus: 1085037  iterations: 0  errors: 0  load test busy: 22%
+ 396.1s  vus: 1086049  iterations: 0  errors: 0  load test busy: 22%
+ 397.1s  vus: 1087060  iterations: 0  errors: 0  load test busy: 22%
+ 398.1s  vus: 1088068  iterations: 0  errors: 0  load test busy: 22%
+ 399.1s  vus: 1089078  iterations: 0  errors: 0  load test busy: 22%
+ 400.1s  vus: 1090090  iterations: 0  errors: 0  load test busy: 23%
+ 401.1s  vus: 1091100  iterations: 0  errors: 0  load test busy: 22%
+ 402.1s  vus: 1092108  iterations: 0  errors: 0  load test busy: 22%
+ 403.2s  vus: 1093119  iterations: 0  errors: 0  load test busy: 21%
+ 404.2s  vus: 1094130  iterations: 0  errors: 0  load test busy: 22%
+ 405.2s  vus: 1095140  iterations: 0  errors: 0  load test busy: 22%
+ 406.2s  vus: 1096149  iterations: 0  errors: 0  load test busy: 22%
+ 407.2s  vus: 1097161  iterations: 0  errors: 0  load test busy: 21%
+ 408.2s  vus: 1098172  iterations: 0  errors: 0  load test busy: 22%
+ 409.2s  vus: 1099180  iterations: 0  errors: 0  load test busy: 22%
+ 410.2s  vus: 1100191  iterations: 0  errors: 0  load test busy: 22%
+ 411.2s  vus: 1101202  iterations: 0  errors: 0  load test busy: 22%
+ 412.2s  vus: 1102212  iterations: 0  errors: 0  load test busy: 21%
+ 413.3s  vus: 1103221  iterations: 0  errors: 0  load test busy: 22%
+ 414.3s  vus: 1104231  iterations: 0  errors: 0  load test busy: 22%
+ 415.3s  vus: 1105242  iterations: 0  errors: 0  load test busy: 22%
+ 416.3s  vus: 1106252  iterations: 0  errors: 0  load test busy: 22%
+ 417.3s  vus: 1107262  iterations: 0  errors: 0  load test busy: 22%
+ 418.3s  vus: 1108273  iterations: 0  errors: 0  load test busy: 22%
+ 419.3s  vus: 1109284  iterations: 0  errors: 0  load test busy: 21%
+ 420.3s  vus: 1110294  iterations: 0  errors: 0  load test busy: 22%
+ 421.3s  vus: 1111303  iterations: 0  errors: 0  load test busy: 23%
+ 422.3s  vus: 1112315  iterations: 0  errors: 0  load test busy: 22%
+ 423.4s  vus: 1113326  iterations: 0  errors: 0  load test busy: 23%
+ 424.4s  vus: 1114335  iterations: 0  errors: 0  load test busy: 23%
+ 425.4s  vus: 1115343  iterations: 0  errors: 0  load test busy: 24%
+ 426.4s  vus: 1116357  iterations: 0  errors: 0  load test busy: 23%
+ 427.4s  vus: 1117366  iterations: 0  errors: 0  load test busy: 23%
+ 428.4s  vus: 1118375  iterations: 0  errors: 0  load test busy: 23%
+ 429.4s  vus: 1119385  iterations: 0  errors: 0  load test busy: 23%
+ 430.4s  vus: 1120398  iterations: 0  errors: 0  load test busy: 23%
+ 431.4s  vus: 1121406  iterations: 0  errors: 0  load test busy: 23%
+ 432.5s  vus: 1122415  iterations: 0  errors: 0  load test busy: 22%
+ 433.5s  vus: 1123428  iterations: 0  errors: 0  load test busy: 22%
+ 434.5s  vus: 1124438  iterations: 0  errors: 0  load test busy: 22%
+ 435.5s  vus: 1125447  iterations: 0  errors: 0  load test busy: 23%
+ 436.5s  vus: 1126456  iterations: 0  errors: 0  load test busy: 23%
+ 437.5s  vus: 1127470  iterations: 0  errors: 0  load test busy: 22%
+ 438.5s  vus: 1128479  iterations: 0  errors: 0  load test busy: 22%
+ 439.5s  vus: 1129487  iterations: 0  errors: 0  load test busy: 23%
+ 440.5s  vus: 1130499  iterations: 0  errors: 0  load test busy: 23%
+ 441.5s  vus: 1131510  iterations: 0  errors: 0  load test busy: 23%
+ 442.6s  vus: 1132519  iterations: 0  errors: 0  load test busy: 22%
+ 443.6s  vus: 1133528  iterations: 0  errors: 0  load test busy: 23%
+ 444.6s  vus: 1134541  iterations: 0  errors: 0  load test busy: 23%
+ 445.6s  vus: 1135551  iterations: 0  errors: 0  load test busy: 23%
+ 446.6s  vus: 1136559  iterations: 0  errors: 0  load test busy: 23%
+ 447.6s  vus: 1137572  iterations: 0  errors: 0  load test busy: 22%
+ 448.6s  vus: 1138582  iterations: 0  errors: 0  load test busy: 22%
+ 449.6s  vus: 1139591  iterations: 0  errors: 0  load test busy: 23%
+ 450.6s  vus: 1140601  iterations: 0  errors: 0  load test busy: 23%
+ 451.6s  vus: 1141614  iterations: 0  errors: 0  load test busy: 24%
+ 452.7s  vus: 1142622  iterations: 0  errors: 0  load test busy: 23%
+ 453.7s  vus: 1143631  iterations: 0  errors: 0  load test busy: 23%
+ 454.7s  vus: 1144641  iterations: 0  errors: 0  load test busy: 24%
+ 455.7s  vus: 1145654  iterations: 0  errors: 0  load test busy: 24%
+ 456.7s  vus: 1146662  iterations: 0  errors: 0  load test busy: 24%
+ 457.7s  vus: 1147671  iterations: 0  errors: 0  load test busy: 23%
+ 458.7s  vus: 1148684  iterations: 0  errors: 0  load test busy: 24%
+ 459.7s  vus: 1149694  iterations: 0  errors: 0  load test busy: 24%
+ 460.7s  vus: 1150703  iterations: 0  errors: 0  load test busy: 24%
+ 461.8s  vus: 1151712  iterations: 0  errors: 0  load test busy: 23%
+ 462.8s  vus: 1152726  iterations: 0  errors: 0  load test busy: 23%
+ 463.8s  vus: 1153734  iterations: 0  errors: 0  load test busy: 23%
+ 464.8s  vus: 1154743  iterations: 0  errors: 0  load test busy: 23%
+ 465.8s  vus: 1155754  iterations: 0  errors: 0  load test busy: 24%
+ 466.8s  vus: 1156766  iterations: 0  errors: 0  load test busy: 24%
+ 467.8s  vus: 1157774  iterations: 0  errors: 0  load test busy: 22%
+ 468.8s  vus: 1158784  iterations: 0  errors: 0  load test busy: 23%
+ 469.8s  vus: 1159797  iterations: 0  errors: 0  load test busy: 24%
+ 470.8s  vus: 1160806  iterations: 0  errors: 0  load test busy: 23%
+ 471.9s  vus: 1161814  iterations: 0  errors: 0  load test busy: 24%
+ 472.9s  vus: 1162828  iterations: 0  errors: 0  load test busy: 23%
+ 473.9s  vus: 1163838  iterations: 0  errors: 0  load test busy: 23%
+ 474.9s  vus: 1164847  iterations: 0  errors: 0  load test busy: 24%
+ 475.9s  vus: 1165856  iterations: 0  errors: 0  load test busy: 24%
+ 476.9s  vus: 1166870  iterations: 0  errors: 0  load test busy: 23%
+ 477.9s  vus: 1167878  iterations: 0  errors: 0  load test busy: 24%
+ 478.9s  vus: 1168888  iterations: 0  errors: 0  load test busy: 23%
+ 479.9s  vus: 1169897  iterations: 0  errors: 0  load test busy: 23%
+ 480.9s  vus: 1170910  iterations: 0  errors: 0  load test busy: 24%
+ 482.0s  vus: 1171919  iterations: 0  errors: 0  load test busy: 24%
+ 483.0s  vus: 1172928  iterations: 0  errors: 0  load test busy: 24%
+ 484.0s  vus: 1173941  iterations: 0  errors: 0  load test busy: 24%
+ 485.0s  vus: 1174950  iterations: 0  errors: 0  load test busy: 26%
+ 486.0s  vus: 1175960  iterations: 0  errors: 0  load test busy: 26%
+ 487.0s  vus: 1176970  iterations: 0  errors: 0  load test busy: 26%
+ 488.0s  vus: 1177982  iterations: 0  errors: 0  load test busy: 24%
+ 489.0s  vus: 1178992  iterations: 0  errors: 0  load test busy: 25%
+ 490.0s  vus: 1180000  iterations: 0  errors: 0  load test busy: 26%
+ 491.0s  vus: 1181012  iterations: 0  errors: 0  load test busy: 25%
+ 492.1s  vus: 1182023  iterations: 0  errors: 0  load test busy: 24%
+ 493.1s  vus: 1183032  iterations: 0  errors: 0  load test busy: 24%
+ 494.1s  vus: 1184041  iterations: 0  errors: 0  load test busy: 25%
+ 495.1s  vus: 1185054  iterations: 0  errors: 0  load test busy: 25%
+ 496.1s  vus: 1186064  iterations: 0  errors: 0  load test busy: 26%
+ 497.1s  vus: 1187072  iterations: 0  errors: 0  load test busy: 25%
+ 498.1s  vus: 1188082  iterations: 0  errors: 0  load test busy: 25%
+ 499.1s  vus: 1189096  iterations: 0  errors: 0  load test busy: 25%
+ 500.1s  vus: 1190104  iterations: 0  errors: 0  load test busy: 25%
+ 501.1s  vus: 1191112  iterations: 0  errors: 0  load test busy: 24%
+ 502.2s  vus: 1192123  iterations: 0  errors: 0  load test busy: 25%
+ 503.2s  vus: 1193136  iterations: 0  errors: 0  load test busy: 23%
+ 504.2s  vus: 1194144  iterations: 0  errors: 0  load test busy: 24%
+ 505.2s  vus: 1195153  iterations: 0  errors: 0  load test busy: 25%
+ 506.2s  vus: 1196167  iterations: 0  errors: 0  load test busy: 24%
+ 507.2s  vus: 1197176  iterations: 0  errors: 0  load test busy: 24%
+ 508.2s  vus: 1198185  iterations: 0  errors: 0  load test busy: 25%
+ 509.2s  vus: 1199196  iterations: 0  errors: 0  load test busy: 24%
+ 510.2s  vus: 1200207  iterations: 0  errors: 0  load test busy: 24%
+ 511.2s  vus: 1201216  iterations: 0  errors: 0  load test busy: 25%
+ 512.3s  vus: 1202226  iterations: 0  errors: 0  load test busy: 24%
+ 513.3s  vus: 1203240  iterations: 0  errors: 0  load test busy: 25%
+ 514.3s  vus: 1204248  iterations: 0  errors: 0  load test busy: 25%
+ 515.3s  vus: 1205257  iterations: 0  errors: 0  load test busy: 25%
+ 516.3s  vus: 1206267  iterations: 0  errors: 0  load test busy: 25%
+ 517.3s  vus: 1207280  iterations: 0  errors: 0  load test busy: 25%
+ 518.3s  vus: 1208288  iterations: 0  errors: 0  load test busy: 25%
+ 519.3s  vus: 1209298  iterations: 0  errors: 0  load test busy: 25%
+ 520.3s  vus: 1210311  iterations: 0  errors: 0  load test busy: 24%
+ 521.4s  vus: 1211320  iterations: 0  errors: 0  load test busy: 25%
+ 522.4s  vus: 1212329  iterations: 0  errors: 0  load test busy: 25%
+ 523.4s  vus: 1213339  iterations: 0  errors: 0  load test busy: 25%
+ 524.4s  vus: 1214352  iterations: 0  errors: 0  load test busy: 25%
+ 525.4s  vus: 1215361  iterations: 0  errors: 0  load test busy: 24%
+ 526.4s  vus: 1216370  iterations: 0  errors: 0  load test busy: 25%
+ 527.4s  vus: 1217380  iterations: 0  errors: 0  load test busy: 25%
+ 528.4s  vus: 1218392  iterations: 0  errors: 0  load test busy: 24%
+ 529.4s  vus: 1219401  iterations: 0  errors: 0  load test busy: 25%
+ 530.4s  vus: 1220410  iterations: 0  errors: 0  load test busy: 25%
+ 531.5s  vus: 1221421  iterations: 0  errors: 0  load test busy: 25%
+ 532.5s  vus: 1222432  iterations: 0  errors: 0  load test busy: 24%
+ 533.5s  vus: 1223441  iterations: 0  errors: 0  load test busy: 24%
+ 534.5s  vus: 1224451  iterations: 0  errors: 0  load test busy: 24%
+ 535.5s  vus: 1225464  iterations: 0  errors: 0  load test busy: 25%
+ 536.5s  vus: 1226473  iterations: 0  errors: 0  load test busy: 25%
+ 537.5s  vus: 1227483  iterations: 0  errors: 0  load test busy: 25%
+ 538.5s  vus: 1228494  iterations: 0  errors: 0  load test busy: 24%
+ 539.5s  vus: 1229504  iterations: 0  errors: 0  load test busy: 24%
+ 540.5s  vus: 1230513  iterations: 0  errors: 0  load test busy: 25%
+ 541.6s  vus: 1231523  iterations: 0  errors: 0  load test busy: 25%
+ 542.6s  vus: 1232536  iterations: 0  errors: 0  load test busy: 26%
+ 543.6s  vus: 1233545  iterations: 0  errors: 0  load test busy: 26%
+ 544.6s  vus: 1234554  iterations: 0  errors: 0  load test busy: 26%
+ 545.6s  vus: 1235564  iterations: 0  errors: 0  load test busy: 26%
+ 546.6s  vus: 1236576  iterations: 0  errors: 0  load test busy: 26%
+ 547.6s  vus: 1237586  iterations: 0  errors: 0  load test busy: 27%
+ 548.6s  vus: 1238596  iterations: 0  errors: 0  load test busy: 26%
+ 549.6s  vus: 1239606  iterations: 0  errors: 0  load test busy: 26%
+ 550.6s  vus: 1240617  iterations: 0  errors: 0  load test busy: 25%
+ 551.7s  vus: 1241627  iterations: 0  errors: 0  load test busy: 25%
+ 552.7s  vus: 1242636  iterations: 0  errors: 0  load test busy: 25%
+ 553.7s  vus: 1243647  iterations: 0  errors: 0  load test busy: 25%
+ 554.7s  vus: 1244658  iterations: 0  errors: 0  load test busy: 25%
+ 555.7s  vus: 1245667  iterations: 0  errors: 0  load test busy: 25%
+ 556.7s  vus: 1246677  iterations: 0  errors: 0  load test busy: 25%
+ 557.7s  vus: 1247689  iterations: 0  errors: 0  load test busy: 25%
+ 558.7s  vus: 1248699  iterations: 0  errors: 0  load test busy: 25%
+ 559.7s  vus: 1249707  iterations: 0  errors: 0  load test busy: 25%
+ 560.8s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 561.8s  vus: 1250000  iterations: 0  errors: 0  load test busy: 23%
+ 562.8s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 563.8s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 564.8s  vus: 1250000  iterations: 0  errors: 0  load test busy: 23%
+ 565.8s  vus: 1250000  iterations: 0  errors: 0  load test busy: 23%
+ 566.8s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 567.8s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 568.8s  vus: 1250000  iterations: 0  errors: 0  load test busy: 23%
+ 569.8s  vus: 1250000  iterations: 0  errors: 0  load test busy: 23%
+ 570.9s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 571.9s  vus: 1250000  iterations: 0  errors: 0  load test busy: 25%
+ 572.9s  vus: 1250000  iterations: 0  errors: 0  load test busy: 25%
+ 573.9s  vus: 1250000  iterations: 0  errors: 0  load test busy: 25%
+ 574.9s  vus: 1250000  iterations: 0  errors: 0  load test busy: 25%
+ 575.9s  vus: 1250000  iterations: 0  errors: 0  load test busy: 25%
+ 576.9s  vus: 1250000  iterations: 0  errors: 0  load test busy: 25%
+ 577.9s  vus: 1250000  iterations: 0  errors: 0  load test busy: 25%
+ 578.9s  vus: 1250000  iterations: 0  errors: 0  load test busy: 25%
+ 579.9s  vus: 1250000  iterations: 0  errors: 0  load test busy: 25%
+ 581.0s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 582.0s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 583.0s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 584.0s  vus: 1250000  iterations: 0  errors: 0  load test busy: 23%
+ 585.0s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 586.0s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 587.0s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 588.0s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 589.0s  vus: 1250000  iterations: 0  errors: 0  load test busy: 25%
+ 590.0s  vus: 1250000  iterations: 0  errors: 0  load test busy: 25%
+ 591.1s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 592.1s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 593.1s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 594.1s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 595.1s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 596.1s  vus: 1250000  iterations: 0  errors: 0  load test busy: 25%
+ 597.1s  vus: 1250000  iterations: 0  errors: 0  load test busy: 23%
+ 598.1s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 599.1s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 600.1s  vus: 1250000  iterations: 0  errors: 0  load test busy: 23%
+ 601.2s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 602.2s  vus: 1250000  iterations: 0  errors: 0  load test busy: 25%
+ 603.2s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 604.2s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 605.2s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 606.2s  vus: 1250000  iterations: 0  errors: 0  load test busy: 25%
+ 607.2s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 608.2s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 609.2s  vus: 1250000  iterations: 0  errors: 0  load test busy: 25%
+ 610.2s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 611.3s  vus: 1250000  iterations: 0  errors: 0  load test busy: 25%
+ 612.3s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 613.3s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 614.3s  vus: 1250000  iterations: 0  errors: 0  load test busy: 23%
+ 615.3s  vus: 1250000  iterations: 0  errors: 0  load test busy: 25%
+ 616.3s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 617.3s  vus: 1250000  iterations: 0  errors: 0  load test busy: 24%
+ 618.3s  vus: 1250000  iterations: 0  errors: 0  load test busy: 23%
+ 619.3s  vus: 1250000  iterations: 0  errors: 0  load test busy: 25%
+   step  1,250,000 VUs: held
+ 620.3s  vus: 1250310  iterations: 0  errors: 0  load test busy: 26%
+ 621.4s  vus: 1251322  iterations: 0  errors: 0  load test busy: 25%
+ 622.4s  vus: 1252332  iterations: 0  errors: 0  load test busy: 25%
+ 623.4s  vus: 1253340  iterations: 0  errors: 0  load test busy: 25%
+ 624.4s  vus: 1254352  iterations: 0  errors: 0  load test busy: 26%
+ 625.4s  vus: 1255362  iterations: 0  errors: 0  load test busy: 24%
+ 626.4s  vus: 1256372  iterations: 0  errors: 0  load test busy: 25%
+ 627.4s  vus: 1257382  iterations: 0  errors: 0  load test busy: 25%
+ 628.4s  vus: 1258394  iterations: 0  errors: 0  load test busy: 25%
+ 629.4s  vus: 1259403  iterations: 0  errors: 0  load test busy: 26%
+ 630.4s  vus: 1260412  iterations: 0  errors: 0  load test busy: 25%
+ 631.5s  vus: 1261422  iterations: 0  errors: 0  load test busy: 26%
+ 632.5s  vus: 1262435  iterations: 0  errors: 0  load test busy: 27%
+ 633.5s  vus: 1263444  iterations: 0  errors: 0  load test busy: 27%
+ 634.5s  vus: 1264452  iterations: 0  errors: 0  load test busy: 26%
+ 635.5s  vus: 1265464  iterations: 0  errors: 0  load test busy: 26%
+ 636.5s  vus: 1266475  iterations: 0  errors: 0  load test busy: 27%
+ 637.5s  vus: 1267484  iterations: 0  errors: 0  load test busy: 27%
+ 638.5s  vus: 1268492  iterations: 0  errors: 0  load test busy: 26%
+ 639.5s  vus: 1269506  iterations: 0  errors: 0  load test busy: 26%
+ 640.5s  vus: 1270516  iterations: 0  errors: 0  load test busy: 27%
+ 641.6s  vus: 1271524  iterations: 0  errors: 0  load test busy: 27%
+ 642.6s  vus: 1272535  iterations: 0  errors: 0  load test busy: 25%
+ 643.6s  vus: 1273546  iterations: 0  errors: 0  load test busy: 25%
+ 644.6s  vus: 1274556  iterations: 0  errors: 0  load test busy: 26%
+ 645.6s  vus: 1275564  iterations: 0  errors: 0  load test busy: 27%
+ 646.6s  vus: 1276577  iterations: 0  errors: 0  load test busy: 27%
+ 647.6s  vus: 1277587  iterations: 0  errors: 0  load test busy: 26%
+ 648.6s  vus: 1278596  iterations: 0  errors: 0  load test busy: 27%
+ 649.6s  vus: 1279606  iterations: 0  errors: 0  load test busy: 27%
+ 650.6s  vus: 1280618  iterations: 0  errors: 0  load test busy: 25%
+ 651.7s  vus: 1281628  iterations: 0  errors: 0  load test busy: 25%
+ 652.7s  vus: 1282636  iterations: 0  errors: 0  load test busy: 27%
+ 653.7s  vus: 1283648  iterations: 0  errors: 0  load test busy: 26%
+ 654.7s  vus: 1284660  iterations: 0  errors: 0  load test busy: 25%
+ 655.7s  vus: 1285669  iterations: 0  errors: 0  load test busy: 25%
+ 656.7s  vus: 1286678  iterations: 0  errors: 0  load test busy: 26%
+ 657.7s  vus: 1287690  iterations: 0  errors: 0  load test busy: 26%
+ 658.7s  vus: 1288701  iterations: 0  errors: 0  load test busy: 25%
+ 659.7s  vus: 1289710  iterations: 0  errors: 0  load test busy: 25%
+ 660.8s  vus: 1290719  iterations: 0  errors: 0  load test busy: 27%
+ 661.8s  vus: 1291732  iterations: 0  errors: 0  load test busy: 27%
+ 662.8s  vus: 1292742  iterations: 0  errors: 0  load test busy: 26%
+ 663.8s  vus: 1293751  iterations: 0  errors: 0  load test busy: 26%
+ 664.8s  vus: 1294761  iterations: 0  errors: 0  load test busy: 27%
+ 665.8s  vus: 1295772  iterations: 0  errors: 0  load test busy: 27%
+ 666.8s  vus: 1296782  iterations: 0  errors: 0  load test busy: 27%
+ 667.8s  vus: 1297792  iterations: 0  errors: 0  load test busy: 27%
+ 668.8s  vus: 1298804  iterations: 0  errors: 0  load test busy: 26%
+ 669.8s  vus: 1299813  iterations: 0  errors: 0  load test busy: 28%
+ 670.9s  vus: 1300824  iterations: 0  errors: 0  load test busy: 26%
+ 671.9s  vus: 1301834  iterations: 0  errors: 0  load test busy: 26%
+ 672.9s  vus: 1302844  iterations: 0  errors: 0  load test busy: 26%
+ 673.9s  vus: 1303854  iterations: 0  errors: 0  load test busy: 27%
+ 674.9s  vus: 1304864  iterations: 0  errors: 0  load test busy: 25%
+ 675.9s  vus: 1305875  iterations: 0  errors: 0  load test busy: 25%
+ 676.9s  vus: 1306885  iterations: 0  errors: 0  load test busy: 28%
+ 677.9s  vus: 1307895  iterations: 0  errors: 0  load test busy: 27%
+ 678.9s  vus: 1308905  iterations: 0  errors: 0  load test busy: 26%
+ 679.9s  vus: 1309916  iterations: 0  errors: 0  load test busy: 26%
+ 681.0s  vus: 1310926  iterations: 0  errors: 0  load test busy: 28%
+ 682.0s  vus: 1311935  iterations: 0  errors: 0  load test busy: 28%
+ 683.0s  vus: 1312946  iterations: 0  errors: 0  load test busy: 26%
+ 684.0s  vus: 1313958  iterations: 0  errors: 0  load test busy: 26%
+ 685.0s  vus: 1314967  iterations: 0  errors: 0  load test busy: 27%
+ 686.0s  vus: 1315977  iterations: 0  errors: 0  load test busy: 27%
+ 687.0s  vus: 1316987  iterations: 0  errors: 0  load test busy: 26%
+ 688.0s  vus: 1317999  iterations: 0  errors: 0  load test busy: 26%
+ 689.0s  vus: 1319008  iterations: 0  errors: 0  load test busy: 27%
+ 690.1s  vus: 1320018  iterations: 0  errors: 0  load test busy: 27%
+ 691.1s  vus: 1321028  iterations: 0  errors: 0  load test busy: 26%
+ 692.1s  vus: 1322039  iterations: 0  errors: 0  load test busy: 27%
+ 693.1s  vus: 1323049  iterations: 0  errors: 0  load test busy: 28%
+ 694.1s  vus: 1324059  iterations: 0  errors: 0  load test busy: 28%
+ 695.1s  vus: 1325070  iterations: 0  errors: 0  load test busy: 27%
+ 696.1s  vus: 1326080  iterations: 0  errors: 0  load test busy: 27%
+ 697.1s  vus: 1327090  iterations: 0  errors: 0  load test busy: 28%
+ 698.1s  vus: 1328101  iterations: 0  errors: 0  load test busy: 27%
+ 699.1s  vus: 1329111  iterations: 0  errors: 0  load test busy: 28%
+ 700.2s  vus: 1330121  iterations: 0  errors: 0  load test busy: 28%
+ 701.2s  vus: 1331131  iterations: 0  errors: 0  load test busy: 28%
+ 702.2s  vus: 1332142  iterations: 0  errors: 0  load test busy: 26%
+ 703.2s  vus: 1333152  iterations: 0  errors: 0  load test busy: 26%
+ 704.2s  vus: 1334162  iterations: 0  errors: 0  load test busy: 28%
+ 705.2s  vus: 1335172  iterations: 0  errors: 0  load test busy: 27%
+ 706.2s  vus: 1336182  iterations: 0  errors: 0  load test busy: 26%
+ 707.2s  vus: 1337192  iterations: 0  errors: 0  load test busy: 26%
+ 708.2s  vus: 1338203  iterations: 0  errors: 0  load test busy: 27%
+ 709.2s  vus: 1339214  iterations: 0  errors: 0  load test busy: 28%
+ 710.3s  vus: 1340223  iterations: 0  errors: 0  load test busy: 26%
+ 711.3s  vus: 1341233  iterations: 0  errors: 0  load test busy: 27%
+ 712.3s  vus: 1342244  iterations: 0  errors: 0  load test busy: 27%
+ 713.3s  vus: 1343254  iterations: 0  errors: 0  load test busy: 27%
+ 714.3s  vus: 1344265  iterations: 0  errors: 0  load test busy: 26%
+ 715.3s  vus: 1345275  iterations: 0  errors: 0  load test busy: 26%
+ 716.3s  vus: 1346285  iterations: 0  errors: 0  load test busy: 28%
+ 717.3s  vus: 1347296  iterations: 0  errors: 0  load test busy: 28%
+ 718.3s  vus: 1348305  iterations: 0  errors: 0  load test busy: 26%
+ 719.4s  vus: 1349316  iterations: 0  errors: 0  load test busy: 26%
+ 720.4s  vus: 1350327  iterations: 0  errors: 0  load test busy: 28%
+ 721.4s  vus: 1351338  iterations: 0  errors: 0  load test busy: 27%
+ 722.4s  vus: 1352347  iterations: 0  errors: 0  load test busy: 28%
+ 723.4s  vus: 1353357  iterations: 0  errors: 0  load test busy: 28%
+ 724.4s  vus: 1354369  iterations: 0  errors: 0  load test busy: 29%
+ 725.4s  vus: 1355378  iterations: 0  errors: 0  load test busy: 29%
+ 726.4s  vus: 1356388  iterations: 0  errors: 0  load test busy: 28%
+ 727.4s  vus: 1357398  iterations: 0  errors: 0  load test busy: 29%
+ 728.4s  vus: 1358410  iterations: 0  errors: 0  load test busy: 29%
+ 729.5s  vus: 1359420  iterations: 0  errors: 0  load test busy: 27%
+ 730.5s  vus: 1360429  iterations: 0  errors: 0  load test busy: 28%
+ 731.5s  vus: 1361438  iterations: 0  errors: 0  load test busy: 28%
+ 732.5s  vus: 1362450  iterations: 0  errors: 0  load test busy: 28%
+ 733.5s  vus: 1363460  iterations: 0  errors: 0  load test busy: 27%
+ 734.5s  vus: 1364470  iterations: 0  errors: 0  load test busy: 27%
+ 735.5s  vus: 1365478  iterations: 0  errors: 0  load test busy: 28%
+ 736.5s  vus: 1366492  iterations: 0  errors: 0  load test busy: 27%
+ 737.5s  vus: 1367500  iterations: 0  errors: 0  load test busy: 28%
+ 738.5s  vus: 1368510  iterations: 0  errors: 0  load test busy: 28%
+ 739.6s  vus: 1369519  iterations: 0  errors: 0  load test busy: 29%
+ 740.6s  vus: 1370532  iterations: 0  errors: 0  load test busy: 27%
+ 741.6s  vus: 1371541  iterations: 0  errors: 0  load test busy: 27%
+ 742.6s  vus: 1372551  iterations: 0  errors: 0  load test busy: 28%
+ 743.6s  vus: 1373562  iterations: 0  errors: 0  load test busy: 27%
+ 744.6s  vus: 1374572  iterations: 0  errors: 0  load test busy: 28%
+ 745.6s  vus: 1375583  iterations: 0  errors: 0  load test busy: 27%
+ 746.6s  vus: 1376593  iterations: 0  errors: 0  load test busy: 28%
+ 747.6s  vus: 1377604  iterations: 0  errors: 0  load test busy: 27%
+ 748.7s  vus: 1378613  iterations: 0  errors: 0  load test busy: 28%
+ 749.7s  vus: 1379624  iterations: 0  errors: 0  load test busy: 27%
+ 750.7s  vus: 1380634  iterations: 0  errors: 0  load test busy: 28%
+ 751.7s  vus: 1381644  iterations: 0  errors: 0  load test busy: 29%
+ 752.7s  vus: 1382655  iterations: 0  errors: 0  load test busy: 28%
+ 753.7s  vus: 1383664  iterations: 0  errors: 0  load test busy: 29%
+ 754.7s  vus: 1384676  iterations: 0  errors: 0  load test busy: 27%
+ 755.7s  vus: 1385686  iterations: 0  errors: 0  load test busy: 30%
+ 756.7s  vus: 1386697  iterations: 0  errors: 0  load test busy: 28%
+ 757.7s  vus: 1387707  iterations: 0  errors: 0  load test busy: 29%
+ 758.8s  vus: 1388717  iterations: 0  errors: 0  load test busy: 30%
+ 759.8s  vus: 1389727  iterations: 0  errors: 0  load test busy: 29%
+ 760.8s  vus: 1390737  iterations: 0  errors: 0  load test busy: 29%
+ 761.8s  vus: 1391748  iterations: 0  errors: 0  load test busy: 29%
+ 762.8s  vus: 1392758  iterations: 0  errors: 0  load test busy: 29%
+ 763.8s  vus: 1393769  iterations: 0  errors: 0  load test busy: 29%
+ 764.8s  vus: 1394778  iterations: 0  errors: 0  load test busy: 30%
+ 765.8s  vus: 1395788  iterations: 0  errors: 0  load test busy: 29%
+ 766.8s  vus: 1396798  iterations: 0  errors: 0  load test busy: 30%
+ 767.8s  vus: 1397809  iterations: 0  errors: 0  load test busy: 29%
+ 768.9s  vus: 1398819  iterations: 0  errors: 0  load test busy: 30%
+ 769.9s  vus: 1399829  iterations: 0  errors: 0  load test busy: 28%
+ 770.9s  vus: 1400839  iterations: 0  errors: 0  load test busy: 31%
+ 771.9s  vus: 1401849  iterations: 0  errors: 0  load test busy: 29%
+ 772.9s  vus: 1402860  iterations: 0  errors: 0  load test busy: 30%
+ 773.9s  vus: 1403870  iterations: 0  errors: 0  load test busy: 27%
+ 774.9s  vus: 1404881  iterations: 0  errors: 0  load test busy: 28%
+ 775.9s  vus: 1405890  iterations: 0  errors: 0  load test busy: 30%
+ 776.9s  vus: 1406901  iterations: 0  errors: 0  load test busy: 29%
+ 777.9s  vus: 1407911  iterations: 0  errors: 0  load test busy: 29%
+ 779.0s  vus: 1408921  iterations: 0  errors: 0  load test busy: 28%
+ 780.0s  vus: 1409932  iterations: 0  errors: 0  load test busy: 30%
+ 781.0s  vus: 1410942  iterations: 0  errors: 0  load test busy: 29%
+ 782.0s  vus: 1411952  iterations: 0  errors: 0  load test busy: 30%
+ 783.0s  vus: 1412963  iterations: 0  errors: 0  load test busy: 29%
+ 784.0s  vus: 1413972  iterations: 0  errors: 0  load test busy: 30%
+ 785.0s  vus: 1414982  iterations: 0  errors: 0  load test busy: 29%
+ 786.0s  vus: 1415992  iterations: 0  errors: 0  load test busy: 29%
+ 787.0s  vus: 1417003  iterations: 0  errors: 0  load test busy: 31%
+ 788.0s  vus: 1418012  iterations: 0  errors: 0  load test busy: 29%
+ 789.1s  vus: 1419022  iterations: 0  errors: 0  load test busy: 30%
+ 790.1s  vus: 1420034  iterations: 0  errors: 0  load test busy: 30%
+ 791.1s  vus: 1421044  iterations: 0  errors: 0  load test busy: 30%
+ 792.1s  vus: 1422053  iterations: 0  errors: 0  load test busy: 29%
+ 793.1s  vus: 1423064  iterations: 0  errors: 0  load test busy: 28%
+ 794.1s  vus: 1424074  iterations: 0  errors: 0  load test busy: 30%
+ 795.1s  vus: 1425084  iterations: 0  errors: 0  load test busy: 29%
+ 796.1s  vus: 1426094  iterations: 0  errors: 0  load test busy: 30%
+ 797.1s  vus: 1427105  iterations: 0  errors: 0  load test busy: 28%
+ 798.1s  vus: 1428115  iterations: 0  errors: 0  load test busy: 30%
+ 799.2s  vus: 1429125  iterations: 0  errors: 0  load test busy: 28%
+ 800.2s  vus: 1430135  iterations: 0  errors: 0  load test busy: 28%
+ 801.2s  vus: 1431145  iterations: 0  errors: 0  load test busy: 30%
+ 802.2s  vus: 1432156  iterations: 0  errors: 0  load test busy: 29%
+ 803.2s  vus: 1433165  iterations: 0  errors: 0  load test busy: 29%
+ 804.2s  vus: 1434176  iterations: 0  errors: 0  load test busy: 28%
+ 805.2s  vus: 1435186  iterations: 0  errors: 0  load test busy: 29%
+ 806.2s  vus: 1436196  iterations: 0  errors: 0  load test busy: 29%
+ 807.2s  vus: 1437207  iterations: 0  errors: 0  load test busy: 28%
+ 808.3s  vus: 1438217  iterations: 0  errors: 0  load test busy: 30%
+ 809.3s  vus: 1439226  iterations: 0  errors: 0  load test busy: 29%
+ 810.3s  vus: 1440237  iterations: 0  errors: 0  load test busy: 30%
+ 811.3s  vus: 1441247  iterations: 0  errors: 0  load test busy: 29%
+ 812.3s  vus: 1442257  iterations: 0  errors: 0  load test busy: 30%
+ 813.3s  vus: 1443267  iterations: 0  errors: 0  load test busy: 29%
+ 814.3s  vus: 1444278  iterations: 0  errors: 0  load test busy: 29%
+ 815.3s  vus: 1445289  iterations: 0  errors: 0  load test busy: 30%
+ 816.3s  vus: 1446298  iterations: 0  errors: 0  load test busy: 29%
+ 817.3s  vus: 1447308  iterations: 0  errors: 0  load test busy: 31%
+ 818.4s  vus: 1448319  iterations: 0  errors: 0  load test busy: 29%
+ 819.4s  vus: 1449329  iterations: 0  errors: 0  load test busy: 30%
+ 820.4s  vus: 1450338  iterations: 0  errors: 0  load test busy: 29%
+ 821.4s  vus: 1451350  iterations: 0  errors: 0  load test busy: 29%
+ 822.4s  vus: 1452360  iterations: 0  errors: 0  load test busy: 30%
+ 823.4s  vus: 1453369  iterations: 0  errors: 0  load test busy: 29%
+ 824.4s  vus: 1454380  iterations: 0  errors: 0  load test busy: 30%
+ 825.4s  vus: 1455391  iterations: 0  errors: 0  load test busy: 29%
+ 826.4s  vus: 1456400  iterations: 0  errors: 0  load test busy: 29%
+ 827.4s  vus: 1457409  iterations: 0  errors: 0  load test busy: 30%
+ 828.5s  vus: 1458421  iterations: 0  errors: 0  load test busy: 29%
+ 829.5s  vus: 1459432  iterations: 0  errors: 0  load test busy: 30%
+ 830.5s  vus: 1460441  iterations: 0  errors: 0  load test busy: 29%
+ 831.5s  vus: 1461451  iterations: 0  errors: 0  load test busy: 29%
+ 832.5s  vus: 1462463  iterations: 0  errors: 0  load test busy: 30%
+ 833.5s  vus: 1463472  iterations: 0  errors: 0  load test busy: 29%
+ 834.5s  vus: 1464481  iterations: 0  errors: 0  load test busy: 30%
+ 835.5s  vus: 1465492  iterations: 0  errors: 0  load test busy: 28%
+ 836.5s  vus: 1466504  iterations: 0  errors: 0  load test busy: 30%
+ 837.5s  vus: 1467513  iterations: 0  errors: 0  load test busy: 37%
+ 838.6s  vus: 1468523  iterations: 0  errors: 0  load test busy: 30%
+ 839.6s  vus: 1469534  iterations: 0  errors: 0  load test busy: 30%
+ 840.6s  vus: 1470544  iterations: 0  errors: 0  load test busy: 30%
+ 841.6s  vus: 1471553  iterations: 0  errors: 0  load test busy: 31%
+ 842.6s  vus: 1472564  iterations: 0  errors: 0  load test busy: 30%
+ 843.6s  vus: 1473574  iterations: 0  errors: 0  load test busy: 31%
+ 844.6s  vus: 1474585  iterations: 0  errors: 0  load test busy: 32%
+ 845.6s  vus: 1475595  iterations: 0  errors: 0  load test busy: 31%
+ 846.6s  vus: 1476604  iterations: 0  errors: 0  load test busy: 31%
+ 847.7s  vus: 1477616  iterations: 0  errors: 0  load test busy: 31%
+ 848.7s  vus: 1478627  iterations: 0  errors: 0  load test busy: 30%
+ 849.7s  vus: 1479636  iterations: 0  errors: 0  load test busy: 30%
+ 850.7s  vus: 1480645  iterations: 0  errors: 0  load test busy: 30%
+ 851.7s  vus: 1481656  iterations: 0  errors: 0  load test busy: 29%
+ 852.7s  vus: 1482668  iterations: 0  errors: 0  load test busy: 29%
+ 853.7s  vus: 1483676  iterations: 0  errors: 0  load test busy: 30%
+ 854.7s  vus: 1484688  iterations: 0  errors: 0  load test busy: 29%
+ 855.7s  vus: 1485698  iterations: 0  errors: 0  load test busy: 29%
+ 856.7s  vus: 1486708  iterations: 0  errors: 0  load test busy: 31%
+ 857.8s  vus: 1487717  iterations: 0  errors: 0  load test busy: 30%
+ 858.8s  vus: 1488728  iterations: 0  errors: 0  load test busy: 30%
+ 859.8s  vus: 1489739  iterations: 0  errors: 0  load test busy: 29%
+ 860.8s  vus: 1490748  iterations: 0  errors: 0  load test busy: 31%
+ 861.8s  vus: 1491759  iterations: 0  errors: 0  load test busy: 29%
+ 862.8s  vus: 1492769  iterations: 0  errors: 0  load test busy: 29%
+ 863.8s  vus: 1493780  iterations: 0  errors: 0  load test busy: 31%
+ 864.8s  vus: 1494789  iterations: 0  errors: 0  load test busy: 29%
+ 865.8s  vus: 1495800  iterations: 0  errors: 0  load test busy: 31%
+ 866.8s  vus: 1496810  iterations: 0  errors: 0  load test busy: 30%
+ 867.9s  vus: 1497820  iterations: 0  errors: 0  load test busy: 31%
+ 868.9s  vus: 1498831  iterations: 0  errors: 0  load test busy: 29%
+ 869.9s  vus: 1499842  iterations: 0  errors: 0  load test busy: 29%
+ 870.9s  vus: 1500000  iterations: 0  errors: 0  load test busy: 31%
+ 871.9s  vus: 1500000  iterations: 0  errors: 0  load test busy: 29%
+ 872.9s  vus: 1500000  iterations: 0  errors: 0  load test busy: 29%
+ 873.9s  vus: 1500000  iterations: 0  errors: 0  load test busy: 30%
+ 874.9s  vus: 1500000  iterations: 0  errors: 0  load test busy: 30%
+ 875.9s  vus: 1500000  iterations: 0  errors: 0  load test busy: 31%
+ 876.9s  vus: 1500000  iterations: 0  errors: 0  load test busy: 29%
+ 878.0s  vus: 1500000  iterations: 0  errors: 0  load test busy: 29%
+ 879.0s  vus: 1500000  iterations: 0  errors: 0  load test busy: 31%
+ 880.0s  vus: 1500000  iterations: 0  errors: 0  load test busy: 29%
+ 881.0s  vus: 1500000  iterations: 0  errors: 0  load test busy: 30%
+ 882.0s  vus: 1500000  iterations: 0  errors: 0  load test busy: 28%
+ 883.0s  vus: 1500000  iterations: 0  errors: 0  load test busy: 29%
+ 884.0s  vus: 1500000  iterations: 0  errors: 0  load test busy: 30%
+ 885.0s  vus: 1500000  iterations: 0  errors: 0  load test busy: 28%
+ 886.0s  vus: 1500000  iterations: 0  errors: 0  load test busy: 30%
+ 887.0s  vus: 1500000  iterations: 0  errors: 0  load test busy: 29%
+ 888.1s  vus: 1500000  iterations: 0  errors: 0  load test busy: 29%
+ 889.1s  vus: 1500000  iterations: 0  errors: 0  load test busy: 29%
+ 890.1s  vus: 1500000  iterations: 0  errors: 0  load test busy: 29%
+ 891.1s  vus: 1500000  iterations: 0  errors: 0  load test busy: 30%
+ 892.1s  vus: 1500000  iterations: 0  errors: 0  load test busy: 28%
+ 893.1s  vus: 1500000  iterations: 0  errors: 0  load test busy: 29%
+ 894.1s  vus: 1500000  iterations: 0  errors: 0  load test busy: 33%
+ 895.1s  vus: 1500000  iterations: 0  errors: 0  load test busy: 30%
+ 896.1s  vus: 1500000  iterations: 0  errors: 0  load test busy: 32%
+ 897.1s  vus: 1500000  iterations: 0  errors: 0  load test busy: 30%
+ 898.2s  vus: 1500000  iterations: 0  errors: 0  load test busy: 31%
+ 899.2s  vus: 1500000  iterations: 0  errors: 0  load test busy: 29%
+ 900.2s  vus: 1500000  iterations: 0  errors: 0  load test busy: 29%
+ 901.2s  vus: 1500000  iterations: 0  errors: 0  load test busy: 32%
+ 902.2s  vus: 1500000  iterations: 0  errors: 0  load test busy: 30%
+ 903.2s  vus: 1500000  iterations: 0  errors: 0  load test busy: 29%
+ 904.2s  vus: 1500000  iterations: 0  errors: 0  load test busy: 31%
+ 905.2s  vus: 1500000  iterations: 0  errors: 0  load test busy: 30%
+ 906.2s  vus: 1500000  iterations: 0  errors: 0  load test busy: 31%
+ 907.3s  vus: 1500000  iterations: 0  errors: 0  load test busy: 30%
+ 908.3s  vus: 1500000  iterations: 0  errors: 0  load test busy: 30%
+ 909.3s  vus: 1500000  iterations: 0  errors: 0  load test busy: 31%
+ 910.3s  vus: 1500000  iterations: 0  errors: 0  load test busy: 30%
+ 911.3s  vus: 1500000  iterations: 0  errors: 0  load test busy: 31%
+ 912.3s  vus: 1500000  iterations: 0  errors: 0  load test busy: 28%
+ 913.3s  vus: 1500000  iterations: 0  errors: 0  load test busy: 29%
+ 914.3s  vus: 1500000  iterations: 0  errors: 0  load test busy: 31%
+ 915.3s  vus: 1500000  iterations: 0  errors: 0  load test busy: 29%
+ 916.3s  vus: 1500000  iterations: 0  errors: 0  load test busy: 30%
+ 917.4s  vus: 1500000  iterations: 0  errors: 0  load test busy: 31%
+ 918.4s  vus: 1500000  iterations: 0  errors: 0  load test busy: 29%
+ 919.4s  vus: 1500000  iterations: 0  errors: 0  load test busy: 31%
+ 920.4s  vus: 1500000  iterations: 0  errors: 0  load test busy: 30%
+ 921.4s  vus: 1500000  iterations: 0  errors: 0  load test busy: 31%
+ 922.4s  vus: 1500000  iterations: 0  errors: 0  load test busy: 30%
+ 923.4s  vus: 1500000  iterations: 0  errors: 0  load test busy: 29%
+ 924.4s  vus: 1500000  iterations: 0  errors: 0  load test busy: 32%
+ 925.4s  vus: 1500000  iterations: 0  errors: 0  load test busy: 29%
+ 926.4s  vus: 1500000  iterations: 0  errors: 0  load test busy: 31%
+ 927.5s  vus: 1500000  iterations: 0  errors: 0  load test busy: 31%
+ 928.5s  vus: 1500000  iterations: 0  errors: 0  load test busy: 29%
+ 929.5s  vus: 1500000  iterations: 0  errors: 0  load test busy: 29%
+   step  1,500,000 VUs: held
+ 930.5s  vus: 1500443  iterations: 0  errors: 0  load test busy: 32%
+ 931.5s  vus: 1501452  iterations: 0  errors: 0  load test busy: 31%
+ 932.5s  vus: 1502465  iterations: 0  errors: 0  load test busy: 32%
+ 933.5s  vus: 1503474  iterations: 0  errors: 0  load test busy: 31%
+ 934.5s  vus: 1504483  iterations: 0  errors: 0  load test busy: 32%
+ 935.5s  vus: 1505493  iterations: 0  errors: 0  load test busy: 30%
+ 936.5s  vus: 1506506  iterations: 0  errors: 0  load test busy: 31%
+ 937.6s  vus: 1507514  iterations: 0  errors: 0  load test busy: 33%
+ 938.6s  vus: 1508523  iterations: 0  errors: 0  load test busy: 31%
+ 939.6s  vus: 1509536  iterations: 0  errors: 0  load test busy: 30%
+ 940.6s  vus: 1510546  iterations: 0  errors: 0  load test busy: 33%
+ 941.6s  vus: 1511554  iterations: 0  errors: 0  load test busy: 30%
+ 942.6s  vus: 1512564  iterations: 0  errors: 0  load test busy: 30%
+ 943.6s  vus: 1513577  iterations: 0  errors: 0  load test busy: 31%
+ 944.6s  vus: 1514586  iterations: 0  errors: 0  load test busy: 31%
+ 945.6s  vus: 1515595  iterations: 0  errors: 0  load test busy: 31%
+ 946.6s  vus: 1516606  iterations: 0  errors: 0  load test busy: 31%
+ 947.7s  vus: 1517618  iterations: 0  errors: 0  load test busy: 31%
+ 948.7s  vus: 1518626  iterations: 0  errors: 0  load test busy: 30%
+ 949.7s  vus: 1519635  iterations: 0  errors: 0  load test busy: 31%
+ 950.7s  vus: 1520647  iterations: 0  errors: 0  load test busy: 32%
+ 951.7s  vus: 1521658  iterations: 0  errors: 0  load test busy: 29%
+ 952.7s  vus: 1522666  iterations: 0  errors: 0  load test busy: 30%
+ 953.7s  vus: 1523676  iterations: 0  errors: 0  load test busy: 31%
+ 954.7s  vus: 1524689  iterations: 0  errors: 0  load test busy: 30%
+ 955.7s  vus: 1525699  iterations: 0  errors: 0  load test busy: 31%
+ 956.7s  vus: 1526709  iterations: 0  errors: 0  load test busy: 33%
+ 957.8s  vus: 1527718  iterations: 0  errors: 0  load test busy: 30%
+ 958.8s  vus: 1528731  iterations: 0  errors: 0  load test busy: 30%
+ 959.8s  vus: 1529740  iterations: 0  errors: 0  load test busy: 33%
+ 960.8s  vus: 1530750  iterations: 0  errors: 0  load test busy: 31%
+ 961.8s  vus: 1531762  iterations: 0  errors: 0  load test busy: 32%
+ 962.8s  vus: 1532771  iterations: 0  errors: 0  load test busy: 33%
+ 963.8s  vus: 1533782  iterations: 0  errors: 0  load test busy: 31%
+ 964.8s  vus: 1534791  iterations: 0  errors: 0  load test busy: 33%
+ 965.8s  vus: 1535802  iterations: 0  errors: 0  load test busy: 33%
+ 966.8s  vus: 1536811  iterations: 0  errors: 0  load test busy: 33%
+ 967.9s  vus: 1537824  iterations: 0  errors: 0  load test busy: 33%
+ 968.9s  vus: 1538834  iterations: 0  errors: 0  load test busy: 32%
+ 969.9s  vus: 1539842  iterations: 0  errors: 0  load test busy: 34%
+ 970.9s  vus: 1540851  iterations: 0  errors: 0  load test busy: 32%
+ 971.9s  vus: 1541865  iterations: 0  errors: 0  load test busy: 31%
+ 972.9s  vus: 1542874  iterations: 0  errors: 0  load test busy: 33%
+ 973.9s  vus: 1543882  iterations: 0  errors: 0  load test busy: 32%
+ 974.9s  vus: 1544892  iterations: 0  errors: 0  load test busy: 31%
+ 975.9s  vus: 1545906  iterations: 0  errors: 0  load test busy: 33%
+ 977.0s  vus: 1546914  iterations: 0  errors: 0  load test busy: 32%
+ 978.0s  vus: 1547923  iterations: 0  errors: 0  load test busy: 31%
+ 979.0s  vus: 1548934  iterations: 0  errors: 0  load test busy: 32%
+ 980.0s  vus: 1549946  iterations: 0  errors: 0  load test busy: 31%
+ 981.0s  vus: 1550954  iterations: 0  errors: 0  load test busy: 31%
+ 982.0s  vus: 1551963  iterations: 0  errors: 0  load test busy: 33%
+ 983.0s  vus: 1552976  iterations: 0  errors: 0  load test busy: 31%
+ 984.0s  vus: 1553986  iterations: 0  errors: 0  load test busy: 30%
+ 985.0s  vus: 1554994  iterations: 0  errors: 0  load test busy: 32%
+ 986.0s  vus: 1556005  iterations: 0  errors: 0  load test busy: 30%
+ 987.1s  vus: 1557017  iterations: 0  errors: 0  load test busy: 31%
+ 988.1s  vus: 1558028  iterations: 0  errors: 0  load test busy: 32%
+ 989.1s  vus: 1559036  iterations: 0  errors: 0  load test busy: 32%
+ 990.1s  vus: 1560049  iterations: 0  errors: 0  load test busy: 32%
+ 991.1s  vus: 1561058  iterations: 0  errors: 0  load test busy: 32%
+ 992.1s  vus: 1562069  iterations: 0  errors: 0  load test busy: 33%
+ 993.1s  vus: 1563081  iterations: 0  errors: 0  load test busy: 32%
+ 994.1s  vus: 1564090  iterations: 0  errors: 0  load test busy: 31%
+ 995.1s  vus: 1565100  iterations: 0  errors: 0  load test busy: 33%
+ 996.1s  vus: 1566111  iterations: 0  errors: 0  load test busy: 31%
+ 997.2s  vus: 1567121  iterations: 0  errors: 0  load test busy: 31%
+ 998.2s  vus: 1568131  iterations: 0  errors: 0  load test busy: 34%
+ 999.2s  vus: 1569141  iterations: 0  errors: 0  load test busy: 31%
+1000.2s  vus: 1570153  iterations: 0  errors: 0  load test busy: 31%
+1001.2s  vus: 1571162  iterations: 0  errors: 0  load test busy: 33%
+1002.2s  vus: 1572171  iterations: 0  errors: 0  load test busy: 31%
+1003.2s  vus: 1573184  iterations: 0  errors: 0  load test busy: 30%
+1004.2s  vus: 1574193  iterations: 0  errors: 0  load test busy: 32%
+1005.2s  vus: 1575202  iterations: 0  errors: 0  load test busy: 31%
+1006.3s  vus: 1576212  iterations: 0  errors: 0  load test busy: 31%
+1007.3s  vus: 1577224  iterations: 0  errors: 0  load test busy: 32%
+1008.3s  vus: 1578234  iterations: 0  errors: 0  load test busy: 31%
+1009.3s  vus: 1579244  iterations: 0  errors: 0  load test busy: 31%
+1010.3s  vus: 1580255  iterations: 0  errors: 0  load test busy: 33%
+1011.3s  vus: 1581265  iterations: 0  errors: 0  load test busy: 32%
+1012.3s  vus: 1582274  iterations: 0  errors: 0  load test busy: 31%
+1013.3s  vus: 1583285  iterations: 0  errors: 0  load test busy: 33%
+1014.3s  vus: 1584296  iterations: 0  errors: 0  load test busy: 31%
+1015.3s  vus: 1585306  iterations: 0  errors: 0  load test busy: 31%
+1016.4s  vus: 1586315  iterations: 0  errors: 0  load test busy: 33%
+1017.4s  vus: 1587326  iterations: 0  errors: 0  load test busy: 32%
+1018.4s  vus: 1588337  iterations: 0  errors: 0  load test busy: 32%
+1019.4s  vus: 1589346  iterations: 0  errors: 0  load test busy: 33%
+1020.4s  vus: 1590356  iterations: 0  errors: 0  load test busy: 32%
+1021.4s  vus: 1591367  iterations: 0  errors: 0  load test busy: 34%
+1022.4s  vus: 1592377  iterations: 0  errors: 0  load test busy: 33%
+1023.4s  vus: 1593389  iterations: 0  errors: 0  load test busy: 32%
+1024.4s  vus: 1594398  iterations: 0  errors: 0  load test busy: 33%
+1025.4s  vus: 1595409  iterations: 0  errors: 0  load test busy: 33%
+1026.5s  vus: 1596420  iterations: 0  errors: 0  load test busy: 34%
+1027.5s  vus: 1597429  iterations: 0  errors: 0  load test busy: 32%
+1028.5s  vus: 1598440  iterations: 0  errors: 0  load test busy: 32%
+1029.5s  vus: 1599452  iterations: 0  errors: 0  load test busy: 32%
+1030.5s  vus: 1600461  iterations: 0  errors: 0  load test busy: 35%
+1031.5s  vus: 1601471  iterations: 0  errors: 0  load test busy: 31%
+1032.5s  vus: 1602482  iterations: 0  errors: 0  load test busy: 32%
+1033.5s  vus: 1603492  iterations: 0  errors: 0  load test busy: 32%
+1034.5s  vus: 1604501  iterations: 0  errors: 0  load test busy: 32%
+1035.5s  vus: 1605513  iterations: 0  errors: 0  load test busy: 33%
+1036.6s  vus: 1606524  iterations: 0  errors: 0  load test busy: 32%
+1037.6s  vus: 1607532  iterations: 0  errors: 0  load test busy: 32%
+1038.6s  vus: 1608542  iterations: 0  errors: 0  load test busy: 32%
+1039.6s  vus: 1609554  iterations: 0  errors: 0  load test busy: 33%
+1040.6s  vus: 1610564  iterations: 0  errors: 0  load test busy: 32%
+1041.6s  vus: 1611573  iterations: 0  errors: 0  load test busy: 32%
+1042.6s  vus: 1612584  iterations: 0  errors: 0  load test busy: 33%
+1043.6s  vus: 1613596  iterations: 0  errors: 0  load test busy: 32%
+1044.6s  vus: 1614605  iterations: 0  errors: 0  load test busy: 32%
+1045.7s  vus: 1615615  iterations: 0  errors: 0  load test busy: 34%
+1046.7s  vus: 1616626  iterations: 0  errors: 0  load test busy: 32%
+1047.7s  vus: 1617637  iterations: 0  errors: 0  load test busy: 33%
+1048.7s  vus: 1618647  iterations: 0  errors: 0  load test busy: 33%
+1049.7s  vus: 1619657  iterations: 0  errors: 0  load test busy: 31%
+1050.7s  vus: 1620669  iterations: 0  errors: 0  load test busy: 34%
+1051.7s  vus: 1621678  iterations: 0  errors: 0  load test busy: 33%
+1052.7s  vus: 1622688  iterations: 0  errors: 0  load test busy: 33%
+1053.7s  vus: 1623699  iterations: 0  errors: 0  load test busy: 35%
+1054.7s  vus: 1624709  iterations: 0  errors: 0  load test busy: 32%
+1055.8s  vus: 1625719  iterations: 0  errors: 0  load test busy: 33%
+1056.8s  vus: 1626728  iterations: 0  errors: 0  load test busy: 34%
+1057.8s  vus: 1627742  iterations: 0  errors: 0  load test busy: 32%
+1058.8s  vus: 1628751  iterations: 0  errors: 0  load test busy: 33%
+1059.8s  vus: 1629759  iterations: 0  errors: 0  load test busy: 35%
+1060.8s  vus: 1630771  iterations: 0  errors: 0  load test busy: 33%
+1061.8s  vus: 1631782  iterations: 0  errors: 0  load test busy: 32%
+1062.8s  vus: 1632791  iterations: 0  errors: 0  load test busy: 34%
+1063.8s  vus: 1633801  iterations: 0  errors: 0  load test busy: 32%
+1064.8s  vus: 1634814  iterations: 0  errors: 0  load test busy: 33%
+1065.9s  vus: 1635823  iterations: 0  errors: 0  load test busy: 34%
+1066.9s  vus: 1636831  iterations: 0  errors: 0  load test busy: 32%
+1067.9s  vus: 1637844  iterations: 0  errors: 0  load test busy: 32%
+1068.9s  vus: 1638854  iterations: 0  errors: 0  load test busy: 34%
+1069.9s  vus: 1639863  iterations: 0  errors: 0  load test busy: 32%
+1070.9s  vus: 1640875  iterations: 0  errors: 0  load test busy: 32%
+1071.9s  vus: 1641885  iterations: 0  errors: 0  load test busy: 34%
+1072.9s  vus: 1642895  iterations: 0  errors: 0  load test busy: 34%
+1073.9s  vus: 1643904  iterations: 0  errors: 0  load test busy: 33%
+1074.9s  vus: 1644915  iterations: 0  errors: 0  load test busy: 35%
+1076.0s  vus: 1645926  iterations: 0  errors: 0  load test busy: 33%
+1077.0s  vus: 1646936  iterations: 0  errors: 0  load test busy: 32%
+1078.0s  vus: 1647947  iterations: 0  errors: 0  load test busy: 34%
+1079.0s  vus: 1648957  iterations: 0  errors: 0  load test busy: 33%
+1080.0s  vus: 1649967  iterations: 0  errors: 0  load test busy: 32%
+1081.0s  vus: 1650977  iterations: 0  errors: 0  load test busy: 33%
+1082.0s  vus: 1651988  iterations: 0  errors: 0  load test busy: 35%
+1083.0s  vus: 1652999  iterations: 0  errors: 0  load test busy: 34%
+1084.0s  vus: 1654009  iterations: 0  errors: 0  load test busy: 33%
+1085.1s  vus: 1655020  iterations: 0  errors: 0  load test busy: 36%
+1086.1s  vus: 1656030  iterations: 0  errors: 0  load test busy: 34%
+1087.1s  vus: 1657039  iterations: 0  errors: 0  load test busy: 34%
+1088.1s  vus: 1658050  iterations: 0  errors: 0  load test busy: 35%
+1089.1s  vus: 1659062  iterations: 0  errors: 0  load test busy: 33%
+1090.1s  vus: 1660071  iterations: 0  errors: 0  load test busy: 34%
+1091.1s  vus: 1661080  iterations: 0  errors: 0  load test busy: 34%
+1092.1s  vus: 1662092  iterations: 0  errors: 0  load test busy: 33%
+1093.1s  vus: 1663103  iterations: 0  errors: 0  load test busy: 33%
+1094.1s  vus: 1664111  iterations: 0  errors: 0  load test busy: 34%
+1095.2s  vus: 1665123  iterations: 0  errors: 0  load test busy: 33%
+1096.2s  vus: 1666134  iterations: 0  errors: 0  load test busy: 33%
+1097.2s  vus: 1667143  iterations: 0  errors: 0  load test busy: 35%
+1098.2s  vus: 1668154  iterations: 0  errors: 0  load test busy: 34%
+1099.2s  vus: 1669164  iterations: 0  errors: 0  load test busy: 34%
+1100.2s  vus: 1670175  iterations: 0  errors: 0  load test busy: 34%
+1101.2s  vus: 1671184  iterations: 0  errors: 0  load test busy: 34%
+1102.2s  vus: 1672194  iterations: 0  errors: 0  load test busy: 34%
+1103.2s  vus: 1673205  iterations: 0  errors: 0  load test busy: 35%
+1104.2s  vus: 1674217  iterations: 0  errors: 0  load test busy: 34%
+1105.3s  vus: 1675226  iterations: 0  errors: 0  load test busy: 34%
+1106.3s  vus: 1676237  iterations: 0  errors: 0  load test busy: 35%
+1107.3s  vus: 1677246  iterations: 0  errors: 0  load test busy: 34%
+1108.3s  vus: 1678257  iterations: 0  errors: 0  load test busy: 34%
+1109.3s  vus: 1679268  iterations: 0  errors: 0  load test busy: 34%
+1110.3s  vus: 1680277  iterations: 0  errors: 0  load test busy: 33%
+1111.3s  vus: 1681288  iterations: 0  errors: 0  load test busy: 35%
+1112.3s  vus: 1682299  iterations: 0  errors: 0  load test busy: 35%
+1113.3s  vus: 1683308  iterations: 0  errors: 0  load test busy: 34%
+1114.3s  vus: 1684318  iterations: 0  errors: 0  load test busy: 34%
+1115.4s  vus: 1685329  iterations: 0  errors: 0  load test busy: 34%
+1116.4s  vus: 1686340  iterations: 0  errors: 0  load test busy: 36%
+1117.4s  vus: 1687349  iterations: 0  errors: 0  load test busy: 34%
+1118.4s  vus: 1688360  iterations: 0  errors: 0  load test busy: 34%
+1119.4s  vus: 1689371  iterations: 0  errors: 0  load test busy: 36%
+1120.4s  vus: 1690380  iterations: 0  errors: 0  load test busy: 35%
+1121.4s  vus: 1691390  iterations: 0  errors: 0  load test busy: 34%
+1122.4s  vus: 1692403  iterations: 0  errors: 0  load test busy: 35%
+1123.4s  vus: 1693412  iterations: 0  errors: 0  load test busy: 33%
+1124.5s  vus: 1694421  iterations: 0  errors: 0  load test busy: 34%
+1125.5s  vus: 1695432  iterations: 0  errors: 0  load test busy: 35%
+1126.5s  vus: 1696443  iterations: 0  errors: 0  load test busy: 32%
+1127.5s  vus: 1697452  iterations: 0  errors: 0  load test busy: 33%
+1128.5s  vus: 1698463  iterations: 0  errors: 0  load test busy: 34%
+1129.5s  vus: 1699474  iterations: 0  errors: 0  load test busy: 35%
+1130.5s  vus: 1700483  iterations: 0  errors: 0  load test busy: 33%
+1131.5s  vus: 1701495  iterations: 0  errors: 0  load test busy: 34%
+1132.5s  vus: 1702506  iterations: 0  errors: 0  load test busy: 35%
+1133.5s  vus: 1703514  iterations: 0  errors: 0  load test busy: 34%
+1134.6s  vus: 1704525  iterations: 0  errors: 0  load test busy: 33%
+1135.6s  vus: 1705535  iterations: 0  errors: 0  load test busy: 34%
+1136.6s  vus: 1706546  iterations: 0  errors: 0  load test busy: 34%
+1137.6s  vus: 1707555  iterations: 0  errors: 0  load test busy: 33%
+1138.6s  vus: 1708568  iterations: 0  errors: 0  load test busy: 35%
+1139.6s  vus: 1709577  iterations: 0  errors: 0  load test busy: 35%
+1140.6s  vus: 1710587  iterations: 0  errors: 0  load test busy: 34%
+1141.6s  vus: 1711598  iterations: 0  errors: 0  load test busy: 36%
+1142.6s  vus: 1712610  iterations: 0  errors: 0  load test busy: 38%
+1143.7s  vus: 1713620  iterations: 0  errors: 0  load test busy: 35%
+1144.7s  vus: 1714628  iterations: 0  errors: 0  load test busy: 36%
+1145.7s  vus: 1715641  iterations: 0  errors: 0  load test busy: 39%
+1146.7s  vus: 1716651  iterations: 0  errors: 0  load test busy: 35%
+1147.7s  vus: 1717662  iterations: 0  errors: 0  load test busy: 35%
+1148.7s  vus: 1718673  iterations: 0  errors: 0  load test busy: 36%
+1149.7s  vus: 1719683  iterations: 0  errors: 0  load test busy: 36%
+1150.7s  vus: 1720694  iterations: 0  errors: 0  load test busy: 35%
+1151.7s  vus: 1721705  iterations: 0  errors: 0  load test busy: 36%
+1152.7s  vus: 1722715  iterations: 0  errors: 0  load test busy: 34%
+1153.8s  vus: 1723726  iterations: 0  errors: 0  load test busy: 33%
+1154.8s  vus: 1724737  iterations: 0  errors: 0  load test busy: 34%
+1155.8s  vus: 1725747  iterations: 0  errors: 0  load test busy: 34%
+1156.8s  vus: 1726758  iterations: 0  errors: 0  load test busy: 34%
+1157.8s  vus: 1727767  iterations: 0  errors: 0  load test busy: 33%
+1158.8s  vus: 1728778  iterations: 0  errors: 0  load test busy: 34%
+1159.8s  vus: 1729790  iterations: 0  errors: 0  load test busy: 35%
+1160.8s  vus: 1730798  iterations: 0  errors: 0  load test busy: 34%
+1161.8s  vus: 1731810  iterations: 0  errors: 0  load test busy: 34%
+1162.8s  vus: 1732821  iterations: 0  errors: 0  load test busy: 36%
+1163.9s  vus: 1733830  iterations: 0  errors: 0  load test busy: 34%
+1164.9s  vus: 1734842  iterations: 0  errors: 0  load test busy: 34%
+1165.9s  vus: 1735853  iterations: 0  errors: 0  load test busy: 36%
+1166.9s  vus: 1736862  iterations: 0  errors: 0  load test busy: 34%
+1167.9s  vus: 1737873  iterations: 0  errors: 0  load test busy: 34%
+1168.9s  vus: 1738883  iterations: 0  errors: 0  load test busy: 36%
+1169.9s  vus: 1739894  iterations: 0  errors: 0  load test busy: 34%
+1170.9s  vus: 1740905  iterations: 0  errors: 0  load test busy: 36%
+1171.9s  vus: 1741916  iterations: 0  errors: 0  load test busy: 36%
+1173.0s  vus: 1742926  iterations: 0  errors: 0  load test busy: 35%
+1174.0s  vus: 1743935  iterations: 0  errors: 0  load test busy: 36%
+1175.0s  vus: 1744947  iterations: 0  errors: 0  load test busy: 35%
+1176.0s  vus: 1745958  iterations: 0  errors: 0  load test busy: 35%
+1177.0s  vus: 1746968  iterations: 0  errors: 0  load test busy: 37%
+1178.0s  vus: 1747977  iterations: 0  errors: 0  load test busy: 35%
+1179.0s  vus: 1748989  iterations: 0  errors: 0  load test busy: 35%
+1180.0s  vus: 1749989  iterations: 0  errors: 0  load test busy: 37%
+1181.0s  vus: 1750000  iterations: 0  errors: 0  load test busy: 33%
+1182.0s  vus: 1750000  iterations: 0  errors: 0  load test busy: 32%
+1183.1s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+1184.1s  vus: 1750000  iterations: 0  errors: 0  load test busy: 32%
+1185.1s  vus: 1750000  iterations: 0  errors: 0  load test busy: 32%
+1186.1s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+1187.1s  vus: 1750000  iterations: 0  errors: 0  load test busy: 32%
+1188.1s  vus: 1750000  iterations: 0  errors: 0  load test busy: 33%
+1189.1s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+1190.1s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+1191.1s  vus: 1750000  iterations: 0  errors: 0  load test busy: 33%
+1192.2s  vus: 1750000  iterations: 0  errors: 0  load test busy: 33%
+1193.2s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+1194.2s  vus: 1750000  iterations: 0  errors: 0  load test busy: 35%
+1195.2s  vus: 1750000  iterations: 0  errors: 0  load test busy: 33%
+1196.2s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+1197.2s  vus: 1750000  iterations: 0  errors: 0  load test busy: 35%
+1198.2s  vus: 1750000  iterations: 0  errors: 0  load test busy: 33%
+1199.2s  vus: 1750000  iterations: 0  errors: 0  load test busy: 33%
+1200.2s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+1201.2s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+1202.3s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+1203.3s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+1204.3s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+1205.3s  vus: 1750000  iterations: 0  errors: 0  load test busy: 35%
+1206.3s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+1207.3s  vus: 1750000  iterations: 0  errors: 0  load test busy: 36%
+1208.3s  vus: 1750000  iterations: 0  errors: 0  load test busy: 42%
+1209.3s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+1210.3s  vus: 1750000  iterations: 0  errors: 0  load test busy: 33%
+1211.3s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+1212.4s  vus: 1750000  iterations: 0  errors: 0  load test busy: 32%
+1213.4s  vus: 1750000  iterations: 0  errors: 0  load test busy: 35%
+1214.4s  vus: 1750000  iterations: 0  errors: 0  load test busy: 32%
+1215.4s  vus: 1750000  iterations: 0  errors: 0  load test busy: 33%
+1216.4s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+1217.4s  vus: 1750000  iterations: 0  errors: 0  load test busy: 32%
+1218.4s  vus: 1750000  iterations: 0  errors: 0  load test busy: 32%
+1219.4s  vus: 1750000  iterations: 0  errors: 0  load test busy: 35%
+1220.4s  vus: 1750000  iterations: 0  errors: 0  load test busy: 33%
+1221.4s  vus: 1750000  iterations: 0  errors: 0  load test busy: 32%
+1222.5s  vus: 1750000  iterations: 0  errors: 0  load test busy: 35%
+1223.5s  vus: 1750000  iterations: 0  errors: 0  load test busy: 33%
+1224.5s  vus: 1750000  iterations: 0  errors: 0  load test busy: 33%
+1225.5s  vus: 1750000  iterations: 0  errors: 0  load test busy: 33%
+1226.5s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+1227.5s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+1228.5s  vus: 1750000  iterations: 0  errors: 0  load test busy: 32%
+1229.5s  vus: 1750000  iterations: 0  errors: 0  load test busy: 32%
+1230.5s  vus: 1750000  iterations: 0  errors: 0  load test busy: 35%
+1231.5s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+1232.6s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+1233.6s  vus: 1750000  iterations: 0  errors: 0  load test busy: 35%
+1234.6s  vus: 1750000  iterations: 0  errors: 0  load test busy: 33%
+1235.6s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+1236.6s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+1237.6s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+1238.6s  vus: 1750000  iterations: 0  errors: 0  load test busy: 35%
+1239.6s  vus: 1750000  iterations: 0  errors: 0  load test busy: 34%
+   step  1,750,000 VUs: held
+1240.6s  vus: 1750603  iterations: 0  errors: 0  load test busy: 34%
+1241.6s  vus: 1751616  iterations: 0  errors: 0  load test busy: 35%
+1242.7s  vus: 1752625  iterations: 0  errors: 0  load test busy: 35%
+1243.7s  vus: 1753634  iterations: 0  errors: 0  load test busy: 34%
+1244.7s  vus: 1754646  iterations: 0  errors: 0  load test busy: 34%
+1245.7s  vus: 1755657  iterations: 0  errors: 0  load test busy: 36%
+1246.7s  vus: 1756666  iterations: 0  errors: 0  load test busy: 34%
+1247.7s  vus: 1757675  iterations: 0  errors: 0  load test busy: 34%
+1248.7s  vus: 1758689  iterations: 0  errors: 0  load test busy: 36%
+1249.7s  vus: 1759697  iterations: 0  errors: 0  load test busy: 36%
+1250.7s  vus: 1760706  iterations: 0  errors: 0  load test busy: 35%
+1251.7s  vus: 1761719  iterations: 0  errors: 0  load test busy: 34%
+1252.8s  vus: 1762729  iterations: 0  errors: 0  load test busy: 34%
+1253.8s  vus: 1763737  iterations: 0  errors: 0  load test busy: 37%
+1254.8s  vus: 1764751  iterations: 0  errors: 0  load test busy: 35%
+1255.8s  vus: 1765761  iterations: 0  errors: 0  load test busy: 34%
+1256.8s  vus: 1766770  iterations: 0  errors: 0  load test busy: 37%
+1257.8s  vus: 1767781  iterations: 0  errors: 0  load test busy: 34%
+1258.8s  vus: 1768793  iterations: 0  errors: 0  load test busy: 34%
+1259.8s  vus: 1769801  iterations: 0  errors: 0  load test busy: 35%
+1260.8s  vus: 1770811  iterations: 0  errors: 0  load test busy: 37%
+1261.9s  vus: 1771825  iterations: 0  errors: 0  load test busy: 35%
+1262.9s  vus: 1772833  iterations: 0  errors: 0  load test busy: 36%
+1263.9s  vus: 1773842  iterations: 0  errors: 0  load test busy: 36%
+1264.9s  vus: 1774856  iterations: 0  errors: 0  load test busy: 37%
+1265.9s  vus: 1775865  iterations: 0  errors: 0  load test busy: 37%
+1266.9s  vus: 1776875  iterations: 0  errors: 0  load test busy: 36%
+1267.9s  vus: 1777888  iterations: 0  errors: 0  load test busy: 38%
+1268.9s  vus: 1778898  iterations: 0  errors: 0  load test busy: 39%
+1269.9s  vus: 1779908  iterations: 0  errors: 0  load test busy: 35%
+1270.9s  vus: 1780919  iterations: 0  errors: 0  load test busy: 35%
+1272.0s  vus: 1781930  iterations: 0  errors: 0  load test busy: 37%
+1273.0s  vus: 1782941  iterations: 0  errors: 0  load test busy: 36%
+1274.0s  vus: 1783953  iterations: 0  errors: 0  load test busy: 36%
+1275.0s  vus: 1784962  iterations: 0  errors: 0  load test busy: 35%
+1276.0s  vus: 1785973  iterations: 0  errors: 0  load test busy: 35%
+1277.0s  vus: 1786986  iterations: 0  errors: 0  load test busy: 38%
+1278.0s  vus: 1787996  iterations: 0  errors: 0  load test busy: 35%
+1279.0s  vus: 1789006  iterations: 0  errors: 0  load test busy: 35%
+1280.0s  vus: 1790017  iterations: 0  errors: 0  load test busy: 35%
+1281.1s  vus: 1791029  iterations: 0  errors: 0  load test busy: 38%
+1282.1s  vus: 1792039  iterations: 0  errors: 0  load test busy: 35%
+1283.1s  vus: 1793049  iterations: 0  errors: 0  load test busy: 35%
+1284.1s  vus: 1794061  iterations: 0  errors: 0  load test busy: 35%
+1285.1s  vus: 1795072  iterations: 0  errors: 0  load test busy: 39%
+1286.1s  vus: 1796082  iterations: 0  errors: 0  load test busy: 36%
+1287.1s  vus: 1797094  iterations: 0  errors: 0  load test busy: 37%
+1288.1s  vus: 1798105  iterations: 0  errors: 0  load test busy: 36%
+1289.1s  vus: 1799115  iterations: 0  errors: 0  load test busy: 36%
+1290.2s  vus: 1800126  iterations: 0  errors: 0  load test busy: 36%
+1291.2s  vus: 1801137  iterations: 0  errors: 0  load test busy: 37%
+1292.2s  vus: 1802148  iterations: 0  errors: 0  load test busy: 36%
+1293.2s  vus: 1803160  iterations: 0  errors: 0  load test busy: 39%
+1294.2s  vus: 1804170  iterations: 0  errors: 0  load test busy: 36%
+1295.2s  vus: 1805180  iterations: 0  errors: 0  load test busy: 35%
+1296.2s  vus: 1806192  iterations: 0  errors: 0  load test busy: 36%
+1297.2s  vus: 1807202  iterations: 0  errors: 0  load test busy: 38%
+1298.2s  vus: 1808213  iterations: 0  errors: 0  load test busy: 37%
+1299.3s  vus: 1809224  iterations: 0  errors: 0  load test busy: 36%
+1300.3s  vus: 1810234  iterations: 0  errors: 0  load test busy: 36%
+1301.3s  vus: 1811246  iterations: 0  errors: 0  load test busy: 37%
+1302.3s  vus: 1812257  iterations: 0  errors: 0  load test busy: 36%
+1303.3s  vus: 1813267  iterations: 0  errors: 0  load test busy: 35%
+1304.3s  vus: 1814279  iterations: 0  errors: 0  load test busy: 35%
+1305.3s  vus: 1815288  iterations: 0  errors: 0  load test busy: 37%
+1306.3s  vus: 1816299  iterations: 0  errors: 0  load test busy: 36%
+1307.3s  vus: 1817312  iterations: 0  errors: 0  load test busy: 36%
+1308.4s  vus: 1818322  iterations: 0  errors: 0  load test busy: 36%
+1309.4s  vus: 1819331  iterations: 0  errors: 0  load test busy: 37%
+1310.4s  vus: 1820344  iterations: 0  errors: 0  load test busy: 36%
+1311.4s  vus: 1821354  iterations: 0  errors: 0  load test busy: 39%
+1312.4s  vus: 1822367  iterations: 0  errors: 0  load test busy: 36%
+1313.4s  vus: 1823377  iterations: 0  errors: 0  load test busy: 37%
+1314.4s  vus: 1824386  iterations: 0  errors: 0  load test busy: 39%
+1315.4s  vus: 1825400  iterations: 0  errors: 0  load test busy: 37%
+1316.4s  vus: 1826408  iterations: 0  errors: 0  load test busy: 37%
+1317.5s  vus: 1827419  iterations: 0  errors: 0  load test busy: 37%
+1318.5s  vus: 1828432  iterations: 0  errors: 0  load test busy: 37%
+1319.5s  vus: 1829440  iterations: 0  errors: 0  load test busy: 39%
+1320.5s  vus: 1830455  iterations: 0  errors: 0  load test busy: 37%
+1321.5s  vus: 1831464  iterations: 0  errors: 0  load test busy: 37%
+1322.5s  vus: 1832472  iterations: 0  errors: 0  load test busy: 39%
+1323.5s  vus: 1833488  iterations: 0  errors: 0  load test busy: 37%
+1324.5s  vus: 1834496  iterations: 0  errors: 0  load test busy: 38%
+1325.5s  vus: 1835506  iterations: 0  errors: 0  load test busy: 38%
+1326.6s  vus: 1836519  iterations: 0  errors: 0  load test busy: 37%
+1327.6s  vus: 1837528  iterations: 0  errors: 0  load test busy: 40%
+1328.6s  vus: 1838540  iterations: 0  errors: 0  load test busy: 38%
+1329.6s  vus: 1839551  iterations: 0  errors: 0  load test busy: 38%
+1330.6s  vus: 1840562  iterations: 0  errors: 0  load test busy: 38%
+1331.6s  vus: 1841573  iterations: 0  errors: 0  load test busy: 37%
+1332.6s  vus: 1842583  iterations: 0  errors: 0  load test busy: 39%
+1333.6s  vus: 1843594  iterations: 0  errors: 0  load test busy: 38%
+1334.6s  vus: 1844606  iterations: 0  errors: 0  load test busy: 37%
+1335.7s  vus: 1845615  iterations: 0  errors: 0  load test busy: 39%
+1336.7s  vus: 1846627  iterations: 0  errors: 0  load test busy: 38%
+1337.7s  vus: 1847638  iterations: 0  errors: 0  load test busy: 37%
+1338.7s  vus: 1848650  iterations: 0  errors: 0  load test busy: 37%
+1339.7s  vus: 1849660  iterations: 0  errors: 0  load test busy: 37%
+1340.7s  vus: 1850670  iterations: 0  errors: 0  load test busy: 39%
+1341.7s  vus: 1851682  iterations: 0  errors: 0  load test busy: 38%
+1342.7s  vus: 1852692  iterations: 0  errors: 0  load test busy: 38%
+1343.7s  vus: 1853704  iterations: 0  errors: 0  load test busy: 37%
+1344.8s  vus: 1854716  iterations: 0  errors: 0  load test busy: 37%
+1345.8s  vus: 1855724  iterations: 0  errors: 0  load test busy: 40%
+1346.8s  vus: 1856739  iterations: 0  errors: 0  load test busy: 37%
+1347.8s  vus: 1857748  iterations: 0  errors: 0  load test busy: 37%
+1348.8s  vus: 1858758  iterations: 0  errors: 0  load test busy: 36%
+1349.8s  vus: 1859771  iterations: 0  errors: 0  load test busy: 37%
+1350.8s  vus: 1860780  iterations: 0  errors: 0  load test busy: 40%
+1351.8s  vus: 1861791  iterations: 0  errors: 0  load test busy: 38%
+1352.8s  vus: 1862803  iterations: 0  errors: 0  load test busy: 39%
+1353.9s  vus: 1863813  iterations: 0  errors: 0  load test busy: 37%
+1354.9s  vus: 1864824  iterations: 0  errors: 0  load test busy: 40%
+1355.9s  vus: 1865835  iterations: 0  errors: 0  load test busy: 38%
+1356.9s  vus: 1866847  iterations: 0  errors: 0  load test busy: 38%
+1357.9s  vus: 1867858  iterations: 0  errors: 0  load test busy: 38%
+1358.9s  vus: 1868868  iterations: 0  errors: 0  load test busy: 39%
+1359.9s  vus: 1869880  iterations: 0  errors: 0  load test busy: 38%
+1360.9s  vus: 1870891  iterations: 0  errors: 0  load test busy: 38%
+1361.9s  vus: 1871901  iterations: 0  errors: 0  load test busy: 38%
+1363.0s  vus: 1872914  iterations: 0  errors: 0  load test busy: 38%
+1364.0s  vus: 1873924  iterations: 0  errors: 0  load test busy: 40%
+1365.0s  vus: 1874934  iterations: 0  errors: 0  load test busy: 37%
+1366.0s  vus: 1875947  iterations: 0  errors: 0  load test busy: 38%
+1367.0s  vus: 1876957  iterations: 0  errors: 0  load test busy: 39%
+1368.0s  vus: 1877969  iterations: 0  errors: 0  load test busy: 39%
+1369.0s  vus: 1878979  iterations: 0  errors: 0  load test busy: 39%
+1370.0s  vus: 1879991  iterations: 0  errors: 0  load test busy: 38%
+1371.0s  vus: 1881002  iterations: 0  errors: 0  load test busy: 38%
+1372.1s  vus: 1882012  iterations: 0  errors: 0  load test busy: 38%
+1373.1s  vus: 1883023  iterations: 0  errors: 0  load test busy: 39%
+1374.1s  vus: 1884034  iterations: 0  errors: 0  load test busy: 41%
+1375.1s  vus: 1885046  iterations: 0  errors: 0  load test busy: 39%
+1376.1s  vus: 1886056  iterations: 0  errors: 0  load test busy: 39%
+1377.1s  vus: 1887066  iterations: 0  errors: 0  load test busy: 39%
+1378.1s  vus: 1888078  iterations: 0  errors: 0  load test busy: 41%
+1379.1s  vus: 1889088  iterations: 0  errors: 0  load test busy: 40%
+1380.1s  vus: 1890101  iterations: 0  errors: 0  load test busy: 38%
+1381.2s  vus: 1891112  iterations: 0  errors: 0  load test busy: 41%
+1382.2s  vus: 1892122  iterations: 0  errors: 0  load test busy: 40%
+1383.2s  vus: 1893134  iterations: 0  errors: 0  load test busy: 40%
+1384.2s  vus: 1894144  iterations: 0  errors: 0  load test busy: 42%
+1385.2s  vus: 1895154  iterations: 0  errors: 0  load test busy: 39%
+1386.2s  vus: 1896167  iterations: 0  errors: 0  load test busy: 39%
+1387.2s  vus: 1897176  iterations: 0  errors: 0  load test busy: 40%
+1388.2s  vus: 1898189  iterations: 0  errors: 0  load test busy: 39%
+1389.2s  vus: 1899200  iterations: 0  errors: 0  load test busy: 42%
+1390.3s  vus: 1900211  iterations: 0  errors: 0  load test busy: 41%
+1391.3s  vus: 1901223  iterations: 0  errors: 0  load test busy: 41%
+1392.3s  vus: 1902232  iterations: 0  errors: 0  load test busy: 40%
+1393.3s  vus: 1903243  iterations: 0  errors: 0  load test busy: 41%
+1394.3s  vus: 1904255  iterations: 0  errors: 0  load test busy: 42%
+1395.3s  vus: 1905265  iterations: 0  errors: 0  load test busy: 39%
+1396.3s  vus: 1906278  iterations: 0  errors: 0  load test busy: 38%
+1397.3s  vus: 1907288  iterations: 0  errors: 0  load test busy: 40%
+1398.3s  vus: 1908300  iterations: 0  errors: 0  load test busy: 39%
+1399.4s  vus: 1909312  iterations: 0  errors: 0  load test busy: 39%
+1400.4s  vus: 1910322  iterations: 0  errors: 0  load test busy: 38%
+1401.4s  vus: 1911334  iterations: 0  errors: 0  load test busy: 39%
+1402.4s  vus: 1912345  iterations: 0  errors: 0  load test busy: 42%
+1403.4s  vus: 1913357  iterations: 0  errors: 0  load test busy: 39%
+1404.4s  vus: 1914368  iterations: 0  errors: 0  load test busy: 39%
+1405.4s  vus: 1915378  iterations: 0  errors: 0  load test busy: 39%
+1406.4s  vus: 1916390  iterations: 0  errors: 0  load test busy: 39%
+1407.4s  vus: 1917401  iterations: 0  errors: 0  load test busy: 42%
+1408.5s  vus: 1918412  iterations: 0  errors: 0  load test busy: 39%
+1409.5s  vus: 1919424  iterations: 0  errors: 0  load test busy: 38%
+1410.5s  vus: 1920434  iterations: 0  errors: 0  load test busy: 39%
+1411.5s  vus: 1921446  iterations: 0  errors: 0  load test busy: 41%
+1412.5s  vus: 1922456  iterations: 0  errors: 0  load test busy: 42%
+1413.5s  vus: 1923469  iterations: 0  errors: 0  load test busy: 40%
+1414.5s  vus: 1924480  iterations: 0  errors: 0  load test busy: 39%
+1415.5s  vus: 1925489  iterations: 0  errors: 0  load test busy: 39%
+1416.5s  vus: 1926503  iterations: 0  errors: 0  load test busy: 40%
+1417.6s  vus: 1927512  iterations: 0  errors: 0  load test busy: 40%
+1418.6s  vus: 1928524  iterations: 0  errors: 0  load test busy: 39%
+1419.6s  vus: 1929535  iterations: 0  errors: 0  load test busy: 39%
+1420.6s  vus: 1930545  iterations: 0  errors: 0  load test busy: 39%
+1421.6s  vus: 1931558  iterations: 0  errors: 0  load test busy: 40%
+1422.6s  vus: 1932568  iterations: 0  errors: 0  load test busy: 40%
+1423.6s  vus: 1933580  iterations: 0  errors: 0  load test busy: 39%
+1424.6s  vus: 1934591  iterations: 0  errors: 0  load test busy: 39%
+1425.6s  vus: 1935600  iterations: 0  errors: 0  load test busy: 39%
+1426.7s  vus: 1936614  iterations: 0  errors: 0  load test busy: 39%
+1427.7s  vus: 1937624  iterations: 0  errors: 0  load test busy: 37%
+1428.7s  vus: 1938635  iterations: 0  errors: 0  load test busy: 39%
+1429.7s  vus: 1939648  iterations: 0  errors: 0  load test busy: 39%
+1430.7s  vus: 1940657  iterations: 0  errors: 0  load test busy: 39%
+1431.7s  vus: 1941668  iterations: 0  errors: 0  load test busy: 39%
+1432.7s  vus: 1942680  iterations: 0  errors: 0  load test busy: 41%
+1433.7s  vus: 1943691  iterations: 0  errors: 0  load test busy: 38%
+1434.8s  vus: 1944702  iterations: 0  errors: 0  load test busy: 38%
+1435.8s  vus: 1945711  iterations: 0  errors: 0  load test busy: 38%
+1436.8s  vus: 1946725  iterations: 0  errors: 0  load test busy: 38%
+1437.8s  vus: 1947735  iterations: 0  errors: 0  load test busy: 40%
+1438.8s  vus: 1948745  iterations: 0  errors: 0  load test busy: 38%
+1439.8s  vus: 1949758  iterations: 0  errors: 0  load test busy: 40%
+1440.8s  vus: 1950768  iterations: 0  errors: 0  load test busy: 40%
+1441.8s  vus: 1951779  iterations: 0  errors: 0  load test busy: 43%
+1442.8s  vus: 1952791  iterations: 0  errors: 0  load test busy: 41%
+1443.9s  vus: 1953801  iterations: 0  errors: 0  load test busy: 41%
+1444.9s  vus: 1954814  iterations: 0  errors: 0  load test busy: 41%
+1445.9s  vus: 1955824  iterations: 0  errors: 0  load test busy: 41%
+1446.9s  vus: 1956836  iterations: 0  errors: 0  load test busy: 42%
+1447.9s  vus: 1957846  iterations: 0  errors: 0  load test busy: 41%
+1448.9s  vus: 1958858  iterations: 0  errors: 0  load test busy: 42%
+1449.9s  vus: 1959870  iterations: 0  errors: 0  load test busy: 40%
+1450.9s  vus: 1960880  iterations: 0  errors: 0  load test busy: 40%
+1451.9s  vus: 1961893  iterations: 0  errors: 0  load test busy: 40%
+1453.0s  vus: 1962902  iterations: 0  errors: 0  load test busy: 41%
+1454.0s  vus: 1963914  iterations: 0  errors: 0  load test busy: 43%
+1455.0s  vus: 1964925  iterations: 0  errors: 0  load test busy: 40%
+1456.0s  vus: 1965936  iterations: 0  errors: 0  load test busy: 40%
+1457.0s  vus: 1966948  iterations: 0  errors: 0  load test busy: 41%
+1458.0s  vus: 1967957  iterations: 0  errors: 0  load test busy: 42%
+1459.0s  vus: 1968968  iterations: 0  errors: 0  load test busy: 40%
+1460.0s  vus: 1969980  iterations: 0  errors: 0  load test busy: 41%
+1461.0s  vus: 1970990  iterations: 0  errors: 0  load test busy: 40%
+1462.1s  vus: 1972003  iterations: 0  errors: 0  load test busy: 41%
+1463.1s  vus: 1973012  iterations: 0  errors: 0  load test busy: 41%
+1464.1s  vus: 1974023  iterations: 0  errors: 0  load test busy: 42%
+1465.1s  vus: 1975036  iterations: 0  errors: 0  load test busy: 40%
+1466.1s  vus: 1976046  iterations: 0  errors: 0  load test busy: 41%
+1467.1s  vus: 1977059  iterations: 0  errors: 0  load test busy: 41%
+1468.1s  vus: 1978068  iterations: 0  errors: 0  load test busy: 40%
+1469.1s  vus: 1979080  iterations: 0  errors: 0  load test busy: 43%
+1470.1s  vus: 1980091  iterations: 0  errors: 0  load test busy: 39%
+1471.2s  vus: 1981102  iterations: 0  errors: 0  load test busy: 41%
+1472.2s  vus: 1982114  iterations: 0  errors: 0  load test busy: 40%
+1473.2s  vus: 1983123  iterations: 0  errors: 0  load test busy: 41%
+1474.2s  vus: 1984136  iterations: 0  errors: 0  load test busy: 44%
+1475.2s  vus: 1985147  iterations: 0  errors: 0  load test busy: 40%
+1476.2s  vus: 1986158  iterations: 0  errors: 0  load test busy: 41%
+1477.2s  vus: 1987169  iterations: 0  errors: 0  load test busy: 40%
+1478.2s  vus: 1988179  iterations: 0  errors: 0  load test busy: 41%
+1479.2s  vus: 1989192  iterations: 0  errors: 0  load test busy: 43%
+1480.3s  vus: 1990202  iterations: 0  errors: 0  load test busy: 40%
+1481.3s  vus: 1991213  iterations: 0  errors: 0  load test busy: 40%
+1482.3s  vus: 1992225  iterations: 0  errors: 0  load test busy: 39%
+1483.3s  vus: 1993235  iterations: 0  errors: 0  load test busy: 40%
+1484.3s  vus: 1994247  iterations: 0  errors: 0  load test busy: 43%
+1485.3s  vus: 1995258  iterations: 0  errors: 0  load test busy: 39%
+1486.3s  vus: 1996270  iterations: 0  errors: 0  load test busy: 40%
+1487.3s  vus: 1997280  iterations: 0  errors: 0  load test busy: 38%
+1488.3s  vus: 1998291  iterations: 0  errors: 0  load test busy: 39%
+1489.4s  vus: 1999304  iterations: 0  errors: 0  load test busy: 41%
+1490.4s  vus: 2000000  iterations: 0  errors: 0  load test busy: 40%
+1491.4s  vus: 2000000  iterations: 0  errors: 0  load test busy: 38%
+1492.4s  vus: 2000000  iterations: 0  errors: 0  load test busy: 38%
+1493.4s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1494.4s  vus: 2000000  iterations: 0  errors: 0  load test busy: 40%
+1495.4s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1496.4s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1497.4s  vus: 2000000  iterations: 0  errors: 0  load test busy: 37%
+1498.5s  vus: 2000000  iterations: 0  errors: 0  load test busy: 38%
+1499.5s  vus: 2000000  iterations: 0  errors: 0  load test busy: 38%
+1500.5s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1501.5s  vus: 2000000  iterations: 0  errors: 0  load test busy: 40%
+1502.5s  vus: 2000000  iterations: 0  errors: 0  load test busy: 38%
+1503.5s  vus: 2000000  iterations: 0  errors: 0  load test busy: 40%
+1504.5s  vus: 2000000  iterations: 0  errors: 0  load test busy: 38%
+1505.5s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1506.5s  vus: 2000000  iterations: 0  errors: 0  load test busy: 41%
+1507.5s  vus: 2000000  iterations: 0  errors: 0  load test busy: 40%
+1508.6s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1509.6s  vus: 2000000  iterations: 0  errors: 0  load test busy: 40%
+1510.6s  vus: 2000000  iterations: 0  errors: 0  load test busy: 40%
+1511.6s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1512.6s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1513.6s  vus: 2000000  iterations: 0  errors: 0  load test busy: 41%
+1514.6s  vus: 2000000  iterations: 0  errors: 0  load test busy: 42%
+1515.6s  vus: 2000000  iterations: 0  errors: 0  load test busy: 41%
+1516.6s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1517.7s  vus: 2000000  iterations: 0  errors: 0  load test busy: 42%
+1518.7s  vus: 2000000  iterations: 0  errors: 0  load test busy: 46%
+1519.7s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1520.7s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1521.7s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1522.7s  vus: 2000000  iterations: 0  errors: 0  load test busy: 40%
+1523.7s  vus: 2000000  iterations: 0  errors: 0  load test busy: 42%
+1524.7s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1525.7s  vus: 2000000  iterations: 0  errors: 0  load test busy: 38%
+1526.7s  vus: 2000000  iterations: 0  errors: 0  load test busy: 38%
+1527.8s  vus: 2000000  iterations: 0  errors: 0  load test busy: 38%
+1528.8s  vus: 2000000  iterations: 0  errors: 0  load test busy: 38%
+1529.8s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1530.8s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1531.8s  vus: 2000000  iterations: 0  errors: 0  load test busy: 40%
+1532.8s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1533.8s  vus: 2000000  iterations: 0  errors: 0  load test busy: 40%
+1534.8s  vus: 2000000  iterations: 0  errors: 0  load test busy: 40%
+1535.8s  vus: 2000000  iterations: 0  errors: 0  load test busy: 40%
+1536.9s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1537.9s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1538.9s  vus: 2000000  iterations: 0  errors: 0  load test busy: 40%
+1539.9s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1540.9s  vus: 2000000  iterations: 0  errors: 0  load test busy: 40%
+1541.9s  vus: 2000000  iterations: 0  errors: 0  load test busy: 40%
+1542.9s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1543.9s  vus: 2000000  iterations: 0  errors: 0  load test busy: 40%
+1544.9s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1545.9s  vus: 2000000  iterations: 0  errors: 0  load test busy: 38%
+1547.0s  vus: 2000000  iterations: 0  errors: 0  load test busy: 42%
+1548.0s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1549.0s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+   step  2,000,000 VUs: held
+1550.0s  vus: 2000000  iterations: 0  errors: 0  load test busy: 39%
+1551.0s  vus: 2000933  iterations: 0  errors: 0  load test busy: 41%
+1552.0s  vus: 2001946  iterations: 0  errors: 0  load test busy: 41%
+1553.0s  vus: 2002956  iterations: 0  errors: 0  load test busy: 41%
+1554.0s  vus: 2003967  iterations: 0  errors: 0  load test busy: 43%
+1555.0s  vus: 2004979  iterations: 0  errors: 0  load test busy: 41%
+1556.1s  vus: 2005990  iterations: 0  errors: 0  load test busy: 41%
+1557.1s  vus: 2007001  iterations: 0  errors: 0  load test busy: 41%
+1558.1s  vus: 2008012  iterations: 0  errors: 0  load test busy: 40%
+1559.1s  vus: 2009022  iterations: 0  errors: 0  load test busy: 41%
+1560.1s  vus: 2010033  iterations: 0  errors: 0  load test busy: 39%
+1561.1s  vus: 2011043  iterations: 0  errors: 0  load test busy: 44%
+1562.1s  vus: 2012058  iterations: 0  errors: 0  load test busy: 42%
+1563.1s  vus: 2013067  iterations: 0  errors: 0  load test busy: 41%
+1564.1s  vus: 2014078  iterations: 0  errors: 0  load test busy: 41%
+1565.2s  vus: 2015091  iterations: 0  errors: 0  load test busy: 43%
+1566.2s  vus: 2016100  iterations: 0  errors: 0  load test busy: 46%
+1567.2s  vus: 2017112  iterations: 0  errors: 0  load test busy: 44%
+1568.2s  vus: 2018122  iterations: 0  errors: 0  load test busy: 45%
+1569.2s  vus: 2019135  iterations: 0  errors: 0  load test busy: 44%
+1570.2s  vus: 2020146  iterations: 0  errors: 0  load test busy: 45%
+1571.2s  vus: 2021155  iterations: 0  errors: 0  load test busy: 43%
+1572.2s  vus: 2022168  iterations: 0  errors: 0  load test busy: 41%
+1573.2s  vus: 2023178  iterations: 0  errors: 0  load test busy: 43%
+1574.3s  vus: 2024191  iterations: 0  errors: 0  load test busy: 43%
+1575.3s  vus: 2025202  iterations: 0  errors: 0  load test busy: 43%
+1576.3s  vus: 2026212  iterations: 0  errors: 0  load test busy: 41%
+1577.3s  vus: 2027225  iterations: 0  errors: 0  load test busy: 40%
+1578.3s  vus: 2028235  iterations: 0  errors: 0  load test busy: 40%
+1579.3s  vus: 2029246  iterations: 0  errors: 0  load test busy: 41%
+1580.3s  vus: 2030258  iterations: 0  errors: 0  load test busy: 43%
+1581.3s  vus: 2031267  iterations: 0  errors: 0  load test busy: 41%
+1582.3s  vus: 2032280  iterations: 0  errors: 0  load test busy: 41%
+1583.4s  vus: 2033291  iterations: 0  errors: 0  load test busy: 42%
+1584.4s  vus: 2034302  iterations: 0  errors: 0  load test busy: 42%
+1585.4s  vus: 2035314  iterations: 0  errors: 0  load test busy: 46%
+1586.4s  vus: 2036324  iterations: 0  errors: 0  load test busy: 43%
+1587.4s  vus: 2037338  iterations: 0  errors: 0  load test busy: 44%
+1588.4s  vus: 2038347  iterations: 0  errors: 0  load test busy: 44%
+1589.4s  vus: 2039359  iterations: 0  errors: 0  load test busy: 45%
+1590.4s  vus: 2040371  iterations: 0  errors: 0  load test busy: 44%
+1591.4s  vus: 2041381  iterations: 0  errors: 0  load test busy: 44%
+1592.5s  vus: 2042392  iterations: 0  errors: 0  load test busy: 47%
+1593.5s  vus: 2043403  iterations: 0  errors: 0  load test busy: 43%
+1594.5s  vus: 2044414  iterations: 0  errors: 0  load test busy: 43%
+1595.5s  vus: 2045426  iterations: 0  errors: 0  load test busy: 46%
+1596.5s  vus: 2046437  iterations: 0  errors: 0  load test busy: 46%
+1597.5s  vus: 2047448  iterations: 0  errors: 0  load test busy: 45%
+1598.5s  vus: 2048459  iterations: 0  errors: 0  load test busy: 44%
+1599.5s  vus: 2049471  iterations: 0  errors: 0  load test busy: 43%
+1600.5s  vus: 2050482  iterations: 0  errors: 0  load test busy: 47%
+1601.6s  vus: 2051494  iterations: 0  errors: 0  load test busy: 44%
+1602.6s  vus: 2052504  iterations: 0  errors: 0  load test busy: 44%
+1603.6s  vus: 2053515  iterations: 0  errors: 0  load test busy: 44%
+1604.6s  vus: 2054527  iterations: 0  errors: 0  load test busy: 46%
+1605.6s  vus: 2055539  iterations: 0  errors: 0  load test busy: 46%
+1606.6s  vus: 2056550  iterations: 0  errors: 0  load test busy: 46%
+1607.6s  vus: 2057561  iterations: 0  errors: 0  load test busy: 47%
+1608.6s  vus: 2058572  iterations: 0  errors: 0  load test busy: 46%
+1609.6s  vus: 2059584  iterations: 0  errors: 0  load test busy: 44%
+1610.7s  vus: 2060595  iterations: 0  errors: 0  load test busy: 44%
+1611.7s  vus: 2061606  iterations: 0  errors: 0  load test busy: 46%
+1612.7s  vus: 2062616  iterations: 0  errors: 0  load test busy: 47%
+1613.7s  vus: 2063628  iterations: 0  errors: 0  load test busy: 47%
+1614.7s  vus: 2064640  iterations: 0  errors: 0  load test busy: 46%
+1615.7s  vus: 2065651  iterations: 0  errors: 0  load test busy: 51%
+1616.7s  vus: 2066662  iterations: 0  errors: 0  load test busy: 47%
+1617.7s  vus: 2067672  iterations: 0  errors: 1  load test busy: 49%
+1618.7s  vus: 2068685  iterations: 0  errors: 585  load test busy: 47%
+1619.8s  vus: 2069696  iterations: 0  errors: 1613  load test busy: 48%
+1620.8s  vus: 2070707  iterations: 0  errors: 2718  load test busy: 49%
+1621.8s  vus: 2071717  iterations: 0  errors: 3822  load test busy: 48%
+1622.8s  vus: 2072728  iterations: 0  errors: 4895  load test busy: 50%
+1623.8s  vus: 2073741  iterations: 0  errors: 5962  load test busy: 48%
+1624.8s  vus: 2074750  iterations: 0  errors: 7025  load test busy: 50%
+1625.8s  vus: 2075764  iterations: 0  errors: 8082  load test busy: 48%
+1626.8s  vus: 2076774  iterations: 0  errors: 9137  load test busy: 48%
+1627.8s  vus: 2077783  iterations: 0  errors: 10203  load test busy: 47%
+1628.9s  vus: 2078797  iterations: 0  errors: 11255  load test busy: 48%
+1629.9s  vus: 2079806  iterations: 0  errors: 12302  load test busy: 47%
+1630.9s  vus: 2080818  iterations: 0  errors: 13343  load test busy: 48%
+1631.9s  vus: 2081831  iterations: 0  errors: 14385  load test busy: 50%
+1632.9s  vus: 2082841  iterations: 0  errors: 15423  load test busy: 50%
+1633.9s  vus: 2083854  iterations: 0  errors: 16466  load test busy: 47%
+1634.9s  vus: 2084863  iterations: 0  errors: 17513  load test busy: 48%
+1635.9s  vus: 2085874  iterations: 0  errors: 18559  load test busy: 48%
+1636.9s  vus: 2086888  iterations: 0  errors: 19610  load test busy: 46%
+1638.0s  vus: 2087898  iterations: 0  errors: 20653  load test busy: 48%
+1639.0s  vus: 2088911  iterations: 0  errors: 21687  load test busy: 49%
+1640.0s  vus: 2089921  iterations: 0  errors: 22722  load test busy: 47%
+1641.0s  vus: 2090933  iterations: 0  errors: 23754  load test busy: 43%
+1642.0s  vus: 2091945  iterations: 0  errors: 24788  load test busy: 45%
+1643.0s  vus: 2092954  iterations: 0  errors: 25817  load test busy: 48%
+1644.0s  vus: 2093966  iterations: 0  errors: 26846  load test busy: 45%
+1645.0s  vus: 2094977  iterations: 0  errors: 27886  load test busy: 45%
+1646.1s  vus: 2095989  iterations: 0  errors: 28916  load test busy: 45%
+1647.1s  vus: 2097000  iterations: 0  errors: 29960  load test busy: 45%
+1648.1s  vus: 2098012  iterations: 0  errors: 31007  load test busy: 46%
+1649.1s  vus: 2099025  iterations: 0  errors: 32818  load test busy: 46%
+1650.1s  vus: 2100035  iterations: 0  errors: 34870  load test busy: 47%
+1651.1s  vus: 2101044  iterations: 0  errors: 37003  load test busy: 48%
+1652.1s  vus: 2102058  iterations: 0  errors: 39104  load test busy: 51%
+1653.1s  vus: 2103067  iterations: 0  errors: 41189  load test busy: 45%
+1654.1s  vus: 2104081  iterations: 0  errors: 43266  load test busy: 49%
+1655.2s  vus: 2105091  iterations: 0  errors: 45329  load test busy: 47%
+1656.2s  vus: 2106101  iterations: 0  errors: 47401  load test busy: 46%
+1657.2s  vus: 2107113  iterations: 0  errors: 49476  load test busy: 49%
+1658.2s  vus: 2108123  iterations: 0  errors: 51542  load test busy: 48%
+1659.2s  vus: 2109135  iterations: 0  errors: 53604  load test busy: 48%
+1660.2s  vus: 2110146  iterations: 0  errors: 55664  load test busy: 49%
+1661.2s  vus: 2111157  iterations: 0  errors: 57720  load test busy: 48%
+1662.2s  vus: 2112169  iterations: 0  errors: 59772  load test busy: 47%
+1663.2s  vus: 2113180  iterations: 0  errors: 61822  load test busy: 47%
+1664.3s  vus: 2114191  iterations: 0  errors: 63881  load test busy: 48%
+1665.3s  vus: 2115203  iterations: 0  errors: 65935  load test busy: 47%
+1666.3s  vus: 2116214  iterations: 0  errors: 67998  load test busy: 47%
+1667.3s  vus: 2117226  iterations: 0  errors: 70062  load test busy: 49%
+1668.3s  vus: 2118238  iterations: 0  errors: 72115  load test busy: 48%
+1669.3s  vus: 2119248  iterations: 0  errors: 74163  load test busy: 49%
+1670.3s  vus: 2120260  iterations: 0  errors: 76216  load test busy: 51%
+1671.3s  vus: 2121271  iterations: 0  errors: 78257  load test busy: 49%
+1672.3s  vus: 2122281  iterations: 0  errors: 80307  load test busy: 50%
+1673.4s  vus: 2123294  iterations: 0  errors: 82347  load test busy: 49%
+1674.4s  vus: 2124304  iterations: 0  errors: 84390  load test busy: 48%
+1675.4s  vus: 2125316  iterations: 0  errors: 86438  load test busy: 49%
+1676.4s  vus: 2126327  iterations: 0  errors: 88486  load test busy: 49%
+1677.4s  vus: 2127337  iterations: 0  errors: 90539  load test busy: 49%
+1678.4s  vus: 2128350  iterations: 0  errors: 92605  load test busy: 50%
+1679.4s  vus: 2129360  iterations: 0  errors: 95623  load test busy: 49%
+1680.4s  vus: 2130369  iterations: 0  errors: 98688  load test busy: 48%
+1681.4s  vus: 2131383  iterations: 0  errors: 101835  load test busy: 51%
+1682.5s  vus: 2132393  iterations: 0  errors: 104946  load test busy: 49%
+1683.5s  vus: 2133407  iterations: 0  errors: 108044  load test busy: 50%
+1684.5s  vus: 2134416  iterations: 0  errors: 111126  load test busy: 47%
+1685.5s  vus: 2135428  iterations: 0  errors: 114206  load test busy: 45%
+1686.5s  vus: 2136439  iterations: 0  errors: 117282  load test busy: 47%
+1687.5s  vus: 2137450  iterations: 0  errors: 120369  load test busy: 49%
+1688.5s  vus: 2138463  iterations: 0  errors: 123450  load test busy: 48%
+1689.5s  vus: 2139472  iterations: 0  errors: 126517  load test busy: 48%
+1690.5s  vus: 2140483  iterations: 0  errors: 129588  load test busy: 48%
+1691.6s  vus: 2141496  iterations: 0  errors: 132655  load test busy: 47%
+1692.6s  vus: 2142505  iterations: 0  errors: 135720  load test busy: 51%
+1693.6s  vus: 2143519  iterations: 0  errors: 138788  load test busy: 48%
+1694.6s  vus: 2144528  iterations: 0  errors: 141852  load test busy: 48%
+1695.6s  vus: 2145539  iterations: 0  errors: 144917  load test busy: 50%
+1696.6s  vus: 2146552  iterations: 0  errors: 147998  load test busy: 49%
+1697.6s  vus: 2147561  iterations: 0  errors: 151064  load test busy: 48%
+1698.6s  vus: 2148574  iterations: 0  errors: 154133  load test busy: 47%
+1699.6s  vus: 2149584  iterations: 0  errors: 157191  load test busy: 48%
+1700.7s  vus: 2150596  iterations: 0  errors: 160257  load test busy: 46%
+1701.7s  vus: 2151608  iterations: 0  errors: 163309  load test busy: 47%
+1702.7s  vus: 2152616  iterations: 0  errors: 166365  load test busy: 49%
+1703.7s  vus: 2153631  iterations: 0  errors: 169416  load test busy: 47%
+1704.7s  vus: 2154640  iterations: 0  errors: 172473  load test busy: 49%
+1705.7s  vus: 2155651  iterations: 0  errors: 175532  load test busy: 47%
+1706.7s  vus: 2156664  iterations: 0  errors: 178592  load test busy: 47%
+1707.7s  vus: 2157674  iterations: 0  errors: 181652  load test busy: 48%
+1708.7s  vus: 2158685  iterations: 0  errors: 184815  load test busy: 47%
+1709.8s  vus: 2159696  iterations: 0  errors: 188869  load test busy: 47%
+1710.8s  vus: 2160706  iterations: 0  errors: 192967  load test busy: 48%
+1711.8s  vus: 2161718  iterations: 0  errors: 197118  load test busy: 49%
+1712.8s  vus: 2162729  iterations: 0  errors: 201231  load test busy: 50%
+1713.8s  vus: 2163742  iterations: 0  errors: 205344  load test busy: 49%
+1714.8s  vus: 2164752  iterations: 0  errors: 209438  load test busy: 49%
+1715.8s  vus: 2165764  iterations: 0  errors: 213534  load test busy: 50%
+1716.8s  vus: 2166776  iterations: 0  errors: 217619  load test busy: 51%
+1717.8s  vus: 2167786  iterations: 0  errors: 221716  load test busy: 50%
+1718.9s  vus: 2168798  iterations: 0  errors: 225806  load test busy: 50%
+1719.9s  vus: 2169808  iterations: 0  errors: 229879  load test busy: 50%
+1720.9s  vus: 2170820  iterations: 0  errors: 233964  load test busy: 50%
+1721.9s  vus: 2171830  iterations: 0  errors: 238042  load test busy: 50%
+1722.9s  vus: 2172842  iterations: 0  errors: 242116  load test busy: 49%
+1723.9s  vus: 2173854  iterations: 0  errors: 246198  load test busy: 50%
+1724.9s  vus: 2174864  iterations: 0  errors: 250273  load test busy: 49%
+1725.9s  vus: 2175876  iterations: 0  errors: 254350  load test busy: 50%
+1727.0s  vus: 2176888  iterations: 0  errors: 258444  load test busy: 51%
+1728.0s  vus: 2177898  iterations: 0  errors: 262519  load test busy: 50%
+1729.0s  vus: 2178909  iterations: 0  errors: 266599  load test busy: 52%
+1730.0s  vus: 2179920  iterations: 0  errors: 270667  load test busy: 52%
+1731.0s  vus: 2180932  iterations: 0  errors: 274742  load test busy: 52%
+1732.0s  vus: 2181942  iterations: 0  errors: 278809  load test busy: 50%
+1733.0s  vus: 2182953  iterations: 0  errors: 282874  load test busy: 51%
+1734.0s  vus: 2183966  iterations: 0  errors: 286989  load test busy: 51%
+1735.0s  vus: 2184976  iterations: 0  errors: 291103  load test busy: 51%
+1736.1s  vus: 2185988  iterations: 0  errors: 295234  load test busy: 50%
+1737.1s  vus: 2186999  iterations: 0  errors: 299635  load test busy: 50%
+1738.1s  vus: 2188011  iterations: 0  errors: 303951  load test busy: 50%
+1739.1s  vus: 2189021  iterations: 0  errors: 308667  load test busy: 50%
+1740.1s  vus: 2190032  iterations: 0  errors: 314157  load test busy: 50%
+1741.1s  vus: 2191045  iterations: 0  errors: 319562  load test busy: 54%
+1742.1s  vus: 2192054  iterations: 0  errors: 325259  load test busy: 51%
+1743.1s  vus: 2193067  iterations: 0  errors: 330486  load test busy: 50%
+1744.1s  vus: 2194078  iterations: 0  errors: 335779  load test busy: 51%
+1745.2s  vus: 2195088  iterations: 0  errors: 341084  load test busy: 50%
+1746.2s  vus: 2196101  iterations: 0  errors: 346478  load test busy: 51%
+1747.2s  vus: 2197110  iterations: 0  errors: 351978  load test busy: 50%
+1748.2s  vus: 2198124  iterations: 0  errors: 357756  load test busy: 49%
+1749.2s  vus: 2199134  iterations: 0  errors: 362931  load test busy: 50%
+1750.2s  vus: 2200144  iterations: 0  errors: 368167  load test busy: 50%
+1751.2s  vus: 2201156  iterations: 0  errors: 373520  load test busy: 50%
+1752.2s  vus: 2202166  iterations: 0  errors: 378733  load test busy: 52%
+1753.2s  vus: 2203180  iterations: 0  errors: 383845  load test busy: 52%
+1754.3s  vus: 2204190  iterations: 0  errors: 389089  load test busy: 50%
+1755.3s  vus: 2205201  iterations: 0  errors: 394112  load test busy: 51%
+1756.3s  vus: 2206212  iterations: 0  errors: 399415  load test busy: 50%
+1757.3s  vus: 2207223  iterations: 0  errors: 404810  load test busy: 50%
+1758.3s  vus: 2208236  iterations: 0  errors: 409789  load test busy: 50%
+1759.3s  vus: 2209246  iterations: 0  errors: 415397  load test busy: 50%
+1760.3s  vus: 2210256  iterations: 0  errors: 420746  load test busy: 51%
+1761.3s  vus: 2211268  iterations: 0  errors: 425786  load test busy: 51%
+1762.3s  vus: 2212280  iterations: 0  errors: 430865  load test busy: 50%
+1763.4s  vus: 2213292  iterations: 0  errors: 435696  load test busy: 51%
+1764.4s  vus: 2214301  iterations: 0  errors: 440977  load test busy: 51%
+1765.4s  vus: 2215314  iterations: 0  errors: 446627  load test busy: 52%
+1766.4s  vus: 2216324  iterations: 0  errors: 451623  load test busy: 49%
+1767.4s  vus: 2217335  iterations: 0  errors: 456663  load test busy: 49%
+1768.4s  vus: 2218347  iterations: 0  errors: 461533  load test busy: 51%
+1769.4s  vus: 2219357  iterations: 0  errors: 467047  load test busy: 51%
+1770.4s  vus: 2220369  iterations: 0  errors: 473774  load test busy: 53%
+1771.4s  vus: 2221380  iterations: 0  errors: 480123  load test busy: 55%
+1772.5s  vus: 2222391  iterations: 0  errors: 486867  load test busy: 54%
+1773.5s  vus: 2223403  iterations: 0  errors: 492872  load test busy: 53%
+1774.5s  vus: 2224413  iterations: 0  errors: 499385  load test busy: 51%
+1775.5s  vus: 2225426  iterations: 0  errors: 505598  load test busy: 51%
+1776.5s  vus: 2226436  iterations: 0  errors: 512296  load test busy: 53%
+1777.5s  vus: 2227448  iterations: 0  errors: 519596  load test busy: 53%
+1778.5s  vus: 2228459  iterations: 0  errors: 526035  load test busy: 52%
+1779.5s  vus: 2229470  iterations: 0  errors: 531908  load test busy: 51%
+1780.5s  vus: 2230481  iterations: 0  errors: 538500  load test busy: 52%
+1781.6s  vus: 2231492  iterations: 0  errors: 544735  load test busy: 52%
+1782.6s  vus: 2232503  iterations: 0  errors: 550768  load test busy: 52%
+1783.6s  vus: 2233515  iterations: 0  errors: 556820  load test busy: 52%
+1784.6s  vus: 2234526  iterations: 0  errors: 563135  load test busy: 52%
+1785.6s  vus: 2235538  iterations: 0  errors: 569005  load test busy: 51%
+1786.6s  vus: 2236549  iterations: 0  errors: 575058  load test busy: 51%
+1787.6s  vus: 2237560  iterations: 0  errors: 581171  load test busy: 53%
+1788.6s  vus: 2238571  iterations: 0  errors: 587380  load test busy: 51%
+1789.6s  vus: 2239581  iterations: 0  errors: 593489  load test busy: 52%
+1790.7s  vus: 2240593  iterations: 0  errors: 599691  load test busy: 51%
+1791.7s  vus: 2241605  iterations: 0  errors: 605711  load test busy: 52%
+1792.7s  vus: 2242616  iterations: 0  errors: 612098  load test busy: 51%
+1793.7s  vus: 2243629  iterations: 0  errors: 617507  load test busy: 49%
+1794.7s  vus: 2244639  iterations: 0  errors: 623564  load test busy: 52%
+1795.7s  vus: 2245649  iterations: 0  errors: 630368  load test busy: 52%
+1796.7s  vus: 2246661  iterations: 0  errors: 636451  load test busy: 52%
+1797.7s  vus: 2247673  iterations: 0  errors: 642887  load test busy: 53%
+1798.7s  vus: 2248686  iterations: 0  errors: 649035  load test busy: 52%
+1799.8s  vus: 2249695  iterations: 0  errors: 655496  load test busy: 52%
+1800.8s  vus: 2250000  iterations: 0  errors: 662133  load test busy: 52%
+1801.8s  vus: 2250000  iterations: 0  errors: 669541  load test busy: 51%
+1802.8s  vus: 2250000  iterations: 0  errors: 676879  load test busy: 52%
+1803.8s  vus: 2250000  iterations: 0  errors: 683983  load test busy: 52%
+1804.8s  vus: 2250000  iterations: 0  errors: 691414  load test busy: 52%
+1805.8s  vus: 2250000  iterations: 0  errors: 699243  load test busy: 52%
+1806.8s  vus: 2250000  iterations: 0  errors: 706850  load test busy: 55%
+1807.8s  vus: 2250000  iterations: 0  errors: 715388  load test busy: 54%
+1808.9s  vus: 2250000  iterations: 0  errors: 722937  load test busy: 54%
+1809.9s  vus: 2250000  iterations: 0  errors: 729996  load test busy: 52%
+1810.9s  vus: 2250000  iterations: 0  errors: 737683  load test busy: 52%
+1811.9s  vus: 2250000  iterations: 0  errors: 744751  load test busy: 51%
+1812.9s  vus: 2250000  iterations: 0  errors: 751581  load test busy: 51%
+1813.9s  vus: 2250000  iterations: 0  errors: 758263  load test busy: 51%
+1814.9s  vus: 2250000  iterations: 0  errors: 765187  load test busy: 49%
+1815.9s  vus: 2250000  iterations: 0  errors: 771820  load test busy: 49%
+1816.9s  vus: 2250000  iterations: 0  errors: 778711  load test busy: 51%
+1818.0s  vus: 2250000  iterations: 0  errors: 785718  load test busy: 78%
+1819.0s  vus: 2250000  iterations: 0  errors: 792651  load test busy: 54%
+1820.0s  vus: 2250000  iterations: 0  errors: 799348  load test busy: 51%
+1821.0s  vus: 2250000  iterations: 0  errors: 806212  load test busy: 51%
+1822.0s  vus: 2250000  iterations: 0  errors: 812868  load test busy: 52%
+1823.0s  vus: 2250000  iterations: 0  errors: 819616  load test busy: 52%
+1824.0s  vus: 2250000  iterations: 0  errors: 825923  load test busy: 51%
+1825.0s  vus: 2250000  iterations: 0  errors: 832849  load test busy: 51%
+1826.0s  vus: 2250000  iterations: 0  errors: 839969  load test busy: 52%
+1827.1s  vus: 2250000  iterations: 0  errors: 847174  load test busy: 51%
+1828.1s  vus: 2250000  iterations: 0  errors: 854443  load test busy: 52%
+1829.1s  vus: 2250000  iterations: 0  errors: 861458  load test busy: 51%
+1830.1s  vus: 2250000  iterations: 0  errors: 868614  load test busy: 52%
+1831.1s  vus: 2250000  iterations: 0  errors: 874796  load test busy: 52%
+1832.1s  vus: 2250000  iterations: 0  errors: 881099  load test busy: 52%
+1833.1s  vus: 2250000  iterations: 0  errors: 888029  load test busy: 50%
+1834.1s  vus: 2250000  iterations: 0  errors: 895120  load test busy: 51%
+1835.1s  vus: 2250000  iterations: 0  errors: 902601  load test busy: 50%
+1836.2s  vus: 2250000  iterations: 0  errors: 910444  load test busy: 53%
+1837.2s  vus: 2250000  iterations: 0  errors: 918329  load test busy: 52%
+1838.2s  vus: 2250000  iterations: 0  errors: 927209  load test busy: 53%
+1839.2s  vus: 2250000  iterations: 0  errors: 935441  load test busy: 54%
+1840.2s  vus: 2250000  iterations: 0  errors: 943663  load test busy: 53%
+1841.2s  vus: 2250000  iterations: 0  errors: 952392  load test busy: 55%
+1842.2s  vus: 2250000  iterations: 0  errors: 960744  load test busy: 53%
+1843.2s  vus: 2250000  iterations: 0  errors: 969052  load test busy: 53%
+1844.2s  vus: 2250000  iterations: 0  errors: 977503  load test busy: 53%
+1845.3s  vus: 2250000  iterations: 0  errors: 986344  load test busy: 52%
+1846.3s  vus: 2250000  iterations: 0  errors: 995694  load test busy: 52%
+1847.3s  vus: 2250000  iterations: 0  errors: 1005870  load test busy: 52%
+1848.3s  vus: 2250000  iterations: 0  errors: 1018359  load test busy: 54%
+1849.3s  vus: 2250000  iterations: 0  errors: 1031884  load test busy: 55%
+1850.3s  vus: 2250000  iterations: 0  errors: 1047108  load test busy: 58%
+1851.3s  vus: 2250000  iterations: 0  errors: 1063178  load test busy: 57%
+1852.3s  vus: 2250000  iterations: 0  errors: 1080450  load test busy: 59%
+1853.3s  vus: 2250000  iterations: 0  errors: 1101830  load test busy: 61%
+1854.4s  vus: 2250000  iterations: 0  errors: 1131086  load test busy: 66%
+1855.4s  vus: 2250000  iterations: 0  errors: 1175820  load test busy: 76%
+1856.4s  vus: 2250000  iterations: 0  errors: 1225879  load test busy: 80%
+1857.4s  vus: 2250000  iterations: 0  errors: 1276404  load test busy: 79%
+1858.4s  vus: 2250000  iterations: 0  errors: 1326362  load test busy: 79%
+1859.4s  vus: 2250000  iterations: 0  errors: 1376016  load test busy: 79%
+   step  2,250,000 VUs: over the limit
+1860.4s  vus: 2250356  iterations: 0  errors: 1425831  load test busy: 78%
+1860.4s  vus: 2250394  iterations: 0  errors: 1429133  load test busy: 91%
+
+BREAK: (a)bort (A)bort with dump (c)ontinue (p)roc info (i)nfo
+       (l)oaded (v)ersion (k)ill (D)b-tables (d)istribution
