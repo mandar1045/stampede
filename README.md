@@ -796,7 +796,6 @@ expect rough edges, and please tell me when you hit one.
 What I'm working on next:
 
   * LiveView at the same scale as Channels
-  * A Livebook smart cell
   * A command line tool that doesn't need Elixir installed
   * More protocols: Socket.IO and GraphQL over WebSocket
 
