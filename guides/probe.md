@@ -83,6 +83,70 @@ They work like any other metric, so you can set thresholds on them:
 thresholds: [{"server.ecto.queue", p95: 50}]
 ```
 
+## Your database
+
+When your app has an Ecto repo, the probe also sends how long queries waited
+for a connection from the pool, every second. When that repo uses Postgres, it
+reads Postgres's own statistics every second too: commits and rows written per
+second, rows read, the cache hit rate, connections, and what active queries
+are waiting on.
+
+You don't give it a database URL. The agent uses your repo's own settings to
+open one connection of its own, outside your app's pool, so it doesn't take a
+connection your app needs. It's closed when the run ends.
+
+The summary gets two more lines, and the dashboard and the HTML report chart
+the pool wait, commits and writes per second, and active queries:
+
+```
+    database at its busiest: 2,454 commits/s, 1,156 rows written/s, 34,000 rows read/s, 11 connections
+    database pool of 10: queries waited up to 300.00ms for a connection
+```
+
+When a `--find-limit` step fails, its verdict says what the database was
+doing, from what it measured:
+
+```
+  limit
+    Held 250 VUs. At 350 VUs, iteration.errors count was 64, over 0. Queries waited up to
+    171.94ms for one of the database pool's 2 connections. Postgres was mostly busy running
+    queries. The app's schedulers were only 16% busy, so the database was the limit, not the app.
+```
+
+It names the wait Postgres spent most of its time on, such as `WALWrite`,
+writing its log to disk before each commit, or `DataFileRead`, reading table
+data from disk, or locks held by other queries. It only says so when queries
+were really waiting on it, and pool waits under 50ms aren't mentioned.
+
+The probe connects as your app's database user, so it sees what your app's
+queries are waiting on. Sessions of other database users only show their waits
+to a superuser or a member of `pg_read_all_stats`. Databases other than
+Postgres only get the pool wait for now.
+
+## In LiveDashboard
+
+If your app has Phoenix LiveDashboard, it can show the run too. Add Stampede
+to the app's dependencies, in the environments where you load test it, and
+its page to the dashboard's route:
+
+```elixir
+{:stampede, "~> 1.4", only: [:dev, :test]}
+```
+
+```elixir
+live_dashboard "/dashboard",
+  additional_pages: [stampede: Stampede.LiveDashboard]
+```
+
+A run that probes the app shows in the dashboard's Stampede tab while it runs,
+with the same charts and server numbers as Stampede's own dashboard. When the
+run is over, it stays there with its full results, even after the load test's
+node goes away. The tab keeps the last 20 runs.
+
+That puts the load next to everything else the dashboard shows. Watch the
+Processes page sorted by message queue while the users climb, and you can see
+which process falls behind first.
+
 ## Finding the bottleneck
 
 | What you see | What it usually means |
@@ -91,11 +155,13 @@ thresholds: [{"server.ecto.queue", p95: 50}]
 | Memory climbing with users, then a crash | The node is out of memory. Work out the memory per connection, and size for it |
 | One process with a long message queue | That process can't keep up, and everything waiting on it slows down |
 | `server.ecto.queue` growing while `server.ecto.query` stays flat | The pool is too small, or queries hold connections too long |
+| Pool waits climbing while Postgres waits on `WALWrite` | Every commit waits on the disk. A bigger pool lets more commits share a flush, and a faster disk helps too |
+| Postgres mostly running queries, with few waits | The database is out of CPU, or a query needs an index |
 | The app's own timings are fast, but the load test's are slow | The time is going somewhere else, such as the network, a proxy, or the load test itself |
 
 When a `--find-limit` step fails, its verdict says if the server's schedulers
-ran out or if the server went down, and warns you if the load test was the one
-too busy to trust.
+ran out, if the server went down, or if the database pool or Postgres was the
+limit, and warns you if the load test was the one too busy to trust.
 
 Past 20,000 processes, the agent only checks the named processes for long
 queues, plus a random sample of a thousand others. Asking a process for its

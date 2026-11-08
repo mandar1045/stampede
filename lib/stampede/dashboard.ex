@@ -20,6 +20,9 @@ defmodule Stampede.Dashboard do
   It follows runs through the telemetry events listed in `Stampede`, so runs
   spread over several nodes and runs of `Stampede.run_parallel/2` show up
   too, as long as the dashboard is on the node that started them.
+
+  To see runs inside Phoenix LiveDashboard instead, see
+  `Stampede.LiveDashboard`.
   """
 
   use GenServer
@@ -30,6 +33,10 @@ defmodule Stampede.Dashboard do
 
   # How long stop/1 waits for an open page to show the last results.
   @stop_wait 2_000
+
+  # How many runs the dashboard that LiveDashboard shows keeps, since it
+  # lives as long as the app does.
+  @shared_keep 20
 
   @doc """
   Starts a dashboard and the web server that serves it.
@@ -48,6 +55,53 @@ defmodule Stampede.Dashboard do
   def start(opts \\ []) do
     opts = Keyword.validate!(opts, port: 4040, ip: {127, 0, 0, 1})
     GenServer.start(__MODULE__, opts)
+  end
+
+  # The dashboard that `Stampede.LiveDashboard` shows: one per node,
+  # registered under this module's name, with no web server of its own. It's
+  # started the first time it's needed and stays up, keeping the last runs.
+  @doc false
+  @spec shared() :: pid()
+  def shared do
+    with nil <- Process.whereis(__MODULE__) do
+      case GenServer.start(__MODULE__, [port: false, keep: @shared_keep], name: __MODULE__) do
+        {:ok, pid} -> pid
+        {:error, {:already_started, pid}} -> pid
+      end
+    end
+  end
+
+  # The runs the shared dashboard of `node` knows of, and their version, or
+  # `:unchanged` when it's still `version`.
+  @doc false
+  @spec runs(node(), non_neg_integer() | nil) :: {[map()], non_neg_integer()} | :unchanged
+  def runs(node, version \\ nil)
+  def runs(node, version) when node == node(), do: GenServer.call(shared(), {:runs, version})
+  def runs(node, version), do: :erpc.call(node, __MODULE__, :runs, [node, version], 5_000)
+
+  # A run that probes an app's nodes also shows on the shared dashboards
+  # there, for nodes that show runs in LiveDashboard. Returns the dashboards
+  # to send the run's events to.
+  @doc false
+  @spec watchers([node()]) :: [pid()]
+  def watchers(nodes) do
+    for node <- Enum.uniq(nodes), node != node(), pid = watcher(node), do: pid
+  end
+
+  defp watcher(node) do
+    if :erpc.call(node, Code, :ensure_loaded?, [Stampede.LiveDashboard], 2_000) do
+      :erpc.call(node, __MODULE__, :shared, [], 2_000)
+    end
+  catch
+    # The node went away, or has a Stampede without the shared dashboard.
+    _kind, _reason -> nil
+  end
+
+  @doc false
+  def forward([], _event, _measurements, _metadata), do: :ok
+
+  def forward(watchers, event, measurements, metadata) do
+    Enum.each(watchers, &send(&1, {:event, self(), event, measurements, metadata}))
   end
 
   @doc """
@@ -72,19 +126,15 @@ defmodule Stampede.Dashboard do
 
   @impl true
   def init(opts) do
-    listen_opts = [:binary, ip: opts[:ip], packet: :http_bin, active: false, reuseaddr: true]
-
-    case :gen_tcp.listen(opts[:port], listen_opts) do
-      {:ok, listen} ->
-        {:ok, port} = :inet.port(listen)
-        dashboard = self()
-        spawn_link(fn -> accept(listen, dashboard) end)
+    case listen(opts) do
+      {:ok, listen, url} ->
         :telemetry.attach_many({__MODULE__, self()}, @events, &__MODULE__.handle_event/4, self())
 
         {:ok,
          %{
            listen: listen,
-           url: "http://#{:inet.ntoa(opts[:ip])}:#{port}",
+           url: url,
+           keep: Keyword.get(opts, :keep),
            runs: %{},
            next_id: 1,
            monitors: %{},
@@ -95,6 +145,21 @@ defmodule Stampede.Dashboard do
 
       {:error, reason} ->
         {:stop, reason}
+    end
+  end
+
+  defp listen(opts) do
+    if opts[:port] == false do
+      {:ok, nil, nil}
+    else
+      listen_opts = [:binary, ip: opts[:ip], packet: :http_bin, active: false, reuseaddr: true]
+
+      with {:ok, listen} <- :gen_tcp.listen(opts[:port], listen_opts) do
+        {:ok, port} = :inet.port(listen)
+        dashboard = self()
+        spawn_link(fn -> accept(listen, dashboard) end)
+        {:ok, listen, "http://#{:inet.ntoa(opts[:ip])}:#{port}"}
+      end
     end
   end
 
@@ -114,6 +179,12 @@ defmodule Stampede.Dashboard do
   def handle_call(:runs, _from, state) do
     runs = state.runs |> Map.values() |> Enum.sort_by(& &1.id, :desc)
     {:reply, {runs, state.version}, state}
+  end
+
+  def handle_call({:runs, version}, from, state) do
+    if version == state.version,
+      do: {:reply, :unchanged, state},
+      else: handle_call(:runs, from, state)
   end
 
   # `shown` is the latest version a page asked for, if a page was opened.
@@ -141,34 +212,18 @@ defmodule Stampede.Dashboard do
   @impl true
   def handle_info({:event, pid, [:stampede, :run, :start], _measurements, metadata}, state) do
     %{scenario: scenario, options: opts} = metadata
-
-    run = %{
-      id: state.next_id,
-      pid: pid,
-      scenario: scenario,
-      status: :running,
-      planned: planned(opts),
-      timeline: [],
-      summaries: %{},
-      totals: %{},
-      result: nil
-    }
-
-    monitors =
-      if Map.has_key?(state.monitors, pid),
-        do: state.monitors,
-        else: Map.put(state.monitors, pid, Process.monitor(pid))
-
-    changed(%{
-      state
-      | runs: Map.put(state.runs, run.id, run),
-        next_id: state.next_id + 1,
-        monitors: monitors
-    })
+    planned = Map.get_lazy(metadata, :planned, fn -> planned(opts) end)
+    changed(add_run(state, pid, scenario, planned))
   end
 
   def handle_info({:event, pid, [:stampede, :run, :interval], _measurements, metadata}, state) do
-    %{interval: point} = metadata
+    %{scenario: scenario, interval: point} = metadata
+
+    # A dashboard started in the middle of a run picks it up from here.
+    state =
+      if running(state, pid) == [],
+        do: add_run(state, pid, scenario, 0),
+        else: state
 
     update_running(state, pid, fn run ->
       totals =
@@ -187,7 +242,14 @@ defmodule Stampede.Dashboard do
 
   def handle_info({:event, pid, [:stampede, :run, :stop], _measurements, metadata}, state) do
     %{result: %Result{} = result} = metadata
-    update_running(state, pid, &%{&1 | status: :done, result: result})
+
+    # Or sees only its result, when it started without the run going.
+    state =
+      if running(state, pid) == [],
+        do: add_run(state, pid, result.scenario, 0),
+        else: state
+
+    changed(finish(state, pid, result))
   end
 
   # A process that stops in the middle of a run took its run with it.
@@ -204,7 +266,7 @@ defmodule Stampede.Dashboard do
   @impl true
   def terminate(_reason, state) do
     :telemetry.detach({__MODULE__, self()})
-    :gen_tcp.close(state.listen)
+    if state.listen, do: :gen_tcp.close(state.listen)
   end
 
   defp planned(opts) do
@@ -213,12 +275,58 @@ defmodule Stampede.Dashboard do
     _error -> 0
   end
 
+  defp add_run(state, pid, scenario, planned) do
+    run = %{
+      id: state.next_id,
+      pid: pid,
+      scenario: scenario,
+      status: :running,
+      planned: planned,
+      timeline: [],
+      summaries: %{},
+      totals: %{},
+      result: nil
+    }
+
+    monitors =
+      if Map.has_key?(state.monitors, pid),
+        do: state.monitors,
+        else: Map.put(state.monitors, pid, Process.monitor(pid))
+
+    %{
+      state
+      | runs: Map.put(state.runs, run.id, run),
+        next_id: state.next_id + 1,
+        monitors: monitors
+    }
+    |> trim()
+  end
+
+  defp finish(state, pid, result) do
+    id = state |> running(pid) |> Enum.max()
+    %{state | runs: Map.update!(state.runs, id, &%{&1 | status: :done, result: result})}
+  end
+
+  # A dashboard that keeps a number of runs forgets the oldest finished ones.
+  defp trim(%{keep: keep, runs: runs} = state) when is_integer(keep) and map_size(runs) > keep do
+    over = map_size(runs) - keep
+
+    forget =
+      for({id, %{status: status}} <- runs, status != :running, do: id)
+      |> Enum.sort()
+      |> Enum.take(over)
+
+    %{state | runs: Map.drop(runs, forget)}
+  end
+
+  defp trim(state), do: state
+
   # A process runs one scenario at a time, so its events belong to the run
   # it started last that is still going.
-  defp update_running(state, pid, fun) do
-    running = for {id, %{pid: ^pid, status: :running}} <- state.runs, do: id
+  defp running(state, pid), do: for({id, %{pid: ^pid, status: :running}} <- state.runs, do: id)
 
-    case running do
+  defp update_running(state, pid, fun) do
+    case running(state, pid) do
       [] -> {:noreply, state}
       ids -> changed(%{state | runs: Map.update!(state.runs, Enum.max(ids), fun)})
     end

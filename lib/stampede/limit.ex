@@ -21,6 +21,10 @@ defmodule Stampede.Limit do
     busy: 0.0,
     server_busy: 0.0,
     server_lost?: false,
+    pool_wait: 0.0,
+    pool_size: nil,
+    database_waits: %{},
+    database_seconds: 0,
     steps: []
   ]
 
@@ -90,18 +94,29 @@ defmodule Stampede.Limit do
   end
 
   # Takes the counts of the second that ended `to` milliseconds into the run,
-  # which belong to the step it ends in, and how busy the load test and the
-  # server were, and whether the server went down. Returns {:stop, limit} once
-  # a step failed or the last one passed.
-  def add_second(%__MODULE__{} = limit, to, rows, busy, server_busy, server_lost?) do
+  # which belong to the step it ends in, how busy the load test and the server
+  # were, whether the server went down, and what the probes saw of its
+  # database pool and database. Returns {:stop, limit} once a step failed or
+  # the last one passed.
+  def add_second(%__MODULE__{} = limit, to, rows, busy, server_busy, server_lost?, server \\ %{}) do
     {_step_from, step_to} = window(limit, limit.index)
+    pool = server[:pool]
+    database = server[:database]
 
     limit = %{
       limit
       | rows: Map.merge(limit.rows, rows, fn _key, a, b -> a + b end),
         busy: max(limit.busy, busy),
         server_busy: max(limit.server_busy, server_busy),
-        server_lost?: limit.server_lost? or server_lost?
+        server_lost?: limit.server_lost? or server_lost?,
+        pool_wait: if(pool, do: max(limit.pool_wait, pool.wait_ms), else: limit.pool_wait),
+        pool_size: if(pool, do: pool.size, else: limit.pool_size),
+        database_waits:
+          if(database,
+            do: Map.merge(limit.database_waits, database.waits, fn _wait, a, b -> a + b end),
+            else: limit.database_waits
+          ),
+        database_seconds: limit.database_seconds + if(database, do: 1, else: 0)
     }
 
     if to >= step_to - @slack, do: check(limit), else: {:continue, limit}
@@ -121,7 +136,11 @@ defmodule Stampede.Limit do
       passed?: Enum.all?(thresholds, & &1.passed?),
       busy: limit.busy,
       server_busy: limit.server_busy,
-      server_lost?: limit.server_lost?
+      server_lost?: limit.server_lost?,
+      pool_wait: limit.pool_wait,
+      pool_size: limit.pool_size,
+      database_waits: limit.database_waits,
+      database_seconds: limit.database_seconds
     }
 
     limit = %{
@@ -130,7 +149,10 @@ defmodule Stampede.Limit do
         index: limit.index + 1,
         rows: %{},
         busy: 0.0,
-        server_busy: 0.0
+        server_busy: 0.0,
+        pool_wait: 0.0,
+        database_waits: %{},
+        database_seconds: 0
     }
 
     if step.passed? and limit.index < length(limit.targets),

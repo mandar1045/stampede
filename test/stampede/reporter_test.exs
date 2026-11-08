@@ -210,6 +210,66 @@ defmodule Stampede.ReporterTest do
     assert Reporter.format(result) =~ "The server's schedulers were 97% busy at that step"
   end
 
+  test "says when the database was the limit, and what Postgres was waiting on" do
+    thresholds = [%{metric: "chat.send", stat: :p95, value: 640.0, limit: 500, passed?: false}]
+
+    step = %{
+      target: 60_000,
+      busy: 0.1,
+      server_busy: 0.3,
+      server_lost?: false,
+      passed?: false,
+      thresholds: thresholds,
+      pool_wait: 300.0,
+      pool_size: 10,
+      database_waits: %{"LWLock:WALWrite" => 40, "IO:WalSync" => 8, "running" => 12},
+      database_seconds: 30
+    }
+
+    limit = %{by: :vus, value: 40_000, failed: step, up_to?: false, min: nil, steps: [step]}
+    summary = Reporter.format(%Result{scenario: Chat, duration: 1_000, limit: limit})
+
+    assert summary =~
+             "Held 40,000 VUs. At 60,000 VUs, chat.send p95 was 640.00ms, over 500.00ms. " <>
+               "Queries waited up to 300.00ms for one of the database pool's 10 connections. " <>
+               "Postgres was mostly waiting on WALWrite, writing its log to disk before each " <>
+               "commit. The app's schedulers were only 30% busy, so the database was the limit, " <>
+               "not the app"
+
+    # A pool that kept up, and a Postgres that was mostly idle, aren't worth a mention.
+    calm = %{step | pool_wait: 4.0, database_waits: %{"running" => 3}}
+
+    summary =
+      Reporter.format(%Result{scenario: Chat, duration: 1_000, limit: %{limit | failed: calm}})
+
+    refute summary =~ "pool"
+    refute summary =~ "Postgres"
+  end
+
+  test "shows the database at its busiest" do
+    server = %{
+      nodes: ["app@a"],
+      busy: 0.5,
+      memory: 1_000_000_000,
+      processes: 10,
+      run_queue: 0,
+      queues: [],
+      database: %{commits: 2454.3, writes: 1156.0, reads: 34_000.0, connections: 11, active: 9},
+      pool: %{size: 10, wait_ms: 300.0}
+    }
+
+    result = %Result{scenario: Chat, duration: 1_000, server: server}
+
+    assert Reporter.format(result) =~
+             "    database at its busiest: 2,454 commits/s, 1,156 rows written/s, 34,000 rows " <>
+               "read/s, 11 connections\n    database pool of 10: queries waited up to 300.00ms " <>
+               "for a connection\n"
+
+    html = Reporter.to_html(result)
+    assert html =~ "<span>Database commits</span><strong>2,454/s</strong>"
+    assert html =~ "<span>Database pool wait</span><strong>300.00ms</strong>"
+  end
+
   test "says when the server went down, whatever else that step looks like" do
     thresholds = [%{metric: "x", stat: :count, value: 9, limit: 0, passed?: false}]
 

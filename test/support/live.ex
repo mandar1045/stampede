@@ -4,6 +4,7 @@ defmodule Stampede.TestRouter do
   import Plug.Conn
   import Phoenix.Controller
   import Phoenix.LiveView.Router
+  import Phoenix.LiveDashboard.Router
 
   pipeline :browser do
     plug :fetch_session
@@ -28,6 +29,8 @@ defmodule Stampede.TestRouter do
     live_session :elsewhere do
       live "/elsewhere", Stampede.TestOtherLive
     end
+
+    live_dashboard("/dashboard", additional_pages: [stampede: Stampede.LiveDashboard])
   end
 
   scope "/api" do

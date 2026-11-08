@@ -35,9 +35,11 @@ defmodule Stampede.MixProject do
       {:mint_web_socket, "~> 1.0"},
       {:telemetry, "~> 1.0"},
       {:igniter, "~> 0.8", optional: true},
-      {:phoenix, "~> 1.7", only: :test},
-      {:phoenix_live_view, "~> 1.0", only: :test},
+      {:phoenix_live_dashboard, "~> 0.8", optional: true},
+      {:phoenix, "~> 1.7", optional: true},
+      {:phoenix_live_view, "~> 1.0", optional: true},
       {:bandit, "~> 1.0", only: :test},
+      {:postgrex, ">= 0.0.0", only: :test},
       {:ex_doc, "~> 0.34", only: :dev, runtime: false}
     ]
   end
@@ -84,7 +86,12 @@ defmodule Stampede.MixProject do
           Stampede.Channels.Serializer.V1,
           Stampede.Channels.Message
         ],
-        Results: [Stampede.Result, Stampede.Reporter, Stampede.Dashboard],
+        Results: [
+          Stampede.Result,
+          Stampede.Reporter,
+          Stampede.Dashboard,
+          Stampede.LiveDashboard
+        ],
         Recording: [Stampede.Recorder]
       ]
     ]

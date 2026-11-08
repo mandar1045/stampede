@@ -72,6 +72,98 @@ defmodule Stampede.ProbeTest do
     assert result.metrics["server.ecto.queue"].p50 >= 4
   end
 
+  test "shows how long queries waited for a connection from the pool, every second" do
+    Application.put_env(:stampede, :ecto_repos, [Repo])
+    on_exit(fn -> Application.delete_env(:stampede, :ecto_repos) end)
+
+    result = Stampede.run(Querying, vus: 1, duration: 2_500, probe: node())
+
+    assert [%{size: 10, wait_ms: wait} | _] =
+             for(%{server: %{pool: pool}} <- result.timeline, pool.queries > 0, do: pool)
+
+    assert wait >= 4
+    assert %{size: 10, wait_ms: peak} = result.server.pool
+    assert peak >= 4
+  end
+
+  defmodule PostgresRepo do
+    def __adapter__, do: Ecto.Adapters.Postgres
+
+    def config do
+      Stampede.TestPostgres.opts() ++ [telemetry_prefix: [:test, :postgres_repo], pool_size: 3]
+    end
+  end
+
+  defmodule Writing do
+    use Stampede.Scenario
+
+    @impl true
+    def setup(_opts) do
+      {:ok, conn} = Postgrex.start_link(Stampede.TestPostgres.opts())
+
+      Postgrex.query!(
+        conn,
+        "create table if not exists stampede_probe_test (id bigserial primary key)",
+        []
+      )
+
+      conn
+    end
+
+    @impl true
+    def run(vu) do
+      Postgrex.query!(vu.data, "insert into stampede_probe_test default values", [])
+      Process.sleep(20)
+    end
+  end
+
+  @tag :postgres
+  test "reads Postgres's own numbers with the app's repo settings, outside its pool" do
+    Application.put_env(:stampede, :ecto_repos, [PostgresRepo])
+    on_exit(fn -> Application.delete_env(:stampede, :ecto_repos) end)
+
+    result = Stampede.run(Writing, vus: 2, duration: 3_000, probe: node())
+
+    databases = for %{server: %{database: database}} <- result.timeline, do: database
+    assert Enum.any?(databases, &(&1.commits > 0 and &1.writes > 0))
+    assert Enum.all?(databases, &is_map(&1.waits))
+    assert %{commits: commits, writes: writes, connections: connections} = result.server.database
+    assert commits > 0 and writes > 0 and connections >= 1
+    assert result.server.pool.size == 3
+  end
+
+  test "adds up what several app nodes saw, but counts their database once" do
+    one = %{
+      busy: 0.5,
+      memory: 10,
+      processes: 1,
+      run_queue: 0,
+      pool: %{size: 10, queries: 5, wait_ms: 2.0},
+      database: %{commits: 100.0}
+    }
+
+    two = %{
+      busy: 0.7,
+      memory: 20,
+      processes: 2,
+      run_queue: 1,
+      pool: %{size: 10, queries: 7, wait_ms: 9.0},
+      database: %{commits: 100.0}
+    }
+
+    assert %{
+             busy: 0.7,
+             memory: 30,
+             processes: 3,
+             run_queue: 1,
+             pool: pool,
+             database: %{commits: 100.0}
+           } =
+             Stampede.Probe.merge_samples([one, two])
+
+    assert pool == %{size: 20, queries: 12, wait_ms: 9.0}
+  end
+
   defmodule Clogged do
     use Stampede.Scenario
 

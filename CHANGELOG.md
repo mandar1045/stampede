@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+  * `--probe` watches your database too. It sends how long queries waited for
+    a connection from the Ecto pool every second, and for a Postgres repo it
+    reads Postgres's own commits, writes, reads, connections and waits, over a
+    connection of its own outside your pool. The dashboard and the HTML report
+    chart them
+  * A `--find-limit` verdict says why the step failed when the probe can tell:
+    queries waiting on the pool, what Postgres was waiting on, such as writing
+    its log to disk, and whether the app's own schedulers were the limit
+  * A Stampede page for Phoenix LiveDashboard, `Stampede.LiveDashboard`. Add
+    it to your app's dashboard, and a run that probes the app shows in a
+    Stampede tab while it runs, next to the dashboard's own pages. Finished
+    runs stay there, with the same results as the HTML report
+
 ## v1.3.2 (2026-11-04)
 
   * The README has the newest result: one 16-core Phoenix server held

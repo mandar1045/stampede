@@ -123,9 +123,26 @@ defmodule Stampede.Reporter do
       "\n  server\n    #{Enum.join(server.nodes, ", ")} at its busiest: schedulers ",
       "#{percent(server.busy)} busy, #{bytes(server.memory)} of memory, ",
       "#{integer(server.processes)} processes, run queue #{integer(server.run_queue)}\n",
+      database(Map.get(server, :database)),
+      pool(Map.get(server, :pool)),
       lost(server),
       if(queues != [], do: ["    longest message queues\n" | queues], else: [])
     ]
+  end
+
+  defp database(nil), do: []
+
+  defp database(database) do
+    "    database at its busiest: #{integer(round(database.commits))} commits/s, " <>
+      "#{integer(round(database.writes))} rows written/s, #{integer(round(database.reads))} " <>
+      "rows read/s, #{integer(database.connections)} connections\n"
+  end
+
+  defp pool(nil), do: []
+
+  defp pool(pool) do
+    "    database pool of #{pool.size}: queries waited up to #{milliseconds(pool.wait_ms)} " <>
+      "for a connection\n"
   end
 
   defp lost(%{lost: [_ | _] = lost}),
@@ -221,11 +238,81 @@ defmodule Stampede.Reporter do
           ". The load test was #{percent(busy)} busy at that step, so the limit may be " <>
           "its own rather than the server's"
 
-      %{server_busy: busy} when busy >= @busy ->
-        headline <> ". The server's schedulers were #{percent(busy)} busy at that step"
+      %{} = step ->
+        Enum.map_join([headline | diagnosis(step)], ". ", & &1)
 
-      _passed_or_not_busy ->
+      nil ->
         headline
+    end
+  end
+
+  # Below this, waiting for a connection from the pool isn't worth a mention.
+  @pool_wait 50
+  # Postgres has to be waiting on one thing this often to say it was the limit.
+  @database_share 0.4
+
+  # What the probes saw at the step that failed, as sentences.
+  defp diagnosis(step) do
+    server =
+      if Map.get(step, :server_busy, 0) >= @busy,
+        do: "The server's schedulers were #{percent(step.server_busy)} busy at that step"
+
+    pool =
+      if Map.get(step, :pool_wait, 0) >= @pool_wait,
+        do:
+          "Queries waited up to #{milliseconds(step.pool_wait)} for one of the database " <>
+            "pool's #{step.pool_size} connections"
+
+    database = database_wait(step)
+
+    database_limit =
+      if (pool || database) && step[:server_busy] && step.server_busy < 0.5,
+        do:
+          "The app's schedulers were only #{percent(step.server_busy)} busy, so the " <>
+            "database was the limit, not the app"
+
+    Enum.reject([server, pool, database, database_limit], &is_nil/1)
+  end
+
+  defp database_wait(%{database_waits: waits, database_seconds: seconds})
+       when map_size(waits) > 0 and seconds > 0 do
+    total = waits |> Map.values() |> Enum.sum()
+    {wait, count} = Enum.max_by(waits, &elem(&1, 1))
+
+    # Only when queries were really waiting on it, a query or more at a time.
+    if total / seconds >= 1 and count / total >= @database_share do
+      case wait do
+        "running" -> "Postgres was mostly busy running queries"
+        wait -> "Postgres was mostly waiting on #{wait_name(wait)}#{wait_reason(wait)}"
+      end
+    end
+  end
+
+  defp database_wait(_step), do: nil
+
+  defp wait_name(wait), do: wait |> String.split(":", parts: 2) |> List.last()
+
+  defp wait_reason(wait) do
+    [type, name] = String.split(wait, ":", parts: 2)
+
+    cond do
+      String.contains?(String.downcase(name), "wal") ->
+        ", writing its log to disk before each commit"
+
+      name == "DataFileRead" ->
+        ", reading table data from disk"
+
+      type == "Lock" ->
+        ", which is a lock held by another query"
+
+      name in ["BufferMapping", "BufferContent"] ->
+        ", contention on its shared buffers"
+
+      type == "IO" ->
+        ", disk I/O"
+
+      true ->
+        ""
     end
   end
 

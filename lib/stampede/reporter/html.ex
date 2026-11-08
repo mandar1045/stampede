@@ -31,9 +31,7 @@ defmodule Stampede.Reporter.HTML do
   @steps [100, 200, 500, 1_000, 2_000, 5_000, 10_000, 15_000, 30_000, 60_000, 120_000] ++
            [300_000, 600_000, 900_000, 1_800_000, 3_600_000, 7_200_000]
 
-  @css """
-  :root {
-    color-scheme: light;
+  @light """
     --page: #f9f9f7;
     --surface: #fcfcfb;
     --ink: #0b0b0b;
@@ -47,31 +45,11 @@ defmodule Stampede.Reporter.HTML do
     --series-3: #1baf7a;
     --good: #0ca30c;
     --critical: #d03b3b;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      color-scheme: dark;
-      --page: #0d0d0d;
-      --surface: #1a1a19;
-      --ink: #f0efec;
-      --ink-2: #c3c2b7;
-      --grid: #2c2c2a;
-      --axis: #383835;
-      --border: rgba(255, 255, 255, 0.1);
-      --series-1: #3987e5;
-      --series-2: #d95926;
-      --series-3: #199e70;
-    }
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    background: var(--page);
-    color: var(--ink);
-    font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
-  }
-  main { max-width: 72rem; margin: 0 auto; padding: 24px 16px 48px; }
-  h1 { font-size: 20px; margin: 0 0 8px; }
+  """
+
+  # Everything but the page itself, so the same parts can be shown inside
+  # another page, such as Phoenix LiveDashboard's.
+  @parts """
   h2 { font-size: 18px; margin: 0; overflow-wrap: anywhere; }
   h3 { font-size: 14px; margin: 24px 0 8px; }
   section { margin-top: 32px; }
@@ -92,7 +70,7 @@ defmodule Stampede.Reporter.HTML do
   .tiles, .charts { display: grid; gap: 12px; margin-top: 16px; }
   .tiles { grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); }
   .charts { grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); }
-  .tile, .chart, .table {
+  .tile, .chart, .table-wrap {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -137,7 +115,7 @@ defmodule Stampede.Reporter.HTML do
   .tip .at { color: var(--ink-2); margin-bottom: 2px; }
   .tip strong { font-variant-numeric: tabular-nums; margin-right: 6px; }
   .tip span:last-child { color: var(--ink-2); }
-  .table { overflow-x: auto; }
+  .table-wrap { overflow-x: auto; }
   table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
   th, td { padding: 6px 12px; text-align: right; white-space: nowrap; }
   th { color: var(--ink-2); font-weight: 500; }
@@ -146,10 +124,63 @@ defmodule Stampede.Reporter.HTML do
   tr + tr td, thead + tbody td { border-top: 1px solid var(--grid); }
   details { margin-top: 16px; }
   summary { cursor: pointer; }
-  details .table { margin-top: 8px; max-height: 24rem; overflow-y: auto; }
+  details .table-wrap { margin-top: 8px; max-height: 24rem; overflow-y: auto; }
   pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; }
   .errors td { vertical-align: top; text-align: left; }
   """
+
+  @css """
+       :root {
+         color-scheme: light;
+       #{@light}}
+       @media (prefers-color-scheme: dark) {
+         :root {
+           color-scheme: dark;
+           --page: #0d0d0d;
+           --surface: #1a1a19;
+           --ink: #f0efec;
+           --ink-2: #c3c2b7;
+           --grid: #2c2c2a;
+           --axis: #383835;
+           --border: rgba(255, 255, 255, 0.1);
+           --series-1: #3987e5;
+           --series-2: #d95926;
+           --series-3: #199e70;
+         }
+       }
+       * { box-sizing: border-box; }
+       body {
+         margin: 0;
+         background: var(--page);
+         color: var(--ink);
+         font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+       }
+       main { max-width: 72rem; margin: 0 auto; padding: 24px 16px 48px; }
+       h1 { font-size: 20px; margin: 0 0 8px; }
+       """ <> @parts
+
+  # The parts again, each rule scoped to an element with the `stampede`
+  # class. LiveDashboard has no dark theme, so it's light only, and it styles
+  # some of the same elements, which the last rules put back.
+  @embedded_css [
+                  ".stampede {\n",
+                  @light,
+                  "  color: var(--ink);\n  font-size: 14px;\n  line-height: 1.5;\n}\n",
+                  ".stampede * { box-sizing: border-box; }\n",
+                  for [_rule, selectors, declarations] <-
+                        Regex.scan(~r/([^{}]+)\{([^{}]*)\}/, @parts) do
+                    scoped =
+                      selectors
+                      |> String.split(",")
+                      |> Enum.map_join(", ", &(".stampede " <> String.trim(&1)))
+
+                    [scoped, " {", declarations, "}\n"]
+                  end,
+                  ".stampede header { background: none; position: static; }\n",
+                  ".stampede h2, .stampede h3 { font-weight: 600; line-height: 1.5; }\n",
+                  ".stampede section:first-child { margin-top: 0; }\n"
+                ]
+                |> IO.iodata_to_binary()
 
   @js """
   const setupCharts = (root) => {
@@ -248,7 +279,7 @@ defmodule Stampede.Reporter.HTML do
   """
 
   def render(results) do
-    document("Stampede report", Enum.map(results, &scenario(&1, nil)), [])
+    document("Stampede report", Enum.map(results, &scenario(&1, nil, [])), [])
   end
 
   # The dashboard's page, with the runs it knows of at `version`.
@@ -269,10 +300,17 @@ defmodule Stampede.Reporter.HTML do
   # far: its `:timeline`, the last `:summaries` of every metric, the `:totals`
   # of their counts, and how long it is `:planned` to last.
   def runs([]), do: ~s(<p class="meta">Waiting for a run to start.</p>\n)
-  def runs(runs), do: Enum.map(runs, &run/1)
+  def runs(runs), do: Enum.map(runs, &run(&1, downloads(&1.id)))
 
-  defp run(%{result: %Result{} = result} = run), do: scenario(result, run.id)
-  defp run(run), do: live(run)
+  # One run, as shown inside another page, which has no downloads to offer.
+  def embedded(run), do: run |> run([]) |> IO.iodata_to_binary()
+
+  # The styles that `embedded/1` needs, scoped to an element with the
+  # `stampede` class.
+  def embedded_css, do: @embedded_css
+
+  defp run(%{result: %Result{} = result} = run, links), do: scenario(result, run.id, links)
+  defp run(run, _links), do: live(run)
 
   defp document(title, body, script) do
     IO.iodata_to_binary([
@@ -312,8 +350,7 @@ defmodule Stampede.Reporter.HTML do
     [
       section_start(run.id, run.scenario, status),
       seconds(at),
-      " of ",
-      seconds(run.planned),
+      if(run.planned > 0, do: [" of ", seconds(run.planned)], else: " so far"),
       "</p></header>\n",
       live_tiles(run, last),
       if(last,
@@ -369,14 +406,14 @@ defmodule Stampede.Reporter.HTML do
     ]
   end
 
-  defp scenario(%Result{} = result, id) do
+  defp scenario(%Result{} = result, id, links) do
     {checks, metrics} = Enum.split_with(result.metrics, &match?({_name, %{type: :check}}, &1))
 
     [
       section_start(id, result.scenario, status(result)),
       "Ran for ",
       seconds(result.duration),
-      downloads(id),
+      links,
       "</p></header>\n",
       result_tiles(result),
       busy(busy_warning(result)),
@@ -425,8 +462,6 @@ defmodule Stampede.Reporter.HTML do
   end
 
   # On the dashboard, finished runs can be saved as the report and the JSON.
-  defp downloads(nil), do: []
-
   defp downloads(id) do
     [
       ~s( · <a href="runs/#{id}/report.html" download>HTML report</a>),
@@ -449,6 +484,22 @@ defmodule Stampede.Reporter.HTML do
       {"Server processes", integer(server.processes)},
       {"Server run queue", integer(server.run_queue)}
     ]
+
+    tiles =
+      case server do
+        %{database: %{} = database, pool: %{} = pool} ->
+          tiles ++
+            [
+              {"Database commits", integer(round(database.commits)) <> "/s"},
+              {"Database pool wait", milliseconds(pool.wait_ms)}
+            ]
+
+        %{pool: %{} = pool} ->
+          tiles ++ [{"Database pool wait", milliseconds(pool.wait_ms)}]
+
+        _no_database ->
+          tiles
+      end
 
     queues =
       for %{length: length, process: process} <- server.queues do
@@ -580,10 +631,49 @@ defmodule Stampede.Reporter.HTML do
         chart("Server memory, GB", result, [{"memory", 1, values.(:memory, &(&1 / 1.0e9))}], :gb),
         chart("Server processes", result, [{"processes", 1, values.(:processes, & &1)}], :count),
         chart("Server run queue", result, [{"run queue", 1, values.(:run_queue, & &1)}], :count)
-      ]
+      ] ++ database_charts(result)
     else
       []
     end
+  end
+
+  # What the probe saw of the app's database pool and its Postgres.
+  defp database_charts(%{timeline: timeline} = result) do
+    value = fn path ->
+      Enum.map(timeline, fn point -> get_in(point, [:server | path]) end)
+    end
+
+    pool =
+      if Enum.any?(timeline, &get_in(&1, [:server, :pool])),
+        do: [
+          chart("Database pool wait, ms", result, [{"wait", 1, value.([:pool, :wait_ms])}], :ms)
+        ],
+        else: []
+
+    database =
+      if Enum.any?(timeline, &get_in(&1, [:server, :database])) do
+        [
+          chart(
+            "Database commits and writes, per second",
+            result,
+            [
+              {"commits", 1, value.([:database, :commits])},
+              {"rows written", 2, value.([:database, :writes])}
+            ],
+            :rate
+          ),
+          chart(
+            "Database active queries",
+            result,
+            [{"active", 1, value.([:database, :active])}],
+            :count
+          )
+        ]
+      else
+        []
+      end
+
+    pool ++ database
   end
 
   defp chart(title, result, series, unit) do
@@ -771,7 +861,7 @@ defmodule Stampede.Reporter.HTML do
       end
 
     [
-      ~s(<h3>Errors</h3>\n<div class="table errors"><table><tbody>\n),
+      ~s(<h3>Errors</h3>\n<div class="table-wrap errors"><table><tbody>\n),
       Enum.map(rows, &["<tr>", &1, "</tr>\n"]),
       "</tbody></table></div>\n"
     ]
@@ -800,7 +890,7 @@ defmodule Stampede.Reporter.HTML do
 
   defp table(header, rows) do
     [
-      ~s(<div class="table"><table>\n<thead><tr>),
+      ~s(<div class="table-wrap"><table>\n<thead><tr>),
       Enum.map(header, &["<th>", &1, "</th>"]),
       "</tr></thead>\n<tbody>\n",
       Enum.map(rows, fn row -> ["<tr>", Enum.map(row, &["<td>", &1, "</td>"]), "</tr>\n"] end),

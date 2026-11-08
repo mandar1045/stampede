@@ -1,7 +1,7 @@
 defmodule Stampede.Runner do
   @moduledoc false
 
-  alias Stampede.{Limit, Metrics, Plan, Probe, Reporter, Result, Thresholds}
+  alias Stampede.{Dashboard, Limit, Metrics, Plan, Probe, Reporter, Result, Thresholds}
   alias Stampede.Runner.Driver
 
   @options [
@@ -96,6 +96,21 @@ defmodule Stampede.Runner do
     printer = if opts[:progress], do: start_printer()
     probes = Probe.start(opts[:probe])
 
+    # Apps that show runs in LiveDashboard see this one there. Only what the
+    # page needs is sent, not the options, which can hold a lot of data.
+    watchers = probes |> Map.values() |> Enum.map(& &1.node) |> Dashboard.watchers()
+
+    Dashboard.forward(
+      watchers,
+      [:stampede, :run, :start],
+      %{system_time: System.system_time()},
+      %{
+        scenario: scenario,
+        options: [],
+        planned: Plan.duration(run.plan)
+      }
+    )
+
     state =
       try do
         drivers = start_drivers(nodes, config)
@@ -105,6 +120,7 @@ defmodule Stampede.Runner do
           scenario: scenario,
           printer: printer,
           probes: probes,
+          watchers: watchers,
           server: %{},
           server_rows: %{},
           lost: [],
@@ -155,10 +171,9 @@ defmodule Stampede.Runner do
 
     measurements = %{duration: System.monotonic_time() - started_at}
 
-    :telemetry.execute([:stampede, :run, :stop], measurements, %{
-      scenario: scenario,
-      result: result
-    })
+    metadata = %{scenario: scenario, result: result}
+    :telemetry.execute([:stampede, :run, :stop], measurements, metadata)
+    Dashboard.forward(state.watchers, [:stampede, :run, :stop], measurements, metadata)
 
     result
   end
@@ -367,10 +382,9 @@ defmodule Stampede.Runner do
     iterations = state.iterations + Metrics.count(entry.rows, "iteration")
     errors = state.errors + Metrics.count(entry.rows, "iteration.errors")
 
-    :telemetry.execute([:stampede, :run, :interval], %{vus: entry.vus}, %{
-      scenario: state.scenario,
-      interval: point
-    })
+    metadata = %{scenario: state.scenario, interval: point}
+    :telemetry.execute([:stampede, :run, :interval], %{vus: entry.vus}, metadata)
+    Dashboard.forward(state.watchers, [:stampede, :run, :interval], %{vus: entry.vus}, metadata)
 
     if state.printer do
       name = if state.named?, do: "  #{inspect(state.scenario)}", else: ""
@@ -404,7 +418,21 @@ defmodule Stampede.Runner do
        when not is_map_key(state, :wrapped) do
     server_busy = state.server |> Map.values() |> Enum.map(& &1.busy) |> Enum.max(fn -> 0.0 end)
 
-    case Limit.add_second(limit, entry.at, entry.rows, entry.busy, server_busy, state.lost != []) do
+    server =
+      case Map.values(state.server) do
+        [] -> %{}
+        samples -> Probe.merge_samples(samples)
+      end
+
+    case Limit.add_second(
+           limit,
+           entry.at,
+           entry.rows,
+           entry.busy,
+           server_busy,
+           state.lost != [],
+           server
+         ) do
       {:continue, new_limit} ->
         print_step(state, limit, new_limit)
         %{state | limit: new_limit}

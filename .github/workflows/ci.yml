@@ -11,6 +11,17 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       MIX_ENV: test
+      STAMPEDE_TEST_POSTGRES: postgres://postgres:postgres@localhost:5432/postgres
+    # For the tests that read Postgres's own statistics.
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
     strategy:
       fail-fast: false
       matrix:

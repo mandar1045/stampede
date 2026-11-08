@@ -18,6 +18,42 @@ defmodule Stampede.LimitTest do
 
   @fast [step: 1, ramp: 0, hold: 2_000]
 
+  test "keeps the longest pool wait and what Postgres waited on, for each step" do
+    limit = Stampede.Limit.new!([step: 1, ramp: 0, hold: 2_000, up_to: 1], [{"latency", p95: 25}])
+
+    second = fn wait_ms, waits ->
+      %{pool: %{size: 10, queries: 3, wait_ms: wait_ms}, database: %{waits: waits}}
+    end
+
+    {:continue, limit} =
+      Stampede.Limit.add_second(
+        limit,
+        1_000,
+        %{},
+        0.1,
+        0.2,
+        false,
+        second.(5.0, %{"IO:WalSync" => 2})
+      )
+
+    assert {:stop, limit} =
+             Stampede.Limit.add_second(
+               limit,
+               2_000,
+               %{},
+               0.1,
+               0.2,
+               false,
+               second.(50.0, %{"IO:WalSync" => 3, "running" => 1})
+             )
+
+    assert [step] = limit.steps
+    assert step.pool_wait == 50.0
+    assert step.pool_size == 10
+    assert step.database_waits == %{"IO:WalSync" => 5, "running" => 1}
+    assert step.database_seconds == 2
+  end
+
   test "finds the most VUs the thresholds allow, and stops at the first step that fails" do
     started_at = System.monotonic_time(:millisecond)
     result = Stampede.run(Crowded, find_limit: @fast)

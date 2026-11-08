@@ -163,6 +163,12 @@ defmodule Stampede do
       * `"server.live.mount"` and `"server.live.event"`
       * `"server.ecto.query"` and `"server.ecto.queue"`, for every Ecto repo
 
+      With an Ecto repo, it also sends how long queries waited for a pool
+      connection each second, and with a Postgres repo, Postgres's own
+      commits, writes, reads and waits, over a connection of its own. A
+      `:find_limit` verdict then says when the pool or the database was the
+      limit.
+
     * `:progress` - prints the number of VUs, iterations and errors every
       second. Defaults to `false`.
 

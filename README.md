@@ -145,6 +145,17 @@ $ mix stampede.run loadtest/lobby.exs --dashboard
 That's the page in the animation at the top. It updates every second while
 the test runs, and shows the full results when it's done.
 
+If your app already has Phoenix LiveDashboard, you can watch from there
+instead. Add Stampede's page to the dashboard's route:
+
+```elixir
+live_dashboard "/dashboard",
+  additional_pages: [stampede: Stampede.LiveDashboard]
+```
+
+Then a run with [`--probe`](#inside-your-app) shows up in a Stampede
+tab while it runs, right next to the dashboard's processes and ports.
+
 ## How many users can it handle?
 
 That's usually the real question, so Stampede can answer it directly:

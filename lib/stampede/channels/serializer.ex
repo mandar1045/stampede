@@ -48,7 +48,7 @@ defmodule Stampede.Channels.Serializer.V2 do
   The `"2.0.0"` serializer, used by default.
 
   Messages are JSON arrays, and `{:binary, data}` payloads are sent and
-  received as binary frames, as `Phoenix.Socket.V2.JSONSerializer` does.
+  received as binary frames, as Phoenix's own V2 JSON serializer does.
   """
 
   @behaviour Stampede.Channels.Serializer
