@@ -113,6 +113,10 @@ defmodule Stampede.ProbeTest do
     @impl true
     def run(vu) do
       Postgrex.query!(vu.data, "insert into stampede_probe_test default values", [])
+      # A busy session shares its numbers with pg_stat_database only now and
+      # then, about once a second, which a short test on a slow machine can
+      # miss entirely. This shares them after every insert.
+      Postgrex.query!(vu.data, "select pg_stat_force_next_flush()", [])
       Process.sleep(20)
     end
   end
@@ -122,7 +126,7 @@ defmodule Stampede.ProbeTest do
     Application.put_env(:stampede, :ecto_repos, [PostgresRepo])
     on_exit(fn -> Application.delete_env(:stampede, :ecto_repos) end)
 
-    result = Stampede.run(Writing, vus: 2, duration: 3_000, probe: node())
+    result = Stampede.run(Writing, vus: 2, duration: 4_000, probe: node())
 
     databases = for %{server: %{database: database}} <- result.timeline, do: database
     assert Enum.any?(databases, &(&1.commits > 0 and &1.writes > 0))

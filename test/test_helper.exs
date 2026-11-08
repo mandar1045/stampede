@@ -22,7 +22,8 @@ distributed? =
       false
   end
 
-# Tests tagged :postgres need a database, from STAMPEDE_TEST_POSTGRES, such as
+# Tests tagged :postgres need a database, Postgres 15 or newer, from
+# STAMPEDE_TEST_POSTGRES, such as
 # postgres://postgres:postgres@localhost:5432/postgres
 postgres? = System.get_env("STAMPEDE_TEST_POSTGRES") not in [nil, ""]
 if not postgres?, do: IO.puts("Skipping :postgres tests, as STAMPEDE_TEST_POSTGRES isn't set")
