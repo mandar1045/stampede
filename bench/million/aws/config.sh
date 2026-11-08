@@ -6,6 +6,9 @@ ZONE=${ZONE:-ap-south-1a}
 SERVER_TYPE=${SERVER_TYPE:-r7g.8xlarge}
 LOADER_TYPE=${LOADER_TYPE:-r7g.xlarge}
 LOADERS=${LOADERS:-4}
+# A database machine for apps that need one, such as the chat app. Empty for none.
+DB_TYPE=${DB_TYPE:-}
+DB_VOLUME_GB=${DB_VOLUME_GB:-150}
 # Extra private addresses per loader. One address gets about 64,000 ports to
 # the server, so 250,000 connections need at least four.
 SOURCE_IPS=${SOURCE_IPS:-10}

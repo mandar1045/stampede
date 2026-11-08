@@ -13,6 +13,10 @@ yourself. The goal was a million. One 16-core server has now held
     `live.exs` is people on a LiveView page, who click a button every 30 to
     60 seconds.
     `realtime.exs` is people in group chats on Supabase Realtime.
+    `chat_db.exs` is people in a chat app that keeps every message in
+    Postgres.
+  * [`chat/`](chat/) is that chat app: a fresh `mix phx.new` app with Ecto
+    and Postgres.
   * [`realtime/`](realtime/) starts the official Supabase Realtime release.
   * [`proof/`](proof/) records real pages during a run, including a real
     `realtime-js` client in Firefox.
@@ -91,6 +95,61 @@ EventBridge schedule terminates them all 5 minutes later in case one can't.
 `./status.sh` lists what's running.
 
 ## Results
+
+### A chat app on Postgres with 100 million messages (November 8, 2026)
+
+The runs below hold connections that barely touch a database, and the question
+I got most after the 2,000,000 one was what happens with a real one. So this is
+a chat app that stores every message: [`chat/`](chat/), a fresh `mix phx.new`
+app with Ecto's default pool of 10 connections. Postgres 17 runs on its own
+r7g.2xlarge (8 cores, 64 GB) with the official image's default settings,
+seeded with 1 million users, 10,000 rooms and 100 million messages, 18 GB in
+all. The app runs on the same r7g.4xlarge (16 cores) as the 2,000,000 run, and
+six r7g.xlarge make the load.
+
+Each user joins a room of about 100 people. Joining reads the room's latest 50
+messages from Postgres and marks them read. Then every 30 to 60 seconds they
+either send a message, which is written to Postgres before the reply comes
+back, or, one time in five, scroll up for the 50 messages before the oldest
+they have.
+
+```console
+$ DB_TYPE=r7g.2xlarge ZONE=ap-south-1a SERVER_TYPE=r7g.4xlarge LOADERS=6 SOURCE_IPS=14 ./up.sh
+$ APP=chat ./deploy.sh
+$ PROOF=1 STEP_RAMP=120 ./run-chat.sh --find-limit --start 20000 --step 20000 --up-to 400000 --hold 60s
+```
+
+[`20261108-0621-chat_db-0`](results/20261108-0621-chat_db-0):
+
+| Users | Join p95 | Send p95 | Scroll up p95 | Errors | |
+|---:|---:|---:|---:|---:|---|
+| 20,000 | 4.58ms | 3.20ms | 38.96ms | 0 | pass |
+| **40,000** | **6.31ms** | **178.14ms** | **167.77ms** | **0** | **pass** |
+| 60,000 | 708.14ms | 640.75ms | 535.20ms | 110,576 | fail |
+
+40,000 held with no errors. At 60,000 channels started crashing, and it wasn't
+one wall but three at once. The app's schedulers peaked at 96% busy. Queries
+spent nearly all their time waiting for one of the pool's 10 connections:
+299.65ms at p95 out of 305.70ms in total, over the whole run. And Postgres's
+active sessions were mostly waiting on `WALWrite` and `WalSync`, writing its log
+to disk before each commit, more often than they were running queries. That's
+in [`db-stats.log`](results/20261108-0621-chat_db-0/db-stats.log), sampled every
+10 seconds.
+
+The run wrote 304,355 messages, which is the count in Postgres before and after
+([`db-before.txt`](results/20261108-0621-chat_db-0/db-before.txt),
+[`db-after.txt`](results/20261108-0621-chat_db-0/db-after.txt)), within 7 of
+the 304,348 sends Stampede counted as answered.
+
+That's a much smaller number than 2,000,000, and it should be: every user here
+reads and writes a real database. It's also what made me teach `--probe` to
+watch the database, so the verdict now says which of those walls it was.
+
+[`20261108-chat-db-cold-cache`](results/20261108-chat-db-cold-cache) is the
+first try, straight after seeding, with Postgres's cache still cold. Within
+seconds the app's pool was dropping requests from its queue, so I stopped it
+and ran again. The `column "chat" does not exist` errors in its `postgres.log`
+come from a quoting bug in my stats loop, fixed since.
 
 ### 2,000,000 Channels users on a 16-core server (November 4, 2026)
 

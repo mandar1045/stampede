@@ -1,0 +1,59 @@
+Dashboard at http://127.0.0.1:4040
+
+   1.0s  vus: 422  iterations: 0  errors: 0  load test busy: 2%
+   2.0s  vus: 843  iterations: 0  errors: 0  load test busy: 1%
+   3.0s  vus: 1263  iterations: 0  errors: 0  load test busy: 1%
+   4.0s  vus: 1684  iterations: 0  errors: 0  load test busy: 1%
+   5.1s  vus: 2105  iterations: 0  errors: 3103  load test busy: 9%
+   6.1s  vus: 2526  iterations: 0  errors: 8411  load test busy: 16%
+   7.1s  vus: 2946  iterations: 0  errors: 8907  load test busy: 4%
+   8.1s  vus: 3368  iterations: 0  errors: 8907  load test busy: 1%
+   9.1s  vus: 3788  iterations: 0  errors: 13528  load test busy: 9%
+  10.1s  vus: 4209  iterations: 0  errors: 19018  load test busy: 13%
+  11.1s  vus: 4630  iterations: 0  errors: 19343  load test busy: 4%
+  12.1s  vus: 5051  iterations: 0  errors: 19343  load test busy: 3%
+  13.1s  vus: 5472  iterations: 0  errors: 25726  load test busy: 11%
+  14.1s  vus: 5892  iterations: 0  errors: 30558  load test busy: 13%
+  15.2s  vus: 6313  iterations: 0  errors: 31331  load test busy: 5%
+  16.2s  vus: 6734  iterations: 0  errors: 31331  load test busy: 5%
+  17.2s  vus: 7155  iterations: 0  errors: 31331  load test busy: 2%
+  18.2s  vus: 7576  iterations: 0  errors: 31331  load test busy: 5%
+  19.2s  vus: 7997  iterations: 0  errors: 31331  load test busy: 1%
+  20.2s  vus: 8418  iterations: 0  errors: 31331  load test busy: 1%
+  21.2s  vus: 8838  iterations: 0  errors: 31331  load test busy: 1%
+  22.2s  vus: 9258  iterations: 0  errors: 31331  load test busy: 1%
+  23.2s  vus: 9680  iterations: 0  errors: 31331  load test busy: 1%
+  24.2s  vus: 10101  iterations: 0  errors: 31331  load test busy: 1%
+  25.3s  vus: 10522  iterations: 0  errors: 31331  load test busy: 1%
+  26.3s  vus: 10943  iterations: 0  errors: 31331  load test busy: 1%
+  27.3s  vus: 11363  iterations: 0  errors: 31331  load test busy: 1%
+  28.3s  vus: 11784  iterations: 0  errors: 31331  load test busy: 1%
+  29.3s  vus: 12204  iterations: 0  errors: 31331  load test busy: 1%
+  30.3s  vus: 12626  iterations: 0  errors: 31331  load test busy: 1%
+  31.3s  vus: 13047  iterations: 0  errors: 31331  load test busy: 1%
+  32.3s  vus: 13468  iterations: 0  errors: 31331  load test busy: 1%
+  33.3s  vus: 13888  iterations: 0  errors: 31331  load test busy: 1%
+  34.3s  vus: 14309  iterations: 0  errors: 31331  load test busy: 1%
+  35.4s  vus: 14730  iterations: 0  errors: 31331  load test busy: 1%
+  36.4s  vus: 15150  iterations: 0  errors: 31331  load test busy: 1%
+  37.4s  vus: 15572  iterations: 0  errors: 31331  load test busy: 1%
+  38.4s  vus: 15993  iterations: 0  errors: 31331  load test busy: 1%
+  39.4s  vus: 16413  iterations: 0  errors: 31331  load test busy: 2%
+  40.4s  vus: 16834  iterations: 0  errors: 31331  load test busy: 2%
+  41.4s  vus: 17255  iterations: 0  errors: 31331  load test busy: 2%
+  42.4s  vus: 17676  iterations: 0  errors: 31331  load test busy: 2%
+  43.4s  vus: 18096  iterations: 0  errors: 31331  load test busy: 2%
+  44.4s  vus: 18518  iterations: 0  errors: 31331  load test busy: 2%
+  45.5s  vus: 18938  iterations: 0  errors: 31331  load test busy: 2%
+  46.5s  vus: 19359  iterations: 0  errors: 31331  load test busy: 4%
+  47.5s  vus: 19780  iterations: 0  errors: 31331  load test busy: 4%
+  48.5s  vus: 20201  iterations: 0  errors: 31331  load test busy: 6%
+  49.5s  vus: 20622  iterations: 0  errors: 31331  load test busy: 6%
+  50.5s  vus: 21042  iterations: 0  errors: 31331  load test busy: 6%
+  51.5s  vus: 21463  iterations: 0  errors: 31331  load test busy: 6%
+  52.5s  vus: 21884  iterations: 0  errors: 31331  load test busy: 5%
+  53.5s  vus: 22305  iterations: 0  errors: 31331  load test busy: 6%
+  54.5s  vus: 22726  iterations: 0  errors: 31331  load test busy: 6%
+
+BREAK: (a)bort (A)bort with dump (c)ontinue (p)roc info (i)nfo
+       (l)oaded (v)ersion (k)ill (D)b-tables (d)istribution

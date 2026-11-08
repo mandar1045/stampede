@@ -1,0 +1,200 @@
+2026-11-08 06:09:10.832 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:09:24.313 UTC [67] LOG:  checkpoint complete: wrote 48 buffers (0.3%); 0 WAL file(s) added, 3 removed, 30 recycled; write=10.124 s, sync=3.310 s, total=13.481 s; sync files=6, longest=2.401 s, average=0.552 s; distance=538328 kB, estimate=544126 kB; lsn=4/340D598, redo lsn=3/E23FE310
+2026-11-08 06:09:24.314 UTC [67] LOG:  checkpoints are occurring too frequently (14 seconds apart)
+2026-11-08 06:09:24.314 UTC [67] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-11-08 06:09:24.314 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:09:37.662 UTC [67] LOG:  checkpoint complete: wrote 18 buffers (0.1%); 0 WAL file(s) added, 3 removed, 30 recycled; write=10.026 s, sync=3.240 s, total=13.349 s; sync files=5, longest=2.508 s, average=0.648 s; distance=542944 kB, estimate=544008 kB; lsn=4/244000E8, redo lsn=4/3636348
+2026-11-08 06:09:37.663 UTC [67] LOG:  checkpoints are occurring too frequently (13 seconds apart)
+2026-11-08 06:09:37.663 UTC [67] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-11-08 06:09:37.663 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:09:49.949 UTC [67] LOG:  checkpoint complete: wrote 38 buffers (0.2%); 0 WAL file(s) added, 1 removed, 32 recycled; write=11.292 s, sync=0.948 s, total=12.287 s; sync files=4, longest=0.563 s, average=0.237 s; distance=540657 kB, estimate=543673 kB; lsn=4/43406180, redo lsn=4/246329C0
+2026-11-08 06:09:50.535 UTC [67] LOG:  checkpoints are occurring too frequently (13 seconds apart)
+2026-11-08 06:09:50.535 UTC [67] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-11-08 06:09:50.535 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:10:04.174 UTC [67] LOG:  checkpoint complete: wrote 31 buffers (0.2%); 0 WAL file(s) added, 3 removed, 30 recycled; write=10.019 s, sync=3.529 s, total=13.639 s; sync files=5, longest=1.648 s, average=0.706 s; distance=536173 kB, estimate=542923 kB; lsn=4/668B6A28, redo lsn=4/451CE0A8
+2026-11-08 06:10:04.174 UTC [67] LOG:  checkpoints are occurring too frequently (14 seconds apart)
+2026-11-08 06:10:04.174 UTC [67] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-11-08 06:10:04.174 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:10:17.575 UTC [67] LOG:  checkpoint complete: wrote 9 buffers (0.1%); 0 WAL file(s) added, 3 removed, 30 recycled; write=10.129 s, sync=3.032 s, total=13.401 s; sync files=4, longest=2.906 s, average=0.758 s; distance=550027 kB, estimate=550027 kB; lsn=4/873CD960, redo lsn=4/66AF0F00
+2026-11-08 06:10:17.575 UTC [67] LOG:  checkpoints are occurring too frequently (13 seconds apart)
+2026-11-08 06:10:17.575 UTC [67] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-11-08 06:10:17.575 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:10:31.184 UTC [67] LOG:  checkpoint complete: wrote 38 buffers (0.2%); 0 WAL file(s) added, 3 removed, 30 recycled; write=10.121 s, sync=3.409 s, total=13.609 s; sync files=4, longest=2.672 s, average=0.853 s; distance=535423 kB, estimate=548567 kB; lsn=4/A84000C8, redo lsn=4/875D0D90
+2026-11-08 06:10:31.184 UTC [67] LOG:  checkpoints are occurring too frequently (14 seconds apart)
+2026-11-08 06:10:31.184 UTC [67] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-11-08 06:10:31.184 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:10:44.689 UTC [67] LOG:  checkpoint complete: wrote 10 buffers (0.1%); 0 WAL file(s) added, 3 removed, 30 recycled; write=10.025 s, sync=3.398 s, total=13.505 s; sync files=5, longest=1.866 s, average=0.680 s; distance=540986 kB, estimate=547809 kB; lsn=4/C9400090, redo lsn=4/A861F860
+2026-11-08 06:10:44.689 UTC [67] LOG:  checkpoints are occurring too frequently (13 seconds apart)
+2026-11-08 06:10:44.689 UTC [67] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-11-08 06:10:44.689 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:10:57.980 UTC [67] LOG:  checkpoint complete: wrote 40 buffers (0.2%); 0 WAL file(s) added, 3 removed, 30 recycled; write=10.131 s, sync=2.934 s, total=13.291 s; sync files=5, longest=2.540 s, average=0.587 s; distance=540710 kB, estimate=547099 kB; lsn=4/EA030DB0, redo lsn=4/C96292C8
+2026-11-08 06:10:57.980 UTC [67] LOG:  checkpoints are occurring too frequently (13 seconds apart)
+2026-11-08 06:10:57.980 UTC [67] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-11-08 06:10:57.981 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:11:11.912 UTC [67] LOG:  checkpoint complete: wrote 59 buffers (0.4%); 0 WAL file(s) added, 3 removed, 30 recycled; write=10.245 s, sync=3.443 s, total=13.932 s; sync files=4, longest=2.543 s, average=0.861 s; distance=537205 kB, estimate=546109 kB; lsn=5/B400058, redo lsn=4/EA2C69D0
+2026-11-08 06:11:11.912 UTC [67] LOG:  checkpoints are occurring too frequently (14 seconds apart)
+2026-11-08 06:11:11.912 UTC [67] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-11-08 06:11:11.912 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:11:25.278 UTC [67] LOG:  checkpoint complete: wrote 55 buffers (0.3%); 0 WAL file(s) added, 3 removed, 30 recycled; write=10.136 s, sync=2.992 s, total=13.366 s; sync files=5, longest=2.980 s, average=0.599 s; distance=544956 kB, estimate=545994 kB; lsn=5/2C1E0630, redo lsn=5/B6F5D00
+2026-11-08 06:11:25.278 UTC [67] LOG:  checkpoints are occurring too frequently (14 seconds apart)
+2026-11-08 06:11:25.278 UTC [67] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-11-08 06:11:25.278 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:11:38.769 UTC [67] LOG:  checkpoint complete: wrote 17 buffers (0.1%); 0 WAL file(s) added, 3 removed, 30 recycled; write=10.130 s, sync=3.124 s, total=13.491 s; sync files=6, longest=2.588 s, average=0.521 s; distance=538522 kB, estimate=545247 kB; lsn=5/4D2ECD40, redo lsn=5/2C4DC688
+2026-11-08 06:11:38.769 UTC [67] LOG:  checkpoints are occurring too frequently (13 seconds apart)
+2026-11-08 06:11:38.769 UTC [67] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-11-08 06:11:38.769 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:12:42.128 UTC [149] LOG:  skipping vacuum of "messages" --- lock not available
+2026-11-08 06:13:42.147 UTC [152] LOG:  skipping vacuum of "messages" --- lock not available
+2026-11-08 06:14:42.167 UTC [155] LOG:  skipping vacuum of "messages" --- lock not available
+2026-11-08 06:14:45.130 UTC [67] LOG:  checkpoint complete: wrote 47 buffers (0.3%); 0 WAL file(s) added, 33 removed, 0 recycled; write=69.715 s, sync=113.109 s, total=186.361 s; sync files=20, longest=13.104 s, average=5.656 s; distance=540946 kB, estimate=544817 kB; lsn=5/D84257A0, redo lsn=5/4D521010
+2026-11-08 06:14:45.130 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:15:06.839 UTC [67] LOG:  checkpoint complete: wrote 14842 buffers (90.6%); 0 WAL file(s) added, 109 removed, 33 recycled; write=21.042 s, sync=0.042 s, total=21.709 s; sync files=25, longest=0.042 s, average=0.002 s; distance=2328196 kB, estimate=2328196 kB; lsn=5/F942FC68, redo lsn=5/DB6C2078
+2026-11-08 06:15:06.945 UTC [67] LOG:  checkpoints are occurring too frequently (21 seconds apart)
+2026-11-08 06:15:06.945 UTC [67] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-11-08 06:15:06.945 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:15:07.023 UTC [67] LOG:  checkpoint complete: wrote 0 buffers (0.0%); 0 WAL file(s) added, 0 removed, 33 recycled; write=0.001 s, sync=0.001 s, total=0.079 s; sync files=0, longest=0.000 s, average=0.000 s; distance=537938 kB, estimate=2149170 kB; lsn=5/FC4C3FA0, redo lsn=5/FC416A18
+2026-11-08 06:15:42.186 UTC [159] LOG:  skipping vacuum of "messages" --- lock not available
+2026-11-08 06:15:46.518 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:15:59.650 UTC [67] LOG:  checkpoint complete: wrote 16 buffers (0.1%); 0 WAL file(s) added, 0 removed, 33 recycled; write=1.519 s, sync=6.528 s, total=13.132 s; sync files=16, longest=6.481 s, average=0.408 s; distance=540666 kB, estimate=1988319 kB; lsn=6/2DCC6758, redo lsn=6/1D4153A0
+2026-11-08 06:16:43.538 UTC [189] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:16:43.538 UTC [189] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:16:53.609 UTC [207] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:16:53.609 UTC [207] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:17:03.679 UTC [215] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:17:03.679 UTC [215] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:17:13.759 UTC [222] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:17:13.759 UTC [222] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:17:23.829 UTC [230] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:17:23.829 UTC [230] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:17:33.903 UTC [237] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:17:33.903 UTC [237] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:17:43.977 UTC [245] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:17:43.977 UTC [245] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:17:54.048 UTC [252] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:17:54.048 UTC [252] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:18:03.622 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:18:04.120 UTC [267] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:18:04.120 UTC [267] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:18:14.196 UTC [274] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:18:14.196 UTC [274] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:18:24.266 UTC [282] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:18:24.266 UTC [282] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:18:34.339 UTC [289] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:18:34.339 UTC [289] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:18:44.412 UTC [297] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:18:44.412 UTC [297] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:18:54.490 UTC [304] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:18:54.490 UTC [304] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:19:04.560 UTC [312] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:19:04.560 UTC [312] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:21:00.570 UTC [387] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:21:00.570 UTC [387] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:21:10.644 UTC [405] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:21:10.644 UTC [405] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:21:20.713 UTC [412] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:21:20.713 UTC [412] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:21:30.783 UTC [420] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:21:30.783 UTC [420] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:21:40.858 UTC [427] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:21:40.858 UTC [427] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:21:50.929 UTC [435] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:21:50.929 UTC [435] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:22:01.000 UTC [442] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:22:01.000 UTC [442] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:22:11.069 UTC [450] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:22:11.069 UTC [450] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:22:21.141 UTC [457] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:22:21.141 UTC [457] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:22:31.215 UTC [465] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:22:31.215 UTC [465] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:22:33.149 UTC [67] LOG:  checkpoint complete: wrote 1162 buffers (7.1%); 0 WAL file(s) added, 0 removed, 33 recycled; write=269.425 s, sync=0.010 s, total=269.528 s; sync files=105, longest=0.004 s, average=0.001 s; distance=536497 kB, estimate=1843137 kB; lsn=6/447EFEB0, redo lsn=6/3E001AD0
+2026-11-08 06:22:41.288 UTC [472] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:22:41.288 UTC [472] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:22:51.359 UTC [480] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:22:51.359 UTC [480] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:23:01.433 UTC [487] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:23:01.433 UTC [487] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:23:03.168 UTC [67] LOG:  checkpoint starting: time
+2026-11-08 06:23:11.507 UTC [495] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:23:11.507 UTC [495] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:23:21.578 UTC [502] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:23:21.578 UTC [502] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:23:31.671 UTC [510] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:23:31.671 UTC [510] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:23:41.742 UTC [517] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:23:41.742 UTC [517] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:23:51.812 UTC [525] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:23:51.812 UTC [525] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:24:01.887 UTC [532] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:24:01.887 UTC [532] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:24:11.956 UTC [540] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:24:11.956 UTC [540] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:24:22.028 UTC [547] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:24:22.028 UTC [547] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:24:32.105 UTC [555] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:24:32.105 UTC [555] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:24:42.175 UTC [562] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:24:42.175 UTC [562] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:24:47.302 UTC [67] LOG:  checkpoint complete: wrote 452 buffers (2.8%); 0 WAL file(s) added, 0 removed, 9 recycled; write=102.058 s, sync=2.033 s, total=104.135 s; sync files=23, longest=1.310 s, average=0.089 s; distance=159786 kB, estimate=1674802 kB; lsn=6/65EE7C48, redo lsn=6/47C0C6B0
+2026-11-08 06:24:52.252 UTC [570] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:24:52.252 UTC [570] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:24:56.421 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:25:02.327 UTC [577] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:25:02.327 UTC [577] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:25:12.402 UTC [585] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:25:12.402 UTC [585] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:25:22.473 UTC [593] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:25:22.473 UTC [593] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:25:32.549 UTC [600] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:25:32.549 UTC [600] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:25:42.621 UTC [608] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:25:42.621 UTC [608] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:25:52.695 UTC [615] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:25:52.695 UTC [615] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:26:02.768 UTC [623] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:26:02.768 UTC [623] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:26:10.375 UTC [67] LOG:  checkpoint complete: wrote 400 buffers (2.4%); 0 WAL file(s) added, 0 removed, 33 recycled; write=72.809 s, sync=0.993 s, total=73.955 s; sync files=20, longest=0.940 s, average=0.050 s; distance=528339 kB, estimate=1560156 kB; lsn=6/85E6DBB0, redo lsn=6/68001650
+2026-11-08 06:26:12.842 UTC [630] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:26:12.842 UTC [630] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:26:19.233 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:26:22.914 UTC [638] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:26:22.914 UTC [638] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:26:32.988 UTC [645] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:26:32.988 UTC [645] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:26:43.063 UTC [653] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:26:43.063 UTC [653] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:26:53.137 UTC [660] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:26:53.137 UTC [660] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:27:03.210 UTC [668] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:27:03.210 UTC [668] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:27:10.221 UTC [67] LOG:  checkpoint complete: wrote 2340 buffers (14.3%); 0 WAL file(s) added, 0 removed, 33 recycled; write=49.438 s, sync=1.395 s, total=50.989 s; sync files=22, longest=1.258 s, average=0.064 s; distance=540695 kB, estimate=1458210 kB; lsn=6/A70B8E68, redo lsn=6/89007348
+2026-11-08 06:27:13.282 UTC [675] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:27:13.282 UTC [675] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:27:15.208 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:27:23.354 UTC [683] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:27:23.354 UTC [683] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:27:33.429 UTC [690] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:27:33.429 UTC [690] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:27:43.501 UTC [698] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:27:43.501 UTC [698] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:27:53.574 UTC [705] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:27:53.574 UTC [705] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:27:56.324 UTC [67] LOG:  checkpoint complete: wrote 2736 buffers (16.7%); 0 WAL file(s) added, 0 removed, 33 recycled; write=37.456 s, sync=3.509 s, total=41.117 s; sync files=14, longest=3.194 s, average=0.251 s; distance=540673 kB, estimate=1366456 kB; lsn=6/C897D340, redo lsn=6/AA007A28
+2026-11-08 06:27:58.211 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:28:03.652 UTC [713] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:28:03.652 UTC [713] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:28:13.725 UTC [720] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:28:13.725 UTC [720] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:28:23.798 UTC [735] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:28:23.798 UTC [735] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:28:33.868 UTC [742] ERROR:  column "chat" does not exist at character 139
+2026-11-08 06:28:33.868 UTC [742] STATEMENT:  select now(), numbackends, xact_commit, tup_inserted, tup_fetched, tup_updated, blks_read, blks_hit from pg_stat_database where datname = chat
+2026-11-08 06:28:38.042 UTC [67] LOG:  checkpoint complete: wrote 1193 buffers (7.3%); 0 WAL file(s) added, 0 removed, 33 recycled; write=33.878 s, sync=5.228 s, total=39.831 s; sync files=19, longest=4.458 s, average=0.276 s; distance=540657 kB, estimate=1283876 kB; lsn=6/E9FB7F90, redo lsn=6/CB003FD8
+2026-11-08 06:28:41.697 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:29:19.502 UTC [67] LOG:  checkpoint complete: wrote 489 buffers (3.0%); 0 WAL file(s) added, 0 removed, 33 recycled; write=37.210 s, sync=0.446 s, total=37.805 s; sync files=21, longest=0.315 s, average=0.022 s; distance=540672 kB, estimate=1209556 kB; lsn=7/9F4ADE0, redo lsn=6/EC004240
+2026-11-08 06:29:23.489 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:30:00.928 UTC [67] LOG:  checkpoint complete: wrote 907 buffers (5.5%); 0 WAL file(s) added, 0 removed, 33 recycled; write=35.285 s, sync=2.000 s, total=37.440 s; sync files=21, longest=1.263 s, average=0.096 s; distance=540680 kB, estimate=1142668 kB; lsn=7/2B6F9260, redo lsn=7/D006578
+2026-11-08 06:30:03.119 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:30:34.860 UTC [67] LOG:  checkpoint complete: wrote 661 buffers (4.0%); 0 WAL file(s) added, 0 removed, 33 recycled; write=30.773 s, sync=0.816 s, total=31.741 s; sync files=17, longest=0.498 s, average=0.048 s; distance=540659 kB, estimate=1082467 kB; lsn=7/4C1DF9D8, redo lsn=7/2E003528
+2026-11-08 06:30:37.427 UTC [67] LOG:  checkpoint starting: wal
+2026-11-08 06:33:15.647 UTC [67] LOG:  checkpoint complete: wrote 556 buffers (3.4%); 0 WAL file(s) added, 0 removed, 33 recycled; write=146.396 s, sync=11.679 s, total=158.220 s; sync files=22, longest=6.862 s, average=0.531 s; distance=540692 kB, estimate=1028290 kB; lsn=7/63943AB0, redo lsn=7/4F008848

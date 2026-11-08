@@ -1,0 +1,45 @@
+ERROR:  column "chat" does not exist
+LINE 1: ...ks_read, blks_hit from pg_stat_database where datname = chat
+                                                                   ^
+ERROR:  column "chat" does not exist
+LINE 1: ...ks_read, blks_hit from pg_stat_database where datname = chat
+                                                                   ^
+ERROR:  column "chat" does not exist
+LINE 1: ...ks_read, blks_hit from pg_stat_database where datname = chat
+                                                                   ^
+ERROR:  column "chat" does not exist
+LINE 1: ...ks_read, blks_hit from pg_stat_database where datname = chat
+                                                                   ^
+ERROR:  column "chat" does not exist
+LINE 1: ...ks_read, blks_hit from pg_stat_database where datname = chat
+                                                                   ^
+ERROR:  column "chat" does not exist
+LINE 1: ...ks_read, blks_hit from pg_stat_database where datname = chat
+                                                                   ^
+ERROR:  column "chat" does not exist
+LINE 1: ...ks_read, blks_hit from pg_stat_database where datname = chat
+                                                                   ^
+ERROR:  column "chat" does not exist
+LINE 1: ...ks_read, blks_hit from pg_stat_database where datname = chat
+                                                                   ^
+ERROR:  column "chat" does not exist
+LINE 1: ...ks_read, blks_hit from pg_stat_database where datname = chat
+                                                                   ^
+ERROR:  column "chat" does not exist
+LINE 1: ...ks_read, blks_hit from pg_stat_database where datname = chat
+                                                                   ^
+ERROR:  column "chat" does not exist
+LINE 1: ...ks_read, blks_hit from pg_stat_database where datname = chat
+                                                                   ^
+ERROR:  column "chat" does not exist
+LINE 1: ...ks_read, blks_hit from pg_stat_database where datname = chat
+                                                                   ^
+ERROR:  column "chat" does not exist
+LINE 1: ...ks_read, blks_hit from pg_stat_database where datname = chat
+                                                                   ^
+ERROR:  column "chat" does not exist
+LINE 1: ...ks_read, blks_hit from pg_stat_database where datname = chat
+                                                                   ^
+ERROR:  column "chat" does not exist
+LINE 1: ...ks_read, blks_hit from pg_stat_database where datname = chat
+                                                                   ^

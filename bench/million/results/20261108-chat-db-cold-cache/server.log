@@ -1,0 +1,300 @@
+06:17:51.089 [error] an exception was raised:
+    ** (DBConnection.ConnectionError) [Elixir.Chat.Repo] connection not available and request was dropped from queue after 102ms. This means requests are coming in and your connection pool cannot serve them fast enough. You can address this by:
+
+  1. Ensuring your database is available and that you can connect to it
+  2. Tracking down slow queries and making sure they are running fast enough
+  3. Increasing the pool_size (although this increases resource consumption)
+  4. Allowing requests to wait longer by increasing :queue_target and :queue_interval
+
+See DBConnection.start_link/2 for more information
+
+        (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:1121: Ecto.Adapters.SQL.raise_sql_call_error/1
+        (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:992: Ecto.Adapters.SQL.insert_all/9
+        (ecto 3.14.3) lib/ecto/repo/schema.ex:86: Ecto.Repo.Schema.do_insert_all/7
+        (chat 0.1.0) lib/chat_web/channels/room_channel.ex:13: ChatWeb.RoomChannel.join/3
+        (phoenix 1.8.16) lib/phoenix/channel/server.ex:395: Phoenix.Channel.Server.channel_join/4
+        (phoenix 1.8.16) lib/phoenix/channel/server.ex:309: Phoenix.Channel.Server.handle_info/2
+        (stdlib 8.1.1) gen_server.erl:2434: :gen_server.try_handle_info/3
+        (stdlib 8.1.1) gen_server.erl:2420: :gen_server.handle_msg/3
+06:17:51.089 [error] GenServer #PID<0.65839.0> terminating
+** (DBConnection.ConnectionError) [Elixir.Chat.Repo] connection not available and request was dropped from queue after 101ms. This means requests are coming in and your connection pool cannot serve them fast enough. You can address this by:
+
+  1. Ensuring your database is available and that you can connect to it
+  2. Tracking down slow queries and making sure they are running fast enough
+  3. Increasing the pool_size (although this increases resource consumption)
+  4. Allowing requests to wait longer by increasing :queue_target and :queue_interval
+
+See DBConnection.start_link/2 for more information
+
+    (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:1121: Ecto.Adapters.SQL.raise_sql_call_error/1
+    (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:992: Ecto.Adapters.SQL.insert_all/9
+    (ecto 3.14.3) lib/ecto/repo/schema.ex:86: Ecto.Repo.Schema.do_insert_all/7
+    (chat 0.1.0) lib/chat_web/channels/room_channel.ex:13: ChatWeb.RoomChannel.join/3
+    (phoenix 1.8.16) lib/phoenix/channel/server.ex:395: Phoenix.Channel.Server.channel_join/4
+    (phoenix 1.8.16) lib/phoenix/channel/server.ex:309: Phoenix.Channel.Server.handle_info/2
+    (stdlib 8.1.1) gen_server.erl:2434: :gen_server.try_handle_info/3
+    (stdlib 8.1.1) gen_server.erl:2420: :gen_server.handle_msg/3
+Process Label: {Phoenix.Channel, ChatWeb.RoomChannel, "room:59"}
+Last message: {Phoenix.Channel, %{}, {#PID<0.65801.0>, #Reference<0.2609460547.3966238721.93751>}, %Phoenix.Socket{assigns: %{user_id: 810843}, channel: ChatWeb.RoomChannel, channel_pid: nil, endpoint: ChatWeb.Endpoint, handler: ChatWeb.UserSocket, id: nil, joined: false, join_ref: "1", private: %{}, pubsub_server: Chat.PubSub, ref: nil, serializer: Phoenix.Socket.V2.JSONSerializer, topic: "room:59", transport: :websocket, transport_pid: #PID<0.65801.0>}}
+06:17:51.089 [error] an exception was raised:
+    ** (DBConnection.ConnectionError) [Elixir.Chat.Repo] connection not available and request was dropped from queue after 101ms. This means requests are coming in and your connection pool cannot serve them fast enough. You can address this by:
+
+  1. Ensuring your database is available and that you can connect to it
+  2. Tracking down slow queries and making sure they are running fast enough
+  3. Increasing the pool_size (although this increases resource consumption)
+  4. Allowing requests to wait longer by increasing :queue_target and :queue_interval
+
+See DBConnection.start_link/2 for more information
+
+        (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:1121: Ecto.Adapters.SQL.raise_sql_call_error/1
+        (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:992: Ecto.Adapters.SQL.insert_all/9
+        (ecto 3.14.3) lib/ecto/repo/schema.ex:86: Ecto.Repo.Schema.do_insert_all/7
+        (chat 0.1.0) lib/chat_web/channels/room_channel.ex:13: ChatWeb.RoomChannel.join/3
+        (phoenix 1.8.16) lib/phoenix/channel/server.ex:395: Phoenix.Channel.Server.channel_join/4
+        (phoenix 1.8.16) lib/phoenix/channel/server.ex:309: Phoenix.Channel.Server.handle_info/2
+        (stdlib 8.1.1) gen_server.erl:2434: :gen_server.try_handle_info/3
+        (stdlib 8.1.1) gen_server.erl:2420: :gen_server.handle_msg/3
+06:17:51.089 [error] GenServer #PID<0.65761.0> terminating
+** (DBConnection.ConnectionError) [Elixir.Chat.Repo] connection not available and request was dropped from queue after 101ms. This means requests are coming in and your connection pool cannot serve them fast enough. You can address this by:
+
+  1. Ensuring your database is available and that you can connect to it
+  2. Tracking down slow queries and making sure they are running fast enough
+  3. Increasing the pool_size (although this increases resource consumption)
+  4. Allowing requests to wait longer by increasing :queue_target and :queue_interval
+
+See DBConnection.start_link/2 for more information
+
+    (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:1121: Ecto.Adapters.SQL.raise_sql_call_error/1
+    (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:992: Ecto.Adapters.SQL.insert_all/9
+    (ecto 3.14.3) lib/ecto/repo/schema.ex:86: Ecto.Repo.Schema.do_insert_all/7
+    (chat 0.1.0) lib/chat_web/channels/room_channel.ex:13: ChatWeb.RoomChannel.join/3
+    (phoenix 1.8.16) lib/phoenix/channel/server.ex:395: Phoenix.Channel.Server.channel_join/4
+    (phoenix 1.8.16) lib/phoenix/channel/server.ex:309: Phoenix.Channel.Server.handle_info/2
+    (stdlib 8.1.1) gen_server.erl:2434: :gen_server.try_handle_info/3
+    (stdlib 8.1.1) gen_server.erl:2420: :gen_server.handle_msg/3
+Process Label: {Phoenix.Channel, ChatWeb.RoomChannel, "room:55"}
+Last message: {Phoenix.Channel, %{}, {#PID<0.65760.0>, #Reference<0.2609460547.3966238721.93622>}, %Phoenix.Socket{assigns: %{user_id: 529344}, channel: ChatWeb.RoomChannel, channel_pid: nil, endpoint: ChatWeb.Endpoint, handler: ChatWeb.UserSocket, id: nil, joined: false, join_ref: "1", private: %{}, pubsub_server: Chat.PubSub, ref: nil, serializer: Phoenix.Socket.V2.JSONSerializer, topic: "room:55", transport: :websocket, transport_pid: #PID<0.65760.0>}}
+06:17:51.089 [error] an exception was raised:
+    ** (DBConnection.ConnectionError) [Elixir.Chat.Repo] connection not available and request was dropped from queue after 101ms. This means requests are coming in and your connection pool cannot serve them fast enough. You can address this by:
+
+  1. Ensuring your database is available and that you can connect to it
+  2. Tracking down slow queries and making sure they are running fast enough
+  3. Increasing the pool_size (although this increases resource consumption)
+  4. Allowing requests to wait longer by increasing :queue_target and :queue_interval
+
+See DBConnection.start_link/2 for more information
+
+        (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:1121: Ecto.Adapters.SQL.raise_sql_call_error/1
+        (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:992: Ecto.Adapters.SQL.insert_all/9
+        (ecto 3.14.3) lib/ecto/repo/schema.ex:86: Ecto.Repo.Schema.do_insert_all/7
+        (chat 0.1.0) lib/chat_web/channels/room_channel.ex:13: ChatWeb.RoomChannel.join/3
+        (phoenix 1.8.16) lib/phoenix/channel/server.ex:395: Phoenix.Channel.Server.channel_join/4
+        (phoenix 1.8.16) lib/phoenix/channel/server.ex:309: Phoenix.Channel.Server.handle_info/2
+        (stdlib 8.1.1) gen_server.erl:2434: :gen_server.try_handle_info/3
+        (stdlib 8.1.1) gen_server.erl:2420: :gen_server.handle_msg/3
+06:17:51.089 [error] an exception was raised:
+    ** (DBConnection.ConnectionError) [Elixir.Chat.Repo] connection not available and request was dropped from queue after 102ms. This means requests are coming in and your connection pool cannot serve them fast enough. You can address this by:
+
+  1. Ensuring your database is available and that you can connect to it
+  2. Tracking down slow queries and making sure they are running fast enough
+  3. Increasing the pool_size (although this increases resource consumption)
+  4. Allowing requests to wait longer by increasing :queue_target and :queue_interval
+
+See DBConnection.start_link/2 for more information
+
+        (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:1121: Ecto.Adapters.SQL.raise_sql_call_error/1
+        (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:992: Ecto.Adapters.SQL.insert_all/9
+        (ecto 3.14.3) lib/ecto/repo/schema.ex:86: Ecto.Repo.Schema.do_insert_all/7
+        (chat 0.1.0) lib/chat_web/channels/room_channel.ex:13: ChatWeb.RoomChannel.join/3
+        (phoenix 1.8.16) lib/phoenix/channel/server.ex:395: Phoenix.Channel.Server.channel_join/4
+        (phoenix 1.8.16) lib/phoenix/channel/server.ex:309: Phoenix.Channel.Server.handle_info/2
+        (stdlib 8.1.1) gen_server.erl:2434: :gen_server.try_handle_info/3
+        (stdlib 8.1.1) gen_server.erl:2420: :gen_server.handle_msg/3
+06:17:51.089 [error] GenServer #PID<0.65845.0> terminating
+** (DBConnection.ConnectionError) [Elixir.Chat.Repo] connection not available and request was dropped from queue after 101ms. This means requests are coming in and your connection pool cannot serve them fast enough. You can address this by:
+
+  1. Ensuring your database is available and that you can connect to it
+  2. Tracking down slow queries and making sure they are running fast enough
+  3. Increasing the pool_size (although this increases resource consumption)
+  4. Allowing requests to wait longer by increasing :queue_target and :queue_interval
+
+See DBConnection.start_link/2 for more information
+
+    (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:1121: Ecto.Adapters.SQL.raise_sql_call_error/1
+    (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:992: Ecto.Adapters.SQL.insert_all/9
+    (ecto 3.14.3) lib/ecto/repo/schema.ex:86: Ecto.Repo.Schema.do_insert_all/7
+    (chat 0.1.0) lib/chat_web/channels/room_channel.ex:13: ChatWeb.RoomChannel.join/3
+    (phoenix 1.8.16) lib/phoenix/channel/server.ex:395: Phoenix.Channel.Server.channel_join/4
+    (phoenix 1.8.16) lib/phoenix/channel/server.ex:309: Phoenix.Channel.Server.handle_info/2
+    (stdlib 8.1.1) gen_server.erl:2434: :gen_server.try_handle_info/3
+    (stdlib 8.1.1) gen_server.erl:2420: :gen_server.handle_msg/3
+Process Label: {Phoenix.Channel, ChatWeb.RoomChannel, "room:59"}
+Last message: {Phoenix.Channel, %{}, {#PID<0.65820.0>, #Reference<0.2609460547.3966238732.92580>}, %Phoenix.Socket{assigns: %{user_id: 243547}, channel: ChatWeb.RoomChannel, channel_pid: nil, endpoint: ChatWeb.Endpoint, handler: ChatWeb.UserSocket, id: nil, joined: false, join_ref: "1", private: %{}, pubsub_server: Chat.PubSub, ref: nil, serializer: Phoenix.Socket.V2.JSONSerializer, topic: "room:59", transport: :websocket, transport_pid: #PID<0.65820.0>}}
+06:17:51.089 [error] GenServer #PID<0.65783.0> terminating
+** (DBConnection.ConnectionError) [Elixir.Chat.Repo] connection not available and request was dropped from queue after 101ms. This means requests are coming in and your connection pool cannot serve them fast enough. You can address this by:
+
+  1. Ensuring your database is available and that you can connect to it
+  2. Tracking down slow queries and making sure they are running fast enough
+  3. Increasing the pool_size (although this increases resource consumption)
+  4. Allowing requests to wait longer by increasing :queue_target and :queue_interval
+
+See DBConnection.start_link/2 for more information
+
+    (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:1121: Ecto.Adapters.SQL.raise_sql_call_error/1
+    (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:992: Ecto.Adapters.SQL.insert_all/9
+    (ecto 3.14.3) lib/ecto/repo/schema.ex:86: Ecto.Repo.Schema.do_insert_all/7
+    (chat 0.1.0) lib/chat_web/channels/room_channel.ex:13: ChatWeb.RoomChannel.join/3
+    (phoenix 1.8.16) lib/phoenix/channel/server.ex:395: Phoenix.Channel.Server.channel_join/4
+    (phoenix 1.8.16) lib/phoenix/channel/server.ex:309: Phoenix.Channel.Server.handle_info/2
+    (stdlib 8.1.1) gen_server.erl:2434: :gen_server.try_handle_info/3
+    (stdlib 8.1.1) gen_server.erl:2420: :gen_server.handle_msg/3
+Process Label: {Phoenix.Channel, ChatWeb.RoomChannel, "room:59"}
+Last message: {Phoenix.Channel, %{}, {#PID<0.65770.0>, #Reference<0.2609460547.3966238723.96636>}, %Phoenix.Socket{assigns: %{user_id: 360983}, channel: ChatWeb.RoomChannel, channel_pid: nil, endpoint: ChatWeb.Endpoint, handler: ChatWeb.UserSocket, id: nil, joined: false, join_ref: "1", private: %{}, pubsub_server: Chat.PubSub, ref: nil, serializer: Phoenix.Socket.V2.JSONSerializer, topic: "room:59", transport: :websocket, transport_pid: #PID<0.65770.0>}}
+06:17:51.089 [error] GenServer #PID<0.65841.0> terminating
+** (DBConnection.ConnectionError) [Elixir.Chat.Repo] connection not available and request was dropped from queue after 101ms. This means requests are coming in and your connection pool cannot serve them fast enough. You can address this by:
+
+  1. Ensuring your database is available and that you can connect to it
+  2. Tracking down slow queries and making sure they are running fast enough
+  3. Increasing the pool_size (although this increases resource consumption)
+  4. Allowing requests to wait longer by increasing :queue_target and :queue_interval
+
+See DBConnection.start_link/2 for more information
+
+    (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:1121: Ecto.Adapters.SQL.raise_sql_call_error/1
+    (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:992: Ecto.Adapters.SQL.insert_all/9
+    (ecto 3.14.3) lib/ecto/repo/schema.ex:86: Ecto.Repo.Schema.do_insert_all/7
+    (chat 0.1.0) lib/chat_web/channels/room_channel.ex:13: ChatWeb.RoomChannel.join/3
+    (phoenix 1.8.16) lib/phoenix/channel/server.ex:395: Phoenix.Channel.Server.channel_join/4
+    (phoenix 1.8.16) lib/phoenix/channel/server.ex:309: Phoenix.Channel.Server.handle_info/2
+    (stdlib 8.1.1) gen_server.erl:2434: :gen_server.try_handle_info/3
+    (stdlib 8.1.1) gen_server.erl:2420: :gen_server.handle_msg/3
+Process Label: {Phoenix.Channel, ChatWeb.RoomChannel, "room:59"}
+Last message: {Phoenix.Channel, %{}, {#PID<0.65819.0>, #Reference<0.2609460547.3966238728.95954>}, %Phoenix.Socket{assigns: %{user_id: 494637}, channel: ChatWeb.RoomChannel, channel_pid: nil, endpoint: ChatWeb.Endpoint, handler: ChatWeb.UserSocket, id: nil, joined: false, join_ref: "1", private: %{}, pubsub_server: Chat.PubSub, ref: nil, serializer: Phoenix.Socket.V2.JSONSerializer, topic: "room:59", transport: :websocket, transport_pid: #PID<0.65819.0>}}
+06:17:51.089 [error] GenServer #PID<0.65791.0> terminating
+** (DBConnection.ConnectionError) [Elixir.Chat.Repo] connection not available and request was dropped from queue after 101ms. This means requests are coming in and your connection pool cannot serve them fast enough. You can address this by:
+
+  1. Ensuring your database is available and that you can connect to it
+  2. Tracking down slow queries and making sure they are running fast enough
+  3. Increasing the pool_size (although this increases resource consumption)
+  4. Allowing requests to wait longer by increasing :queue_target and :queue_interval
+
+See DBConnection.start_link/2 for more information
+
+    (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:1121: Ecto.Adapters.SQL.raise_sql_call_error/1
+    (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:992: Ecto.Adapters.SQL.insert_all/9
+    (ecto 3.14.3) lib/ecto/repo/schema.ex:86: Ecto.Repo.Schema.do_insert_all/7
+    (chat 0.1.0) lib/chat_web/channels/room_channel.ex:13: ChatWeb.RoomChannel.join/3
+    (phoenix 1.8.16) lib/phoenix/channel/server.ex:395: Phoenix.Channel.Server.channel_join/4
+    (phoenix 1.8.16) lib/phoenix/channel/server.ex:309: Phoenix.Channel.Server.handle_info/2
+    (stdlib 8.1.1) gen_server.erl:2434: :gen_server.try_handle_info/3
+    (stdlib 8.1.1) gen_server.erl:2420: :gen_server.handle_msg/3
+Process Label: {Phoenix.Channel, ChatWeb.RoomChannel, "room:59"}
+Last message: {Phoenix.Channel, %{}, {#PID<0.65784.0>, #Reference<0.2609460547.3966238731.90598>}, %Phoenix.Socket{assigns: %{user_id: 7071}, channel: ChatWeb.RoomChannel, channel_pid: nil, endpoint: ChatWeb.Endpoint, handler: ChatWeb.UserSocket, id: nil, joined: false, join_ref: "1", private: %{}, pubsub_server: Chat.PubSub, ref: nil, serializer: Phoenix.Socket.V2.JSONSerializer, topic: "room:59", transport: :websocket, transport_pid: #PID<0.65784.0>}}
+06:17:51.090 [error] an exception was raised:
+    ** (DBConnection.ConnectionError) [Elixir.Chat.Repo] connection not available and request was dropped from queue after 101ms. This means requests are coming in and your connection pool cannot serve them fast enough. You can address this by:
+
+  1. Ensuring your database is available and that you can connect to it
+  2. Tracking down slow queries and making sure they are running fast enough
+  3. Increasing the pool_size (although this increases resource consumption)
+  4. Allowing requests to wait longer by increasing :queue_target and :queue_interval
+
+See DBConnection.start_link/2 for more information
+
+        (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:1121: Ecto.Adapters.SQL.raise_sql_call_error/1
+        (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:992: Ecto.Adapters.SQL.insert_all/9
+        (ecto 3.14.3) lib/ecto/repo/schema.ex:86: Ecto.Repo.Schema.do_insert_all/7
+        (chat 0.1.0) lib/chat_web/channels/room_channel.ex:13: ChatWeb.RoomChannel.join/3
+        (phoenix 1.8.16) lib/phoenix/channel/server.ex:395: Phoenix.Channel.Server.channel_join/4
+        (phoenix 1.8.16) lib/phoenix/channel/server.ex:309: Phoenix.Channel.Server.handle_info/2
+        (stdlib 8.1.1) gen_server.erl:2434: :gen_server.try_handle_info/3
+        (stdlib 8.1.1) gen_server.erl:2420: :gen_server.handle_msg/3
+06:17:51.090 [error] an exception was raised:
+    ** (DBConnection.ConnectionError) [Elixir.Chat.Repo] connection not available and request was dropped from queue after 101ms. This means requests are coming in and your connection pool cannot serve them fast enough. You can address this by:
+
+  1. Ensuring your database is available and that you can connect to it
+  2. Tracking down slow queries and making sure they are running fast enough
+  3. Increasing the pool_size (although this increases resource consumption)
+  4. Allowing requests to wait longer by increasing :queue_target and :queue_interval
+
+See DBConnection.start_link/2 for more information
+
+        (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:1121: Ecto.Adapters.SQL.raise_sql_call_error/1
+        (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:992: Ecto.Adapters.SQL.insert_all/9
+        (ecto 3.14.3) lib/ecto/repo/schema.ex:86: Ecto.Repo.Schema.do_insert_all/7
+        (chat 0.1.0) lib/chat_web/channels/room_channel.ex:13: ChatWeb.RoomChannel.join/3
+        (phoenix 1.8.16) lib/phoenix/channel/server.ex:395: Phoenix.Channel.Server.channel_join/4
+        (phoenix 1.8.16) lib/phoenix/channel/server.ex:309: Phoenix.Channel.Server.handle_info/2
+        (stdlib 8.1.1) gen_server.erl:2434: :gen_server.try_handle_info/3
+        (stdlib 8.1.1) gen_server.erl:2420: :gen_server.handle_msg/3
+06:17:51.090 [error] an exception was raised:
+    ** (DBConnection.ConnectionError) [Elixir.Chat.Repo] connection not available and request was dropped from queue after 101ms. This means requests are coming in and your connection pool cannot serve them fast enough. You can address this by:
+
+  1. Ensuring your database is available and that you can connect to it
+  2. Tracking down slow queries and making sure they are running fast enough
+  3. Increasing the pool_size (although this increases resource consumption)
+  4. Allowing requests to wait longer by increasing :queue_target and :queue_interval
+
+See DBConnection.start_link/2 for more information
+
+        (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:1121: Ecto.Adapters.SQL.raise_sql_call_error/1
+        (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:992: Ecto.Adapters.SQL.insert_all/9
+        (ecto 3.14.3) lib/ecto/repo/schema.ex:86: Ecto.Repo.Schema.do_insert_all/7
+        (chat 0.1.0) lib/chat_web/channels/room_channel.ex:13: ChatWeb.RoomChannel.join/3
+        (phoenix 1.8.16) lib/phoenix/channel/server.ex:395: Phoenix.Channel.Server.channel_join/4
+        (phoenix 1.8.16) lib/phoenix/channel/server.ex:309: Phoenix.Channel.Server.handle_info/2
+        (stdlib 8.1.1) gen_server.erl:2434: :gen_server.try_handle_info/3
+        (stdlib 8.1.1) gen_server.erl:2420: :gen_server.handle_msg/3
+06:17:51.090 [error] an exception was raised:
+    ** (DBConnection.ConnectionError) [Elixir.Chat.Repo] connection not available and request was dropped from queue after 101ms. This means requests are coming in and your connection pool cannot serve them fast enough. You can address this by:
+
+  1. Ensuring your database is available and that you can connect to it
+  2. Tracking down slow queries and making sure they are running fast enough
+  3. Increasing the pool_size (although this increases resource consumption)
+  4. Allowing requests to wait longer by increasing :queue_target and :queue_interval
+
+See DBConnection.start_link/2 for more information
+
+        (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:1121: Ecto.Adapters.SQL.raise_sql_call_error/1
+        (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:992: Ecto.Adapters.SQL.insert_all/9
+        (ecto 3.14.3) lib/ecto/repo/schema.ex:86: Ecto.Repo.Schema.do_insert_all/7
+        (chat 0.1.0) lib/chat_web/channels/room_channel.ex:13: ChatWeb.RoomChannel.join/3
+        (phoenix 1.8.16) lib/phoenix/channel/server.ex:395: Phoenix.Channel.Server.channel_join/4
+        (phoenix 1.8.16) lib/phoenix/channel/server.ex:309: Phoenix.Channel.Server.handle_info/2
+        (stdlib 8.1.1) gen_server.erl:2434: :gen_server.try_handle_info/3
+        (stdlib 8.1.1) gen_server.erl:2420: :gen_server.handle_msg/3
+06:17:51.090 [error] an exception was raised:
+    ** (DBConnection.ConnectionError) [Elixir.Chat.Repo] connection not available and request was dropped from queue after 101ms. This means requests are coming in and your connection pool cannot serve them fast enough. You can address this by:
+
+  1. Ensuring your database is available and that you can connect to it
+  2. Tracking down slow queries and making sure they are running fast enough
+  3. Increasing the pool_size (although this increases resource consumption)
+  4. Allowing requests to wait longer by increasing :queue_target and :queue_interval
+
+See DBConnection.start_link/2 for more information
+
+        (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:1121: Ecto.Adapters.SQL.raise_sql_call_error/1
+        (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:992: Ecto.Adapters.SQL.insert_all/9
+        (ecto 3.14.3) lib/ecto/repo/schema.ex:86: Ecto.Repo.Schema.do_insert_all/7
+        (chat 0.1.0) lib/chat_web/channels/room_channel.ex:13: ChatWeb.RoomChannel.join/3
+        (phoenix 1.8.16) lib/phoenix/channel/server.ex:395: Phoenix.Channel.Server.channel_join/4
+        (phoenix 1.8.16) lib/phoenix/channel/server.ex:309: Phoenix.Channel.Server.handle_info/2
+        (stdlib 8.1.1) gen_server.erl:2434: :gen_server.try_handle_info/3
+        (stdlib 8.1.1) gen_server.erl:2420: :gen_server.handle_msg/3
+06:17:51.090 [error] an exception was raised:
+    ** (DBConnection.ConnectionError) [Elixir.Chat.Repo] connection not available and request was dropped from queue after 101ms. This means requests are coming in and your connection pool cannot serve them fast enough. You can address this by:
+
+  1. Ensuring your database is available and that you can connect to it
+  2. Tracking down slow queries and making sure they are running fast enough
+  3. Increasing the pool_size (although this increases resource consumption)
+  4. Allowing requests to wait longer by increasing :queue_target and :queue_interval
+
+See DBConnection.start_link/2 for more information
+
+        (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:1121: Ecto.Adapters.SQL.raise_sql_call_error/1
+        (ecto_sql 3.14.0) lib/ecto/adapters/sql.ex:992: Ecto.Adapters.SQL.insert_all/9
+        (ecto 3.14.3) lib/ecto/repo/schema.ex:86: Ecto.Repo.Schema.do_insert_all/7
+        (chat 0.1.0) lib/chat_web/channels/room_channel.ex:13: ChatWeb.RoomChannel.join/3
+        (phoenix 1.8.16) lib/phoenix/channel/server.ex:395: Phoenix.Channel.Server.channel_join/4
+        (phoenix 1.8.16) lib/phoenix/channel/server.ex:309: Phoenix.Channel.Server.handle_info/2
+        (stdlib 8.1.1) gen_server.erl:2434: :gen_server.try_handle_info/3
+        (stdlib 8.1.1) gen_server.erl:2420: :gen_server.handle_msg/3

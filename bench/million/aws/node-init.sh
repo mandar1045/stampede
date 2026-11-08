@@ -16,7 +16,7 @@ iptables -A INPUT -i lo -j ACCEPT
 iptables -A INPUT -p tcp --dport 22 -s __OPERATOR_IP__ -j ACCEPT
 iptables -A INPUT -p tcp --dport 22 -s __VPC_CIDR__ -j ACCEPT
 iptables -A INPUT -p tcp --dport 22 -j DROP
-iptables -A INPUT -p tcp -m multiport --dports 4369,9100:9110,11434 ! -s __VPC_CIDR__ -j DROP
+iptables -A INPUT -p tcp -m multiport --dports 4369,5432,9100:9110,11434 ! -s __VPC_CIDR__ -j DROP
 
 # Room for a million connections.
 cat > /etc/sysctl.d/90-stampede.conf <<'CONF'
@@ -26,7 +26,7 @@ net.core.somaxconn = 65535
 net.core.netdev_max_backlog = 65535
 net.ipv4.tcp_max_syn_backlog = 65535
 net.ipv4.ip_local_port_range = 1024 65535
-net.ipv4.ip_local_reserved_ports = 4369,9100-9110,11434
+net.ipv4.ip_local_reserved_ports = 4369,5432,9100-9110,11434
 net.ipv4.tcp_tw_reuse = 1
 CONF
 sysctl --system

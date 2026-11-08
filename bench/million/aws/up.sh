@@ -46,7 +46,7 @@ launched=()
 trap 'if [ ${#launched[@]} -gt 0 ]; then echo "Failed, terminating ${launched[*]}"; aws ec2 terminate-instances --instance-ids "${launched[@]}" > /dev/null; fi' ERR
 
 launch() {
-  local role=$1 type=$2 count=$3 extra_ips=$4 credits=() network
+  local role=$1 type=$2 count=$3 extra_ips=$4 size=${5:-20} credits=() network
   network="DeviceIndex=0,SubnetId=$subnet,Groups=$sg,AssociatePublicIpAddress=true"
   if [ "$extra_ips" -gt 0 ]; then network+=",SecondaryPrivateIpAddressCount=$extra_ips"; fi
   # Burstable types could otherwise bill for extra CPU credits.
@@ -56,7 +56,7 @@ launch() {
     --instance-initiated-shutdown-behavior terminate "${credits[@]}" \
     --metadata-options HttpTokens=required,HttpEndpoint=enabled \
     --network-interfaces "$network" \
-    --block-device-mappings 'DeviceName=/dev/sda1,Ebs={VolumeSize=20,VolumeType=gp3,DeleteOnTermination=true}' \
+    --block-device-mappings "DeviceName=/dev/sda1,Ebs={VolumeSize=$size,VolumeType=gp3,DeleteOnTermination=true}" \
     --tag-specifications "ResourceType=instance,Tags=[{Key=Project,Value=$TAG},{Key=Name,Value=$TAG-$role},{Key=Role,Value=$role}]" \
     "ResourceType=volume,Tags=[{Key=Project,Value=$TAG}]" \
     --query 'Instances[].InstanceId' --output text
@@ -66,6 +66,11 @@ server=$(launch server "$SERVER_TYPE" 1 0)
 launched+=($server)
 loaders=$(launch loader "$LOADER_TYPE" "$LOADERS" "$SOURCE_IPS")
 launched+=($loaders)
+if [ -n "$DB_TYPE" ]; then
+  db=$(launch db "$DB_TYPE" 1 0 "$DB_VOLUME_GB")
+  launched+=($db)
+  echo "Launched database $db"
+fi
 echo "Launched server $server and loaders $loaders"
 
 # The second kill switch, run by AWS rather than the machines.

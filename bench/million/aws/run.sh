@@ -18,7 +18,7 @@ ramp=${3:-60}
 hold=${4:-60}
 stampede_args=("${@:5}")
 # NO_PROBE=1 runs without watching the app, to compare what watching costs.
-load_env="PAUSE=${PAUSE:-30-60} ${STEP_RAMP:+STEP_RAMP=$STEP_RAMP}"
+load_env="PAUSE=${PAUSE:-30-60} ${STEP_RAMP:+STEP_RAMP=$STEP_RAMP} ${LOAD_ENV:-}"
 name="$(date -u +%Y%m%d-%H%M)-$scenario-$vus"
 mkdir -p "$RESULTS/$name"
 
@@ -48,8 +48,9 @@ echo "Starting the app on $server_private"
 stop_old "$server_public"
 start_monitor "$server_public"
 secret=$(head -c 64 /dev/urandom | base64 -w0)
-on "$server_public" "cd stampede/bench/million/app || exit 1; MIX_ENV=prod PHX_SERVER=true PORT=4000 \
-  PHX_HOST=$server_private LOG_LEVEL=warning SECRET_KEY_BASE=$secret \
+# APP picks the app, and APP_ENV adds to its environment, such as a DATABASE_URL.
+on "$server_public" "cd stampede/bench/million/${APP:-app} || exit 1; MIX_ENV=prod PHX_SERVER=true PORT=4000 \
+  PHX_HOST=$server_private LOG_LEVEL=warning SECRET_KEY_BASE=$secret ${APP_ENV:-} \
   setsid nohup elixir --name app@$server_private --cookie $cookie --erl '$erl_flags' -S mix phx.server \
   > ~/server.log 2>&1 < /dev/null &"
 for _ in $(seq 60); do
@@ -101,7 +102,7 @@ on "$public" "rm -f run.log results.json report.html
 sleep 20
 if [ -n "${PROOF:-}" ]; then
   ssh "${SSH_OPTS[@]}" -f -N -L 14040:127.0.0.1:4040 "ubuntu@$public"
-  "$HERE/../proof/record.py" "http://127.0.0.1:14040" "$proof_out/stampede-dashboard" "${PROOF_SECONDS:-5400}" --port 2871 --every 2 > "$proof_out/recorder.log" 2>&1 &
+  "$HERE/../proof/record.py" "http://127.0.0.1:14040" "$proof_out/stampede-dashboard" "${PROOF_SECONDS:-5400}" --port 2871 --every 2 --height "${PROOF_HEIGHT:-1900}" > "$proof_out/recorder.log" 2>&1 &
   recorder=$!
   # A real recording of the terminal, to replay with scriptreplay.
   follow='tail -n +1 -F run.log & tailing=$!

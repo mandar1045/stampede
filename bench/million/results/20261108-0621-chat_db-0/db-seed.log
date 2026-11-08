@@ -1,0 +1,33 @@
+Timing is on.
+TRUNCATE TABLE
+Time: 4.082 ms
+INSERT 0 1000000
+Time: 2416.202 ms (00:02.416)
+INSERT 0 10000
+Time: 24.296 ms
+DROP INDEX
+Time: 0.873 ms
+DROP INDEX
+Time: 0.595 ms
+ALTER TABLE
+Time: 0.680 ms
+ALTER TABLE
+Time: 0.587 ms
+INSERT 0 100000000
+Time: 568302.214 ms (09:28.302)
+CREATE INDEX
+Time: 210331.914 ms (03:30.332)
+CREATE INDEX
+Time: 47749.629 ms (00:47.750)
+ALTER TABLE
+Time: 1.389 ms
+ALTER TABLE
+Time: 0.663 ms
+VACUUM
+Time: 24128.188 ms (00:24.128)
+ messages  | size  
+-----------+-------
+ 100000000 | 18 GB
+(1 row)
+
+Time: 5863.407 ms (00:05.863)
