@@ -15,7 +15,7 @@ You don't need a project, just [Elixir](https://elixir-lang.org/install.html).
 Save this as `chat.exs`, and change the URL and the model to yours:
 
 ```elixir
-Mix.install([{:stampede, "~> 1.3"}])
+Mix.install([{:stampede, "~> 1.4"}])
 
 defmodule Chat do
   use Stampede.Scenario

@@ -1,6 +1,14 @@
 # Changelog
 
-## Unreleased
+## v1.4.0 (2026-11-08)
+
+After the 2,000,000 run, the question I kept getting was: what about a real
+database? So I load tested a chat app that keeps every message in Postgres,
+with 100 million messages in it, and it held 40,000 users on one 16-core
+server, with Postgres on a machine of its own. That test is why the probe now
+watches your database, and why a `--find-limit` verdict tells you which part
+gave out. Runs also show up where you already work now, in your app's
+LiveDashboard and in Livebook.
 
   * `--probe` watches your database too. It sends how long queries waited for
     a connection from the Ecto pool every second, and for a Postgres repo it

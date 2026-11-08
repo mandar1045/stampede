@@ -69,7 +69,7 @@ Without Igniter, add it to your dependencies:
 ```elixir
 def deps do
   [
-    {:stampede, "~> 1.3", only: [:dev, :test]}
+    {:stampede, "~> 1.4", only: [:dev, :test]}
   ]
 end
 ```
@@ -724,7 +724,7 @@ running across a network.
 A load test can also be a plain script:
 
 ```elixir
-Mix.install([{:stampede, "~> 1.3"}])
+Mix.install([{:stampede, "~> 1.4"}])
 
 defmodule Lobby do
   use Stampede.Scenario
