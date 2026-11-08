@@ -14,6 +14,15 @@
     it to your app's dashboard, and a run that probes the app shows in a
     Stampede tab while it runs, next to the dashboard's own pages. Finished
     runs stay there, with the same results as the HTML report
+  * Load tests in Livebook. With Kino in the notebook, a **Load test** smart
+    cell writes and runs a scenario for a page, a LiveView, a channel or an AI
+    chat API, and can probe your app's node. `Stampede.Kino.run/2` shows any
+    run in the notebook while it goes, and any `Stampede.Result` shows as the
+    report
+  * The bench has a new result: a chat app that keeps every message in
+    Postgres, seeded with 100 million messages, held 40,000 users with no
+    errors on one 16-core server, with Postgres on an 8-core machine of its
+    own
 
 ## v1.3.2 (2026-11-04)
 

@@ -36,8 +36,7 @@ defmodule Stampede.MixProject do
       {:telemetry, "~> 1.0"},
       {:igniter, "~> 0.8", optional: true},
       {:phoenix_live_dashboard, "~> 0.8", optional: true},
-      {:phoenix, "~> 1.7", optional: true},
-      {:phoenix_live_view, "~> 1.0", optional: true},
+      {:kino, "~> 0.14", optional: true},
       {:bandit, "~> 1.0", only: :test},
       {:postgrex, ">= 0.0.0", only: :test},
       {:ex_doc, "~> 0.34", only: :dev, runtime: false}
@@ -90,7 +89,8 @@ defmodule Stampede.MixProject do
           Stampede.Result,
           Stampede.Reporter,
           Stampede.Dashboard,
-          Stampede.LiveDashboard
+          Stampede.LiveDashboard,
+          Stampede.Kino
         ],
         Recording: [Stampede.Recorder]
       ]

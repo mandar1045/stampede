@@ -182,7 +182,8 @@ defmodule Stampede.Reporter.HTML do
                 ]
                 |> IO.iodata_to_binary()
 
-  @js """
+  # The charts' tooltips. Livebook runs this too, inside Stampede.Kino.
+  @chart_js """
   const setupCharts = (root) => {
   for (const chart of root.querySelectorAll(".chart")) {
     const data = JSON.parse(chart.dataset.points);
@@ -248,9 +249,9 @@ defmodule Stampede.Reporter.HTML do
     });
   }
   };
-
-  setupCharts(document);
   """
+
+  @js @chart_js <> "\nsetupCharts(document);\n"
 
   # The dashboard asks for its runs every second, with the version it has,
   # and gets them back only when they changed.
@@ -308,6 +309,9 @@ defmodule Stampede.Reporter.HTML do
   # The styles that `embedded/1` needs, scoped to an element with the
   # `stampede` class.
   def embedded_css, do: @embedded_css
+
+  # What sets up the charts' tooltips in an element, as `setupCharts(root)`.
+  def chart_js, do: @chart_js
 
   defp run(%{result: %Result{} = result} = run, links), do: scenario(result, run.id, links)
   defp run(run, _links), do: live(run)

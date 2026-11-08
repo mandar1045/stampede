@@ -742,6 +742,26 @@ IO.puts(Stampede.Reporter.format(result))
 System.halt(if result.passed?, do: 0, else: 1)
 ```
 
+## In Livebook
+
+[![Run in Livebook](https://livebook.dev/badge/v1/blue.svg)](https://livebook.dev/run?url=https%3A%2F%2Fgithub.com%2Fmandar1045%2Fstampede%2Fblob%2Fmain%2Fnotebooks%2Fload_test.livemd)
+
+Add Stampede and Kino to a notebook, and pick **Load test** from the
+**+ Smart** menu:
+
+```elixir
+Mix.install([{:stampede, "~> 1.4"}, {:kino, "~> 0.14"}])
+```
+
+You fill in what to load test, a page, a LiveView, a channel or an AI chat
+API, and how many users, and it writes the scenario for you. The run shows in
+the notebook while it goes, like the dashboard, and the result shows as the
+report. Give it your app's node and cookie, and you get the app's own numbers
+too. The badge above opens a notebook that starts a small server to try it on.
+
+From code, `Stampede.Kino.run/2` does the same for any scenario, and any
+`Stampede.Result` shows as the report.
+
 ## Guides
 
   * [Pages behind a login](https://stampede.hexdocs.pm/login.html)

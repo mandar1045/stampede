@@ -1,0 +1,82 @@
+# Load testing with Stampede
+
+```elixir
+Mix.install([
+  {:stampede, "~> 1.4"},
+  {:kino, "~> 0.14"},
+  # Only for the small server below.
+  {:bandit, "~> 1.0"}
+])
+```
+
+## Something to load test
+
+This starts a tiny web server inside the notebook, so there's something to point
+the load test at. To test your own app, skip it and put your app's URL in the
+load test below.
+
+```elixir
+defmodule Hello do
+  import Plug.Conn
+
+  def init(opts), do: opts
+
+  def call(conn, _opts) do
+    # A little work, like rendering a small page.
+    body = for i <- 1..100, into: "", do: "<li>item #{i}</li>"
+    send_resp(conn, 200, "<ul>" <> body <> "</ul>")
+  end
+end
+
+# Only this machine can reach it.
+Kino.start_child!({Bandit, plug: Hello, port: 4321, ip: :loopback})
+```
+
+## The load test
+
+This is a **Load test** smart cell, from the **+ Smart** menu. It ramps up to 50
+users over 10 seconds, holds them for 20, and fails if the page's p95 goes over
+100ms. Change the fields and run it again, or turn it into code to write your
+own scenario.
+
+If your app runs as a named node, put its name and cookie in the probe fields, and
+you'll see its schedulers, memory and processes next to the load.
+
+<!-- livebook:{"attrs":"eyJuYW1lIjoiTG9hZFRlc3QiLCJraW5kIjoiaHR0cCIsInVybCI6Imh0dHA6Ly9sb2NhbGhvc3Q6NDMyMS8iLCJ0b3BpYyI6InJvb206bG9iYnkiLCJldmVudCI6InBpbmciLCJtb2RlbCI6InF3ZW4yLjU6MC41YiIsInZ1cyI6NTAsInJhbXAiOjEwLCJob2xkIjoyMCwicGF1c2UiOjEsInA5NSI6MTAwLCJwcm9iZSI6IiIsImNvb2tpZSI6IiJ9","chunks":null,"kind":"Elixir.Stampede.Kino.SmartCell","livebook_object":"smart_cell"} -->
+
+```elixir
+defmodule LoadTest do
+  use Stampede.Scenario
+
+  @impl true
+  def run(_vu) do
+    {:ok, response} = Stampede.HTTP.get("http://localhost:4321/")
+    Stampede.check("status is 200", response.status == 200)
+    Process.sleep(to_timeout(second: 1))
+  end
+end
+
+Stampede.Kino.run(LoadTest,
+  stages: [{[second: 10], 50}, {[second: 20], 50}],
+  thresholds: [{"http.request", p95: 100}, {"iteration.errors", count: 0}]
+)
+```
+
+## From code
+
+`Stampede.Kino.run/2` takes any scenario, with the same options as
+`Stampede.run/2`:
+
+```elixir
+defmodule Burst do
+  use Stampede.Scenario
+
+  @impl true
+  def run(_vu) do
+    {:ok, response} = Stampede.HTTP.get("http://localhost:4321/")
+    Stampede.check("status is 200", response.status == 200)
+  end
+end
+
+Stampede.Kino.run(Burst, vus: 20, duration: [second: 10])
+```

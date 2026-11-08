@@ -131,11 +131,11 @@ if Code.ensure_loaded?(Phoenix.LiveDashboard.PageBuilder) do
       ~H"""
       <style nonce={@csp_nonces[:style]}><%= Phoenix.HTML.raw(Reporter.HTML.embedded_css()) %></style>
       <div :if={@error} class="card mb-4">
-        <div class="card-body">{@error}</div>
+        <div class="card-body"><%= @error %></div>
       </div>
       <div :if={!@error and @runs == []} class="card mb-4">
         <div class="card-body">
-          No runs yet. Start a load test with <code>--probe {@page.node}</code>,
+          No runs yet. Start a load test with <code>--probe <%= @page.node %></code>,
           and it shows here while it runs.
         </div>
       </div>
@@ -153,11 +153,11 @@ if Code.ensure_loaded?(Phoenix.LiveDashboard.PageBuilder) do
             <tbody>
               <tr :for={run <- @runs} class={if shown?(run, @shown), do: "table-active"}>
                 <td class="pl-4">
-                  <.link patch={live_dashboard_path(@socket, @page, run: run.id)}>#{run.id}</.link>
+                  <.link patch={live_dashboard_path(@socket, @page, run: run.id)}>#<%= run.id %></.link>
                 </td>
-                <td><code>{inspect(run.scenario)}</code></td>
-                <td>{status(run)}</td>
-                <td class="text-right pr-4">{duration(run)}</td>
+                <td><code><%= inspect(run.scenario) %></code></td>
+                <td><%= status(run) %></td>
+                <td class="text-right pr-4"><%= duration(run) %></td>
               </tr>
             </tbody>
           </table>
@@ -165,7 +165,7 @@ if Code.ensure_loaded?(Phoenix.LiveDashboard.PageBuilder) do
       </div>
       <div :if={@html} class="card mb-4">
         <div class="card-body stampede" id="stampede-run">
-          {Phoenix.HTML.raw(@html)}
+          <%= Phoenix.HTML.raw(@html) %>
         </div>
       </div>
       """
