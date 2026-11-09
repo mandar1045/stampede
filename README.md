@@ -9,7 +9,7 @@ Load testing for Phoenix that speaks Phoenix: Channels, LiveView, HTTP and
 plain WebSockets, with scenarios written in Elixir. It load tests AI chat APIs
 too, such as Ollama or vLLM.
 
-![The dashboard following a real run, sped up, as one Phoenix server climbs to 2,000,000 users with 0 errors](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/dashboard-2m.gif)
+![The dashboard following the 600,000-user run, replayed from its saved results and sped up, as one 4-core Phoenix server climbs to 600,000 users with 0 errors](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/dashboard-600k.gif)
 
 | What I load tested | Server | It held |
 |---|---|---|
@@ -220,7 +220,12 @@ many users, and it writes and runs the scenario:
 Mix.install([{:stampede, "~> 1.4"}, {:kino, "~> 0.14"}])
 ```
 
-![The Load test smart cell in Livebook, sped up: the run shows live, then the report with the app's own numbers](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/livebook-smart-cell.gif)
+![The Load test smart cell in Livebook: what to load test, how many users, and the app's node to probe](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/livebook-smart-cell-form.png)
+
+Any `Stampede.Result` shows as the report in a notebook, so a saved run looks
+like this:
+
+![The 600,000-user run's saved results shown as the report in Livebook](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/livebook-report-600k.png)
 
 **A file.** `--html report.html` writes the same charts into one file with
 nothing else to load, for CI to keep. `--out results.json` saves everything,
@@ -247,8 +252,6 @@ second at p95 and no errors:
 
 Memory came to about 51 KB a user, so the CPU set the limit: two million users
 send well over 100,000 heartbeats and messages a second.
-
-![The dashboard at 2,000,000 users, with the server's own CPU, memory and processes](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/benchmark-2m.png)
 
 The best-known Phoenix number is the core team's 2 million connections from
 2015, on a 40-core machine, where each connection joined and then sat idle.

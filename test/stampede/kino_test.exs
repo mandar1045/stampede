@@ -51,8 +51,13 @@ defmodule Stampede.KinoTest do
 
     assert %{type: :js, js_view: %{ref: _ref}} = report
     assert %{type: :terminal_text} = raw
-    assert Stampede.Kino.js() =~ "const setupCharts"
-    assert Stampede.Kino.js() =~ ".stampede .tile"
+
+    js =
+      Stampede.Kino.js(Stampede.Reporter.HTML.embedded_css(), Stampede.Reporter.HTML.chart_js())
+
+    assert js =~ "const setupCharts"
+    assert js =~ ".stampede .tile"
+    assert js =~ ".stampede .band.held"
   end
 
   describe "the smart cell" do

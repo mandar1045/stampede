@@ -74,9 +74,9 @@ if Code.ensure_loaded?(Kino) do
     @doc false
     # The page that shows a run or a result, with the report's styles and
     # tooltips, light only like LiveDashboard's.
-    def js do
+    def js(report_css, chart_js) do
       css =
-        Reporter.HTML.embedded_css() <>
+        report_css <>
           """
           .stampede {
             background: var(--page);
@@ -87,7 +87,7 @@ if Code.ensure_loaded?(Kino) do
           """
 
       """
-      #{Reporter.HTML.chart_js()}
+      #{chart_js}
       const css = #{JSON.encode!(css)};
 
       export function init(ctx, html) {
@@ -122,8 +122,10 @@ if Code.ensure_loaded?(Kino) do
       Kino.JS.new(__MODULE__, Stampede.Reporter.HTML.embedded(%{id: nil, result: result}))
     end
 
+    # Calling the report here, not only from js/2, makes this rebuild when the
+    # report's styles change.
     asset "main.js" do
-      Stampede.Kino.js()
+      Stampede.Kino.js(Stampede.Reporter.HTML.embedded_css(), Stampede.Reporter.HTML.chart_js())
     end
   end
 
@@ -181,8 +183,10 @@ if Code.ensure_loaded?(Kino) do
       :exit, _reason -> ctx
     end
 
+    # Calling the report here, not only from js/2, makes this rebuild when the
+    # report's styles change.
     asset "main.js" do
-      Stampede.Kino.js()
+      Stampede.Kino.js(Stampede.Reporter.HTML.embedded_css(), Stampede.Reporter.HTML.chart_js())
     end
   end
 
