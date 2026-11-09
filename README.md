@@ -9,7 +9,7 @@ Load testing for Phoenix that speaks Phoenix: Channels, LiveView, HTTP and
 plain WebSockets, with scenarios written in Elixir. It load tests AI chat APIs
 too, such as Ollama or vLLM.
 
-![The dashboard following the 600,000-user run, replayed from its saved results and sped up, as one 4-core Phoenix server climbs to 600,000 users with 0 errors](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/dashboard-600k.gif)
+![The dashboard following a real run, sped up, as one Phoenix server climbs to 2,000,000 users with 0 errors](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/dashboard-2m.gif)
 
 | What I load tested | Server | It held |
 |---|---|---|
@@ -251,7 +251,10 @@ second at p95 and no errors:
 | **2,000,000** | **78–84%** | **103 GB** |
 
 Memory came to about 51 KB a user, so the CPU set the limit: two million users
-send well over 100,000 heartbeats and messages a second.
+send well over 100,000 heartbeats and messages a second. This is the dashboard
+at the end of the 2,000,000 step:
+
+![The dashboard at 2,000,000 users, with the server's own CPU, memory and processes](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/benchmark-2m.png)
 
 The best-known Phoenix number is the core team's 2 million connections from
 2015, on a 40-core machine, where each connection joined and then sat idle.
@@ -262,7 +265,10 @@ This was 16 cores, with every user active.
 Stock Phoenix on one 4-core, 32 GB server held 600,000 users with no errors.
 At the 600,000 step, joins took 31ms and messages 10ms at p95, at 76% CPU. Its
 memory was 98% full by then, about 47 KB a connection, so that's as far as
-this server goes. The report is [above](#find-your-limit).
+this server goes. Here's that run replayed from its saved results in the
+dashboard, with its report [above](#find-your-limit):
+
+![The dashboard following the 600,000-user run, replayed from its saved results and sped up, through every find-limit step to 600,000 users with 0 errors](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/dashboard-600k.gif)
 
 ### 50,000 users on a real product
 
