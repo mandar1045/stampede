@@ -16,6 +16,7 @@ too, such as Ollama or vLLM.
 | Stock Phoenix, with Channels | 16 cores, 128 GB | **2,000,000 users** |
 | Stock Phoenix, with Channels | 4 cores, 32 GB | **600,000 users** |
 | A real open source Phoenix product, with 100 users in each channel | 4 cores, 32 GB | **50,000 users for 10 minutes**, with 80.9 million messages delivered |
+| A chat app that keeps every message in Postgres, 100 million of them | 16 cores, 128 GB, with Postgres on 8 more | **40,000 users**, each one reading and writing the database |
 
 What it does for you:
 
@@ -23,12 +24,12 @@ What it does for you:
     and tells you the most that held.
   * **Writes the test for you.** `mix stampede.record` turns you clicking through
     your app into a load test, signing in included.
-  * **Sees inside your app.** `--probe` shows what the server was doing during the
-    run, with no changes to your app.
+  * **Sees inside your app.** `--probe` shows what the server and its database
+    were doing during the run, and why a step broke, with no changes to your app.
   * **Knows Phoenix.** Joins, heartbeats, LiveView tokens and uploads are handled
     for you, so a scenario is just what a user does.
-  * **Fits your workflow.** Scenarios are plain Elixir, and a failed threshold
-    fails your CI.
+  * **Fits your workflow.** Scenarios are plain Elixir, a failed threshold fails
+    your CI, and runs show up in your app's LiveDashboard and in Livebook.
 
 [Install](#installation) ·
 [First test](#your-first-load-test) ·
@@ -37,6 +38,7 @@ What it does for you:
 [Inside your app](#inside-your-app) ·
 [LiveView](#liveview) ·
 [AI chat APIs](#ai-chat-apis) ·
+[Livebook](#in-livebook) ·
 [Guides](#guides)
 
 ## Why I built this
@@ -154,7 +156,12 @@ live_dashboard "/dashboard",
 ```
 
 Then a run with [`--probe`](#inside-your-app) shows up in a Stampede
-tab while it runs, right next to the dashboard's processes and ports.
+tab while it runs, right next to the dashboard's processes and ports:
+
+![A probed run in LiveDashboard's Stampede tab, sped up, ramping to 200 users with 0 errors next to the run before it](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/livedashboard-tab.gif)
+
+Finished runs stay there after the load test has gone, and the tab keeps the
+last 20.
 
 ## How many users can it handle?
 
@@ -302,6 +309,33 @@ It's one workload, on public channels with no TLS, so the
 [case study](https://stampede.hexdocs.pm/supabase_realtime.html) has what it doesn't show, and how to run
 it yourself.
 
+### 40,000 users on a chat app with a real database
+
+The runs above barely touch a database, and the question I got most after the
+2,000,000 one was what happens with a real one. So this is a chat app that
+keeps every message in Postgres: a fresh `mix phx.new` app with Ecto's default
+pool of 10, and Postgres 17 with its default settings on a machine of its own,
+seeded with 1 million users, 10,000 rooms and 100 million messages. Each user
+joins a room of about 100 people, which reads the room's latest 50 messages,
+then every 30 to 60 seconds sends a message, which is written before the reply
+comes back, or scrolls up for older ones.
+
+![The dashboard following the chat app, sped up, as it climbs to 40,000 users with 0 errors](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/postgres-chat-40k.gif)
+
+| Users | Join p95 | Send p95 | Scroll up p95 | Errors |
+|---:|---:|---:|---:|---:|
+| 20,000 | 4.58ms | 3.20ms | 38.96ms | 0 |
+| **40,000** | **6.31ms** | **178.14ms** | **167.77ms** | **0** |
+
+That's a much smaller number than 2,000,000, and it should be: every one of
+those users reads and writes a real database. Past 40,000 it ran into three
+limits at once: the app's schedulers were 96% busy, queries spent nearly all
+their time waiting for one of the pool's 10 connections, and Postgres was
+mostly waiting to write its log to disk. Working that out by hand is what made
+me teach `--probe` to watch the database, so now the verdict says it for you. The app, the
+seed and every log are in
+[`bench/million`](https://github.com/mandar1045/stampede/tree/main/bench/million#a-chat-app-on-postgres-with-100-million-messages-november-8-2026).
+
 ### 12,000 LiveView users on my laptop
 
 Before that, I'd tried it on my laptop: a fresh Phoenix app in production
@@ -419,8 +453,22 @@ You get how busy its schedulers were, its memory, processes and run queue
 every second, charted in the dashboard and the HTML report, and its longest
 message queues. Phoenix requests, channel events, LiveView events and Ecto
 queries come back as `server.*` metrics, with percentiles, and you can set
-thresholds on them like any other metric. When a `--find-limit` step fails,
-the verdict tells you if the server's schedulers were the ones that ran out.
+thresholds on them like any other metric.
+
+It watches your database too. With an Ecto repo, you get how long queries
+waited for a connection from the pool, every second. With Postgres, the probe
+opens one connection of its own, outside your pool, and reads Postgres's own
+commits, rows written and read, connections and what its sessions were waiting
+on. When a `--find-limit` step fails, the verdict puts that together and says
+why. Here it is on my laptop, with Postgres held to a fifth of a CPU so that it
+would be the limit:
+
+```
+  limit
+    Held 250 VUs. At 350 VUs, iteration.errors count was 64, over 0. Queries waited up to
+    171.94ms for one of the database pool's 2 connections. Postgres was mostly busy running
+    queries. The app's schedulers were only 16% busy, so the database was the limit, not the app.
+```
 
 Here's what the probe saw on the way to 600,000 users, with 1.2 million
 processes on 4 cores:
@@ -752,6 +800,8 @@ Add Stampede and Kino to a notebook, and pick **Load test** from the
 ```elixir
 Mix.install([{:stampede, "~> 1.4"}, {:kino, "~> 0.14"}])
 ```
+
+![The Load test smart cell in Livebook, sped up: the run shows live, then the report with the app's own numbers](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/livebook-smart-cell.gif)
 
 You fill in what to load test, a page, a LiveView, a channel or an AI chat
 API, and how many users, and it writes the scenario for you. The run shows in
