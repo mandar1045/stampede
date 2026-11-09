@@ -42,6 +42,51 @@ defmodule Stampede.Reporter do
   end
 
   @doc """
+  Reads results back from the JSON that `to_json/1`, or `mix stampede.run
+  --out`, wrote, so they can be reported again, such as with `to_html/1`.
+
+  Takes one result or a list of them, and always returns a list. Meant for
+  your own files, as it makes atoms of the names in them.
+  """
+  @spec from_json(String.t()) :: [Result.t()]
+  def from_json(json) when is_binary(json) do
+    json
+    |> JSON.decode!()
+    |> List.wrap()
+    |> Enum.map(&result_from_json/1)
+  end
+
+  # Metrics and Postgres's waits are keyed by their own names, which stay
+  # strings. Everything else is keyed by a field.
+  @named_keys ["metrics", "waits", "database_waits"]
+  @atom_values ["type", "stat", "by"]
+
+  defp result_from_json(%{} = map) do
+    fields = from_json_value(map, nil)
+    scenario = Module.concat([fields.scenario])
+    struct!(Result, %{fields | scenario: scenario})
+  end
+
+  defp from_json_value(%{} = map, parent) when parent in @named_keys do
+    Map.new(map, fn {key, value} -> {key, from_json_value(value, nil)} end)
+  end
+
+  defp from_json_value(%{} = map, _parent) do
+    Map.new(map, fn
+      {key, value} when key in @atom_values and is_binary(value) ->
+        {String.to_atom(key), String.to_atom(value)}
+
+      {key, value} ->
+        {String.to_atom(key), from_json_value(value, key)}
+    end)
+  end
+
+  defp from_json_value(list, parent) when is_list(list),
+    do: Enum.map(list, &from_json_value(&1, parent))
+
+  defp from_json_value(value, _parent), do: value
+
+  @doc """
   Returns `results` as an HTML page, with charts of their timelines, along
   with the tables of `format/1`.
 

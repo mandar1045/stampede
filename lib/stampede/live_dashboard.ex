@@ -36,6 +36,11 @@ if Code.ensure_loaded?(Phoenix.LiveDashboard.PageBuilder) do
 
     @tick 1_000
 
+    # The run sits in one of LiveDashboard's cards, so it isn't a card itself.
+    @flat ".stampede section { border: 0; box-shadow: none; padding: 0; background: none; }\n"
+
+    defp css, do: Reporter.HTML.embedded_css() <> @flat
+
     @impl true
     def menu_link(_session, _capabilities), do: {:ok, "Stampede"}
 
@@ -129,7 +134,7 @@ if Code.ensure_loaded?(Phoenix.LiveDashboard.PageBuilder) do
     @impl true
     def render(assigns) do
       ~H"""
-      <style nonce={@csp_nonces[:style]}><%= Phoenix.HTML.raw(Reporter.HTML.embedded_css()) %></style>
+      <style nonce={@csp_nonces[:style]}><%= Phoenix.HTML.raw(css()) %></style>
       <div :if={@error} class="card mb-4">
         <div class="card-body"><%= @error %></div>
       </div>

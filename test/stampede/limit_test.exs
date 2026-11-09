@@ -82,8 +82,8 @@ defmodule Stampede.LimitTest do
     refute summary =~ "thresholds"
 
     html = Stampede.Reporter.to_html(result)
-    assert html =~ "<span>Limit</span><strong>2 VUs</strong>"
-    assert html =~ "<h3>Limit</h3>"
+    assert html =~ "<span>Limit</span><strong>2</strong><small>VUs, the most that held</small>"
+    assert html =~ "<h3>Steps</h3>"
     assert html =~ ~s(<span class="status failed">over</span>)
 
     assert %{"limit" => %{"value" => 2, "steps" => [_, _, _]}} =

@@ -27,6 +27,14 @@ LiveDashboard and in Livebook.
     chat API, and can probe your app's node. `Stampede.Kino.run/2` shows any
     run in the notebook while it goes, and any `Stampede.Result` shows as the
     report
+  * A new look for the dashboard and the HTML report, and the LiveDashboard
+    and Livebook views that share them. A `--find-limit` run leads with its
+    verdict, the tiles fit the kind of test, so a run that holds connections
+    shows its messages instead of "0 iterations", the steps are shaded on the
+    users chart, thresholds are drawn on their latency charts, and the charts
+    are grouped by load, latency, server and database
+  * `mix stampede.report results.json` writes the HTML report of a saved run,
+    and `Stampede.Reporter.from_json/1` reads results back from JSON
   * The bench has a new result: a chat app that keeps every message in
     Postgres, seeded with 100 million messages, held 40,000 users with no
     errors on one 16-core server, with Postgres on an 8-core machine of its

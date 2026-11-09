@@ -7,85 +7,100 @@
 <style>
 :root {
   color-scheme: light;
-  --page: #f9f9f7;
-  --surface: #fcfcfb;
-  --ink: #0b0b0b;
-  --ink-2: #52514e;
-  --muted: #898781;
-  --grid: #e1e0d9;
-  --axis: #c3c2b7;
-  --border: rgba(11, 11, 11, 0.1);
-  --series-1: #2a78d6;
-  --series-2: #eb6834;
-  --series-3: #1baf7a;
-  --good: #0ca30c;
-  --critical: #d03b3b;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --page: #0d0d0d;
-    --surface: #1a1a19;
-    --ink: #f0efec;
-    --ink-2: #c3c2b7;
-    --grid: #2c2c2a;
-    --axis: #383835;
-    --border: rgba(255, 255, 255, 0.1);
-    --series-1: #3987e5;
-    --series-2: #d95926;
-    --series-3: #199e70;
-  }
+  --page: #f5f6f8;
+  --surface: #ffffff;
+  --surface-2: #f8f9fb;
+  --ink: #0f1419;
+  --ink-2: #4b5563;
+  --muted: #8a93a0;
+  --grid: #e7eaee;
+  --axis: #c9ced6;
+  --border: #e3e6eb;
+  --series-1: #2f6fde;
+  --series-2: #e8590c;
+  --series-3: #12a37b;
+  --good: #138a4e;
+  --good-soft: #e6f4ec;
+  --critical: #c93636;
+  --critical-soft: #fbeaea;
+  --info-soft: #e9f0fc;
+  --band-held: rgba(19, 138, 78, 0.07);
+  --band-over: rgba(201, 54, 54, 0.09);
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
 }
 * { box-sizing: border-box; }
 body {
   margin: 0;
   background: var(--page);
   color: var(--ink);
-  font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
-main { max-width: 72rem; margin: 0 auto; padding: 24px 16px 48px; }
-h1 { font-size: 20px; margin: 0 0 8px; }
-h2 { font-size: 18px; margin: 0; overflow-wrap: anywhere; }
-h3 { font-size: 14px; margin: 24px 0 8px; }
-section { margin-top: 32px; }
-header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.topbar { border-bottom: 1px solid var(--border); background: var(--surface); }
+.topbar div { max-width: 76rem; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; gap: 10px; }
+.brand { font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
+h1 { font-size: 13px; font-weight: 500; color: var(--ink-2); margin: 0; padding-left: 10px; border-left: 1px solid var(--border); }
+.live { margin-left: auto; font-size: 12px; color: var(--ink-2); display: inline-flex; align-items: center; gap: 6px; }
+.live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--good); }
+main { max-width: 76rem; margin: 0 auto; padding: 8px 20px 56px; }
+section:first-child { margin-top: 20px; }
+h2 { font-size: 20px; line-height: 1.25; margin: 0; font-weight: 650; letter-spacing: -0.01em; overflow-wrap: anywhere; }
+h3 { font-size: 11px; font-weight: 650; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); margin: 28px 0 10px; }
+section { margin-top: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px 24px; box-shadow: var(--shadow); }
+section > header { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
 .meta, figcaption, summary { color: var(--ink-2); }
 .meta { margin: 0; }
-.status { font-weight: 600; }
-.status::before { margin-right: 4px; }
-.passed::before { content: "\2713"; color: var(--good); }
-.failed::before { content: "\2717"; color: var(--critical); }
-.running::before { content: "\25CF"; color: var(--series-1); }
-.notice {
-  padding: 8px 12px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-}
+section > header .meta { flex-basis: 100%; font-size: 13px; }
+a { color: var(--series-1); }
+.status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; line-height: 1; padding: 5px 10px 5px 8px; border-radius: 999px; background: var(--info-soft); color: var(--series-1); }
+.status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.passed { background: var(--good-soft); color: var(--good); }
+.failed { background: var(--critical-soft); color: var(--critical); }
+.running::before { animation: stampede-pulse 1.4s ease-in-out infinite; }
+td .status { font-size: 11px; padding: 4px 8px 4px 7px; }
+.progress { flex-basis: 100%; height: 4px; border-radius: 999px; background: var(--grid); overflow: hidden; margin-top: 4px; }
+.progress span { display: block; height: 100%; border-radius: 999px; background: var(--series-1); }
+.notice { padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+.verdict { margin-top: 18px; padding: 14px 16px; border-radius: 12px; background: var(--good-soft); border: 1px solid transparent; }
+.verdict.over { background: var(--critical-soft); }
+.verdict strong { display: block; font-size: 17px; font-weight: 650; color: var(--good); margin-bottom: 2px; }
+.verdict.over strong { color: var(--critical); }
+.verdict p { margin: 0; color: var(--ink); }
+.warning { margin-top: 14px; padding: 10px 14px; border-radius: 10px; background: var(--critical-soft); color: var(--ink); }
 .tiles, .charts { display: grid; gap: 12px; margin-top: 16px; }
-.tiles { grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); }
+.tiles { grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr)); }
 .charts { grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); }
-.tile, .chart, .table {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-}
-.tile { padding: 12px; }
-.tile span { display: block; color: var(--ink-2); font-size: 12px; }
-.tile strong { font-size: 22px; font-weight: 600; }
-.chart { position: relative; margin: 0; padding: 12px; outline-offset: 2px; }
-figcaption { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13px; }
-figcaption b { color: var(--ink); font-weight: 600; margin-right: auto; overflow-wrap: anywhere; }
-.key { display: inline-block; width: 12px; height: 2px; margin-right: 4px; vertical-align: middle; }
+.tile, .chart, .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+.tile { padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.tile span { color: var(--ink-2); font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+.tile strong { font-size: 22px; line-height: 1.2; font-weight: 650; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile small { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+.tile.bad strong { color: var(--critical); }
+.tile.good strong { color: var(--good); }
+.chart { position: relative; margin: 0; padding: 14px 14px 10px; outline-offset: 2px; min-width: 0; }
+.charts.pairs { grid-template-columns: repeat(auto-fill, minmax(min(100%, 30rem), 1fr)); }
+.chart.wide { grid-column: 1 / -1; }
+figcaption { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: 12px; }
+figcaption b { color: var(--ink); font-size: 13px; font-weight: 600; margin-right: auto; overflow-wrap: anywhere; }
+.key { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
 .k1 { background: var(--series-1); }
 .k2 { background: var(--series-2); }
 .k3 { background: var(--series-3); }
-svg { display: block; width: 100%; height: auto; margin-top: 8px; overflow: visible; }
+svg { display: block; width: 100%; height: auto; margin-top: 10px; overflow: visible; }
 svg text { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
-svg line, svg path, svg circle { vector-effect: non-scaling-stroke; }
+svg line, svg path, svg circle, svg rect { vector-effect: non-scaling-stroke; }
 .grid { stroke: var(--grid); }
 .axis { stroke: var(--axis); }
-.cross { stroke: var(--muted); display: none; }
+.cross { stroke: var(--muted); stroke-dasharray: 3 3; display: none; }
+.band.held { fill: var(--band-held); }
+.band.over { fill: var(--band-over); }
+.band-label { font-size: 10px; font-weight: 600; }
+.band-label.held { fill: var(--good); }
+.band-label.over { fill: var(--critical); }
+.limit { stroke: var(--critical); stroke-width: 1.25; stroke-dasharray: 5 4; opacity: 0.8; }
+.limit-label { fill: var(--critical); font-size: 10px; font-weight: 600; }
+.area { stroke: none; opacity: 0.12; }
+.area.s1 { fill: var(--series-1); }
 .line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 .line.s1 { stroke: var(--series-1); }
 .line.s2 { stroke: var(--series-2); }
@@ -94,161 +109,179 @@ svg line, svg path, svg circle { vector-effect: non-scaling-stroke; }
 .dot.s1 { fill: var(--series-1); }
 .dot.s2 { fill: var(--series-2); }
 .dot.s3 { fill: var(--series-3); }
-.tip {
-  position: absolute;
-  top: 40px;
-  min-width: 8rem;
-  padding: 8px 10px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  font-size: 12px;
-  pointer-events: none;
-}
+.tip { position: absolute; top: 44px; min-width: 8rem; padding: 8px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 6px 20px rgba(16, 24, 40, 0.12); font-size: 12px; pointer-events: none; z-index: 2; }
 .tip div { white-space: nowrap; }
 .tip .at { color: var(--ink-2); margin-bottom: 2px; }
 .tip strong { font-variant-numeric: tabular-nums; margin-right: 6px; }
 .tip span:last-child { color: var(--ink-2); }
-.table { overflow-x: auto; }
-table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
-th, td { padding: 6px 12px; text-align: right; white-space: nowrap; }
-th { color: var(--ink-2); font-weight: 500; }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: 13px; }
+th, td { padding: 8px 12px; text-align: right; white-space: nowrap; }
+th { color: var(--ink-2); font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; background: var(--surface-2); }
 th:first-child, td:first-child { text-align: left; }
 td:first-child { white-space: normal; overflow-wrap: anywhere; }
 tr + tr td, thead + tbody td { border-top: 1px solid var(--grid); }
-details { margin-top: 16px; }
-summary { cursor: pointer; }
-details .table { margin-top: 8px; max-height: 24rem; overflow-y: auto; }
+details { margin-top: 18px; }
+summary { cursor: pointer; font-weight: 600; font-size: 13px; }
+details .table-wrap { margin-top: 10px; max-height: 24rem; overflow-y: auto; }
 pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; }
 .errors td { vertical-align: top; text-align: left; }
+.queues { margin-top: 12px; font-size: 13px; }
+@keyframes stampede-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) { .running::before { animation: none; } }
 </style>
 </head>
 <body>
+<header class="topbar"><div><span class="brand">Stampede</span><h1>Report</h1></div></header>
 <main>
-<h1>Stampede report</h1>
 <section>
 <header><h2>Load.Realtime</h2><span class="status passed">Passed</span><p class="meta">Ran for 60.0s</p></header>
 <div class="tiles">
-<div class="tile"><span>Iterations</span><strong>0</strong></div>
-<div class="tile"><span>Iterations per second</span><strong>0.00</strong></div>
-<div class="tile"><span>Iteration p95</span><strong>–</strong></div>
+<div class="tile"><span>Messages</span><strong>148,904</strong><small>channel.messages</small></div>
+<div class="tile"><span>Messages per second</span><strong>2,482</strong></div>
+<div class="tile"><span>channel.join p95</span><strong>3.13ms</strong></div>
 <div class="tile"><span>Errors</span><strong>0</strong></div>
 <div class="tile"><span>Peak VUs</span><strong>3,000</strong></div>
 </div>
+<h3>Load</h3>
 <div class="charts">
-<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[49.1,54.2,59.4,64.5,69.6,74.7,79.8,84.9,90.1,95.2,100.3,105.4,110.5,115.7,120.8,125.9,131.0,136.1,141.2,146.4,151.5,156.6,161.7,166.8,171.9,177.1,182.2,187.3,192.4,197.5,202.6,207.8,212.9,218.0,223.1,228.2,233.3,238.5,243.6,248.7,253.8,258.9,264.1,269.2,274.3,279.4,284.5,289.6,294.8,299.9,305.0,310.1,315.2,320.3,325.5,330.6,335.7,340.8,345.9,348.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.1s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.3s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.4s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.5s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.0s&quot;],&quot;width&quot;:360,&quot;series&quot;:[{&quot;name&quot;:&quot;VUs&quot;,&quot;slot&quot;:1,&quot;values&quot;:[&quot;101&quot;,&quot;202&quot;,&quot;303&quot;,&quot;404&quot;,&quot;505&quot;,&quot;606&quot;,&quot;707&quot;,&quot;808&quot;,&quot;909&quot;,&quot;1,010&quot;,&quot;1,111&quot;,&quot;1,212&quot;,&quot;1,313&quot;,&quot;1,414&quot;,&quot;1,515&quot;,&quot;1,616&quot;,&quot;1,717&quot;,&quot;1,818&quot;,&quot;1,919&quot;,&quot;2,020&quot;,&quot;2,121&quot;,&quot;2,222&quot;,&quot;2,323&quot;,&quot;2,424&quot;,&quot;2,525&quot;,&quot;2,626&quot;,&quot;2,727&quot;,&quot;2,828&quot;,&quot;2,929&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;]}]}">
+<figure class="chart wide" tabindex="0" data-points="{&quot;x&quot;:[61.6,79.2,96.8,114.3,131.9,149.5,167.1,184.6,202.2,219.8,237.3,254.9,272.5,290.1,307.6,325.2,342.8,360.4,377.9,395.5,413.1,430.7,448.2,465.8,483.4,501.0,518.5,536.1,553.7,571.2,588.8,606.4,624.0,641.5,659.1,676.7,694.3,711.8,729.4,747.0,764.6,782.1,799.7,817.3,834.9,852.4,870.0,887.6,905.1,922.7,940.3,957.9,975.4,993.0,1010.6,1028.2,1045.7,1063.3,1080.9,1088.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.1s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.3s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.4s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.5s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.0s&quot;],&quot;width&quot;:1100,&quot;series&quot;:[{&quot;name&quot;:&quot;VUs&quot;,&quot;slot&quot;:1,&quot;values&quot;:[&quot;101&quot;,&quot;202&quot;,&quot;303&quot;,&quot;404&quot;,&quot;505&quot;,&quot;606&quot;,&quot;707&quot;,&quot;808&quot;,&quot;909&quot;,&quot;1,010&quot;,&quot;1,111&quot;,&quot;1,212&quot;,&quot;1,313&quot;,&quot;1,414&quot;,&quot;1,515&quot;,&quot;1,616&quot;,&quot;1,717&quot;,&quot;1,818&quot;,&quot;1,919&quot;,&quot;2,020&quot;,&quot;2,121&quot;,&quot;2,222&quot;,&quot;2,323&quot;,&quot;2,424&quot;,&quot;2,525&quot;,&quot;2,626&quot;,&quot;2,727&quot;,&quot;2,828&quot;,&quot;2,929&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;,&quot;3,000&quot;]}]}">
 <figcaption><b>VUs</b></figcaption>
-<svg viewBox="0 0 360 180" role="img" aria-label="VUs">
-<line class="axis" x1="44" x2="348" y1="156.0" y2="156.0"/><text x="38" y="156.0" dy="0.32em" text-anchor="end">0</text>
-<line class="grid" x1="44" x2="348" y1="108.0" y2="108.0"/><text x="38" y="108.0" dy="0.32em" text-anchor="end">1K</text>
-<line class="grid" x1="44" x2="348" y1="60.0" y2="60.0"/><text x="38" y="60.0" dy="0.32em" text-anchor="end">2K</text>
-<line class="grid" x1="44" x2="348" y1="12.0" y2="12.0"/><text x="38" y="12.0" dy="0.32em" text-anchor="end">3K</text>
-<text x="44.0" y="174" text-anchor="middle">0s</text>
-<text x="120.0" y="174" text-anchor="middle">15s</text>
-<text x="196.0" y="174" text-anchor="middle">30s</text>
-<text x="272.0" y="174" text-anchor="middle">45s</text>
-<text x="348.0" y="174" text-anchor="middle">1m</text>
-<path class="line s1" d="M49.1,151.2 L54.2,146.3 L59.4,141.5 L64.5,136.6 L69.6,131.8 L74.7,126.9 L79.8,122.1 L84.9,117.2 L90.1,112.4 L95.2,107.5 L100.3,102.7 L105.4,97.8 L110.5,93.0 L115.7,88.1 L120.8,83.3 L125.9,78.4 L131.0,73.6 L136.1,68.7 L141.2,63.9 L146.4,59.0 L151.5,54.2 L156.6,49.3 L161.7,44.5 L166.8,39.6 L171.9,34.8 L177.1,30.0 L182.2,25.1 L187.3,20.3 L192.4,15.4 L197.5,12.0 L202.6,12.0 L207.8,12.0 L212.9,12.0 L218.0,12.0 L223.1,12.0 L228.2,12.0 L233.3,12.0 L238.5,12.0 L243.6,12.0 L248.7,12.0 L253.8,12.0 L258.9,12.0 L264.1,12.0 L269.2,12.0 L274.3,12.0 L279.4,12.0 L284.5,12.0 L289.6,12.0 L294.8,12.0 L299.9,12.0 L305.0,12.0 L310.1,12.0 L315.2,12.0 L320.3,12.0 L325.5,12.0 L330.6,12.0 L335.7,12.0 L340.8,12.0 L345.9,12.0 L348.0,12.0"/>
-<line class="cross" y1="12" y2="156"/>
+<svg viewBox="0 0 1100 260" role="img" aria-label="VUs">
+<line class="axis" x1="44" x2="1088" y1="236.0" y2="236.0"/><text x="38" y="236.0" dy="0.32em" text-anchor="end">0</text>
+<line class="grid" x1="44" x2="1088" y1="162.0" y2="162.0"/><text x="38" y="162.0" dy="0.32em" text-anchor="end">1K</text>
+<line class="grid" x1="44" x2="1088" y1="88.0" y2="88.0"/><text x="38" y="88.0" dy="0.32em" text-anchor="end">2K</text>
+<line class="grid" x1="44" x2="1088" y1="14.0" y2="14.0"/><text x="38" y="14.0" dy="0.32em" text-anchor="end">3K</text>
+<text x="44.0" y="254" text-anchor="middle">0s</text>
+<text x="218.0" y="254" text-anchor="middle">10s</text>
+<text x="392.0" y="254" text-anchor="middle">20s</text>
+<text x="566.0" y="254" text-anchor="middle">30s</text>
+<text x="740.0" y="254" text-anchor="middle">40s</text>
+<text x="914.0" y="254" text-anchor="middle">50s</text>
+<text x="1088.0" y="254" text-anchor="middle">1m</text>
+<path class="area s1" d="M61.6,236 L61.6,228.5 L79.2,221.1 L96.8,213.6 L114.3,206.1 L131.9,198.6 L149.5,191.2 L167.1,183.7 L184.6,176.2 L202.2,168.7 L219.8,161.3 L237.3,153.8 L254.9,146.3 L272.5,138.8 L290.1,131.4 L307.6,123.9 L325.2,116.4 L342.8,108.9 L360.4,101.5 L377.9,94.0 L395.5,86.5 L413.1,79.0 L430.7,71.6 L448.2,64.1 L465.8,56.6 L483.4,49.1 L501.0,41.7 L518.5,34.2 L536.1,26.7 L553.7,19.3 L571.2,14.0 L588.8,14.0 L606.4,14.0 L624.0,14.0 L641.5,14.0 L659.1,14.0 L676.7,14.0 L694.3,14.0 L711.8,14.0 L729.4,14.0 L747.0,14.0 L764.6,14.0 L782.1,14.0 L799.7,14.0 L817.3,14.0 L834.9,14.0 L852.4,14.0 L870.0,14.0 L887.6,14.0 L905.1,14.0 L922.7,14.0 L940.3,14.0 L957.9,14.0 L975.4,14.0 L993.0,14.0 L1010.6,14.0 L1028.2,14.0 L1045.7,14.0 L1063.3,14.0 L1080.9,14.0 L1088.0,14.0 L1088.0,236 Z"/>
+<path class="line s1" d="M61.6,228.5 L79.2,221.1 L96.8,213.6 L114.3,206.1 L131.9,198.6 L149.5,191.2 L167.1,183.7 L184.6,176.2 L202.2,168.7 L219.8,161.3 L237.3,153.8 L254.9,146.3 L272.5,138.8 L290.1,131.4 L307.6,123.9 L325.2,116.4 L342.8,108.9 L360.4,101.5 L377.9,94.0 L395.5,86.5 L413.1,79.0 L430.7,71.6 L448.2,64.1 L465.8,56.6 L483.4,49.1 L501.0,41.7 L518.5,34.2 L536.1,26.7 L553.7,19.3 L571.2,14.0 L588.8,14.0 L606.4,14.0 L624.0,14.0 L641.5,14.0 L659.1,14.0 L676.7,14.0 L694.3,14.0 L711.8,14.0 L729.4,14.0 L747.0,14.0 L764.6,14.0 L782.1,14.0 L799.7,14.0 L817.3,14.0 L834.9,14.0 L852.4,14.0 L870.0,14.0 L887.6,14.0 L905.1,14.0 L922.7,14.0 L940.3,14.0 L957.9,14.0 L975.4,14.0 L993.0,14.0 L1010.6,14.0 L1028.2,14.0 L1045.7,14.0 L1063.3,14.0 L1080.9,14.0 L1088.0,14.0"/>
+<line class="cross" y1="14" y2="236"/>
 </svg>
 <div class="tip" hidden></div>
 </figure>
-<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[49.1,54.2,59.4,64.5,69.6,74.7,79.8,84.9,90.1,95.2,100.3,105.4,110.5,115.7,120.8,125.9,131.0,136.1,141.2,146.4,151.5,156.6,161.7,166.8,171.9,177.1,182.2,187.3,192.4,197.5,202.6,207.8,212.9,218.0,223.1,228.2,233.3,238.5,243.6,248.7,253.8,258.9,264.1,269.2,274.3,279.4,284.5,289.6,294.8,299.9,305.0,310.1,315.2,320.3,325.5,330.6,335.7,340.8,345.9,348.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.1s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.3s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.4s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.5s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.0s&quot;],&quot;width&quot;:360,&quot;series&quot;:[{&quot;name&quot;:&quot;iterations&quot;,&quot;slot&quot;:1,&quot;values&quot;:[&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;]}]}">
-<figcaption><b>Iterations per second</b></figcaption>
-<svg viewBox="0 0 360 180" role="img" aria-label="Iterations per second">
-<line class="axis" x1="44" x2="348" y1="156.0" y2="156.0"/><text x="38" y="156.0" dy="0.32em" text-anchor="end">0</text>
-<line class="grid" x1="44" x2="348" y1="12.0" y2="12.0"/><text x="38" y="12.0" dy="0.32em" text-anchor="end">0.25</text>
-<text x="44.0" y="174" text-anchor="middle">0s</text>
-<text x="120.0" y="174" text-anchor="middle">15s</text>
-<text x="196.0" y="174" text-anchor="middle">30s</text>
-<text x="272.0" y="174" text-anchor="middle">45s</text>
-<text x="348.0" y="174" text-anchor="middle">1m</text>
-<path class="line s1" d="M49.1,156.0 L54.2,156.0 L59.4,156.0 L64.5,156.0 L69.6,156.0 L74.7,156.0 L79.8,156.0 L84.9,156.0 L90.1,156.0 L95.2,156.0 L100.3,156.0 L105.4,156.0 L110.5,156.0 L115.7,156.0 L120.8,156.0 L125.9,156.0 L131.0,156.0 L136.1,156.0 L141.2,156.0 L146.4,156.0 L151.5,156.0 L156.6,156.0 L161.7,156.0 L166.8,156.0 L171.9,156.0 L177.1,156.0 L182.2,156.0 L187.3,156.0 L192.4,156.0 L197.5,156.0 L202.6,156.0 L207.8,156.0 L212.9,156.0 L218.0,156.0 L223.1,156.0 L228.2,156.0 L233.3,156.0 L238.5,156.0 L243.6,156.0 L248.7,156.0 L253.8,156.0 L258.9,156.0 L264.1,156.0 L269.2,156.0 L274.3,156.0 L279.4,156.0 L284.5,156.0 L289.6,156.0 L294.8,156.0 L299.9,156.0 L305.0,156.0 L310.1,156.0 L315.2,156.0 L320.3,156.0 L325.5,156.0 L330.6,156.0 L335.7,156.0 L340.8,156.0 L345.9,156.0 L348.0,156.0"/>
-<line class="cross" y1="12" y2="156"/>
+</div>
+<div class="charts pairs">
+<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[52.2,60.3,68.5,76.6,84.8,92.9,101.0,109.2,117.3,125.5,133.6,141.8,149.9,158.1,166.2,174.4,182.5,190.7,198.8,207.0,215.1,223.3,231.4,239.5,247.7,255.8,264.0,272.1,280.3,288.4,296.6,304.7,312.9,321.0,329.2,337.3,345.5,353.6,361.8,369.9,378.1,386.2,394.3,402.5,410.6,418.8,426.9,435.1,443.2,451.4,459.5,467.7,475.8,484.0,492.1,500.3,508.4,516.6,524.7,528.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.1s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.3s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.4s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.5s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.0s&quot;],&quot;width&quot;:540,&quot;series&quot;:[{&quot;name&quot;:&quot;messages&quot;,&quot;slot&quot;:1,&quot;values&quot;:[&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;99.01/s&quot;,&quot;359.41/s&quot;,&quot;821.78/s&quot;,&quot;1183.17/s&quot;,&quot;954.46/s&quot;,&quot;2700.00/s&quot;,&quot;2435.64/s&quot;,&quot;2670.30/s&quot;,&quot;2572.28/s&quot;,&quot;3001.98/s&quot;,&quot;3066.34/s&quot;,&quot;4813.86/s&quot;,&quot;2097.03/s&quot;,&quot;4074.26/s&quot;,&quot;4053.47/s&quot;,&quot;4651.49/s&quot;,&quot;4848.51/s&quot;,&quot;5738.61/s&quot;,&quot;6029.70/s&quot;,&quot;5145.54/s&quot;,&quot;6400.99/s&quot;,&quot;8350.50/s&quot;,&quot;7744.55/s&quot;,&quot;6797.03/s&quot;,&quot;8414.85/s&quot;,&quot;7588.12/s&quot;,&quot;8249.50/s&quot;,&quot;8571.29/s&quot;,&quot;8067.33/s&quot;,&quot;11807.92/s&quot;,&quot;10176.04/s&quot;]}]}">
+<figcaption><b>Messages per second</b></figcaption>
+<svg viewBox="0 0 540 210" role="img" aria-label="Messages per second">
+<line class="axis" x1="44" x2="528" y1="186.0" y2="186.0"/><text x="38" y="186.0" dy="0.32em" text-anchor="end">0</text>
+<line class="grid" x1="44" x2="528" y1="128.7" y2="128.7"/><text x="38" y="128.7" dy="0.32em" text-anchor="end">5K</text>
+<line class="grid" x1="44" x2="528" y1="71.3" y2="71.3"/><text x="38" y="71.3" dy="0.32em" text-anchor="end">10K</text>
+<line class="grid" x1="44" x2="528" y1="14.0" y2="14.0"/><text x="38" y="14.0" dy="0.32em" text-anchor="end">15K</text>
+<text x="44.0" y="204" text-anchor="middle">0s</text>
+<text x="165.0" y="204" text-anchor="middle">15s</text>
+<text x="286.0" y="204" text-anchor="middle">30s</text>
+<text x="407.0" y="204" text-anchor="middle">45s</text>
+<text x="528.0" y="204" text-anchor="middle">1m</text>
+<path class="line s1" d="M52.2,186.0 L60.3,186.0 L68.5,186.0 L76.6,186.0 L84.8,186.0 L92.9,186.0 L101.0,186.0 L109.2,186.0 L117.3,186.0 L125.5,186.0 L133.6,186.0 L141.8,186.0 L149.9,186.0 L158.1,186.0 L166.2,186.0 L174.4,186.0 L182.5,186.0 L190.7,186.0 L198.8,186.0 L207.0,186.0 L215.1,186.0 L223.3,186.0 L231.4,186.0 L239.5,186.0 L247.7,186.0 L255.8,186.0 L264.0,186.0 L272.1,186.0 L280.3,186.0 L288.4,184.9 L296.6,181.9 L304.7,176.6 L312.9,172.4 L321.0,175.1 L329.2,155.0 L337.3,158.1 L345.5,155.4 L353.6,156.5 L361.8,151.6 L369.9,150.8 L378.1,130.8 L386.2,162.0 L394.3,139.3 L402.5,139.5 L410.6,132.7 L418.8,130.4 L426.9,120.2 L435.1,116.9 L443.2,127.0 L451.4,112.6 L459.5,90.2 L467.7,97.2 L475.8,108.1 L484.0,89.5 L492.1,99.0 L500.3,91.4 L508.4,87.7 L516.6,93.5 L524.7,50.6 L528.0,69.3"/>
+<line class="cross" y1="14" y2="186"/>
 </svg>
 <div class="tip" hidden></div>
 </figure>
-<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[49.1,54.2,59.4,64.5,69.6,74.7,79.8,84.9,90.1,95.2,100.3,105.4,110.5,115.7,120.8,125.9,131.0,136.1,141.2,146.4,151.5,156.6,161.7,166.8,171.9,177.1,182.2,187.3,192.4,197.5,202.6,207.8,212.9,218.0,223.1,228.2,233.3,238.5,243.6,248.7,253.8,258.9,264.1,269.2,274.3,279.4,284.5,289.6,294.8,299.9,305.0,310.1,315.2,320.3,325.5,330.6,335.7,340.8,345.9,348.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.1s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.3s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.4s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.5s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.0s&quot;],&quot;width&quot;:360,&quot;series&quot;:[{&quot;name&quot;:&quot;p50&quot;,&quot;slot&quot;:1,&quot;values&quot;:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,&quot;1.02ms&quot;,&quot;1.13ms&quot;,&quot;1.06ms&quot;,&quot;1.04ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.11ms&quot;,&quot;1.02ms&quot;,&quot;1.04ms&quot;,&quot;1.00ms&quot;,&quot;1.06ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.06ms&quot;,&quot;1.02ms&quot;,&quot;1.04ms&quot;,&quot;1.04ms&quot;,&quot;1.04ms&quot;,&quot;1.04ms&quot;,&quot;1.04ms&quot;,&quot;1.02ms&quot;,&quot;1.02ms&quot;,&quot;1.02ms&quot;,&quot;1.00ms&quot;,&quot;1.02ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.02ms&quot;,&quot;1.02ms&quot;,&quot;1.02ms&quot;]},{&quot;name&quot;:&quot;p95&quot;,&quot;slot&quot;:2,&quot;values&quot;:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,&quot;4.15ms&quot;,&quot;1.22ms&quot;,&quot;1.47ms&quot;,&quot;1.20ms&quot;,&quot;1.65ms&quot;,&quot;1.56ms&quot;,&quot;1.44ms&quot;,&quot;1.56ms&quot;,&quot;1.44ms&quot;,&quot;1.13ms&quot;,&quot;1.62ms&quot;,&quot;1.22ms&quot;,&quot;1.25ms&quot;,&quot;1.44ms&quot;,&quot;1.47ms&quot;,&quot;1.35ms&quot;,&quot;1.47ms&quot;,&quot;1.53ms&quot;,&quot;1.47ms&quot;,&quot;1.53ms&quot;,&quot;1.56ms&quot;,&quot;1.83ms&quot;,&quot;1.62ms&quot;,&quot;1.44ms&quot;,&quot;1.56ms&quot;,&quot;1.56ms&quot;,&quot;1.38ms&quot;,&quot;1.56ms&quot;,&quot;1.59ms&quot;,&quot;1.44ms&quot;]},{&quot;name&quot;:&quot;p99&quot;,&quot;slot&quot;:3,&quot;values&quot;:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,&quot;4.15ms&quot;,&quot;1.22ms&quot;,&quot;1.47ms&quot;,&quot;1.20ms&quot;,&quot;1.75ms&quot;,&quot;1.59ms&quot;,&quot;1.53ms&quot;,&quot;1.56ms&quot;,&quot;1.65ms&quot;,&quot;1.18ms&quot;,&quot;1.62ms&quot;,&quot;1.22ms&quot;,&quot;1.47ms&quot;,&quot;1.69ms&quot;,&quot;2.10ms&quot;,&quot;1.56ms&quot;,&quot;1.62ms&quot;,&quot;2.06ms&quot;,&quot;1.94ms&quot;,&quot;1.94ms&quot;,&quot;1.94ms&quot;,&quot;2.10ms&quot;,&quot;2.10ms&quot;,&quot;1.75ms&quot;,&quot;1.90ms&quot;,&quot;2.02ms&quot;,&quot;1.69ms&quot;,&quot;1.59ms&quot;,&quot;1.94ms&quot;,&quot;1.56ms&quot;]}]}">
-<figcaption><b>broadcast.ack</b><span><i class="key k1"></i>p50</span><span><i class="key k2"></i>p95</span><span><i class="key k3"></i>p99</span></figcaption>
-<svg viewBox="0 0 360 180" role="img" aria-label="broadcast.ack">
-<line class="axis" x1="44" x2="348" y1="156.0" y2="156.0"/><text x="38" y="156.0" dy="0.32em" text-anchor="end">0</text>
-<line class="grid" x1="44" x2="348" y1="108.0" y2="108.0"/><text x="38" y="108.0" dy="0.32em" text-anchor="end">2ms</text>
-<line class="grid" x1="44" x2="348" y1="60.0" y2="60.0"/><text x="38" y="60.0" dy="0.32em" text-anchor="end">4ms</text>
-<line class="grid" x1="44" x2="348" y1="12.0" y2="12.0"/><text x="38" y="12.0" dy="0.32em" text-anchor="end">6ms</text>
-<text x="44.0" y="174" text-anchor="middle">0s</text>
-<text x="120.0" y="174" text-anchor="middle">15s</text>
-<text x="196.0" y="174" text-anchor="middle">30s</text>
-<text x="272.0" y="174" text-anchor="middle">45s</text>
-<text x="348.0" y="174" text-anchor="middle">1m</text>
-<path class="line s1" d="M202.6,131.5 L207.8,128.9 L212.9,130.5 L218.0,131.0 L223.1,129.9 L228.2,130.5 L233.3,129.4 L238.5,131.5 L243.6,131.0 L248.7,131.9 L253.8,130.5 L258.9,129.9 L264.1,130.5 L269.2,130.5 L274.3,131.5 L279.4,131.0 L284.5,131.0 L289.6,131.0 L294.8,131.0 L299.9,131.0 L305.0,131.5 L310.1,131.5 L315.2,131.5 L320.3,131.9 L325.5,131.5 L330.6,129.9 L335.7,130.5 L340.8,131.5 L345.9,131.5 L348.0,131.5"/>
-<path class="line s2" d="M202.6,56.5 L207.8,126.6 L212.9,120.8 L218.0,127.2 L223.1,116.3 L228.2,118.6 L233.3,121.5 L238.5,118.6 L243.6,121.5 L248.7,128.9 L253.8,117.1 L258.9,126.6 L264.1,126.0 L269.2,121.5 L274.3,120.8 L279.4,123.5 L284.5,120.8 L289.6,119.4 L294.8,120.8 L299.9,119.4 L305.0,118.6 L310.1,112.2 L315.2,117.1 L320.3,121.5 L325.5,118.6 L330.6,118.6 L335.7,122.9 L340.8,118.6 L345.9,117.9 L348.0,121.5"/>
-<path class="line s3" d="M202.6,56.5 L207.8,126.6 L212.9,120.8 L218.0,127.2 L223.1,113.9 L228.2,117.9 L233.3,119.4 L238.5,118.6 L243.6,116.3 L248.7,127.8 L253.8,117.1 L258.9,126.6 L264.1,120.8 L269.2,115.5 L274.3,105.6 L279.4,118.6 L284.5,117.1 L289.6,106.6 L294.8,109.5 L299.9,109.5 L305.0,109.5 L310.1,105.6 L315.2,105.6 L320.3,113.9 L325.5,110.4 L330.6,107.6 L335.7,115.5 L340.8,117.9 L345.9,109.5 L348.0,118.6"/>
-<line class="cross" y1="12" y2="156"/>
+<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[52.2,60.3,68.5,76.6,84.8,92.9,101.0,109.2,117.3,125.5,133.6,141.8,149.9,158.1,166.2,174.4,182.5,190.7,198.8,207.0,215.1,223.3,231.4,239.5,247.7,255.8,264.0,272.1,280.3,288.4,296.6,304.7,312.9,321.0,329.2,337.3,345.5,353.6,361.8,369.9,378.1,386.2,394.3,402.5,410.6,418.8,426.9,435.1,443.2,451.4,459.5,467.7,475.8,484.0,492.1,500.3,508.4,516.6,524.7,528.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.1s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.3s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.4s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.5s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.0s&quot;],&quot;width&quot;:540,&quot;series&quot;:[{&quot;name&quot;:&quot;errors&quot;,&quot;slot&quot;:2,&quot;values&quot;:[&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;,&quot;0.00/s&quot;]}]}">
+<figcaption><b>Errors per second</b></figcaption>
+<svg viewBox="0 0 540 210" role="img" aria-label="Errors per second">
+<line class="axis" x1="44" x2="528" y1="186.0" y2="186.0"/><text x="38" y="186.0" dy="0.32em" text-anchor="end">0</text>
+<line class="grid" x1="44" x2="528" y1="14.0" y2="14.0"/><text x="38" y="14.0" dy="0.32em" text-anchor="end">0.25</text>
+<text x="44.0" y="204" text-anchor="middle">0s</text>
+<text x="165.0" y="204" text-anchor="middle">15s</text>
+<text x="286.0" y="204" text-anchor="middle">30s</text>
+<text x="407.0" y="204" text-anchor="middle">45s</text>
+<text x="528.0" y="204" text-anchor="middle">1m</text>
+<path class="line s2" d="M52.2,186.0 L60.3,186.0 L68.5,186.0 L76.6,186.0 L84.8,186.0 L92.9,186.0 L101.0,186.0 L109.2,186.0 L117.3,186.0 L125.5,186.0 L133.6,186.0 L141.8,186.0 L149.9,186.0 L158.1,186.0 L166.2,186.0 L174.4,186.0 L182.5,186.0 L190.7,186.0 L198.8,186.0 L207.0,186.0 L215.1,186.0 L223.3,186.0 L231.4,186.0 L239.5,186.0 L247.7,186.0 L255.8,186.0 L264.0,186.0 L272.1,186.0 L280.3,186.0 L288.4,186.0 L296.6,186.0 L304.7,186.0 L312.9,186.0 L321.0,186.0 L329.2,186.0 L337.3,186.0 L345.5,186.0 L353.6,186.0 L361.8,186.0 L369.9,186.0 L378.1,186.0 L386.2,186.0 L394.3,186.0 L402.5,186.0 L410.6,186.0 L418.8,186.0 L426.9,186.0 L435.1,186.0 L443.2,186.0 L451.4,186.0 L459.5,186.0 L467.7,186.0 L475.8,186.0 L484.0,186.0 L492.1,186.0 L500.3,186.0 L508.4,186.0 L516.6,186.0 L524.7,186.0 L528.0,186.0"/>
+<line class="cross" y1="14" y2="186"/>
 </svg>
 <div class="tip" hidden></div>
 </figure>
-<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[49.1,54.2,59.4,64.5,69.6,74.7,79.8,84.9,90.1,95.2,100.3,105.4,110.5,115.7,120.8,125.9,131.0,136.1,141.2,146.4,151.5,156.6,161.7,166.8,171.9,177.1,182.2,187.3,192.4,197.5,202.6,207.8,212.9,218.0,223.1,228.2,233.3,238.5,243.6,248.7,253.8,258.9,264.1,269.2,274.3,279.4,284.5,289.6,294.8,299.9,305.0,310.1,315.2,320.3,325.5,330.6,335.7,340.8,345.9,348.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.1s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.3s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.4s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.5s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.0s&quot;],&quot;width&quot;:360,&quot;series&quot;:[{&quot;name&quot;:&quot;p50&quot;,&quot;slot&quot;:1,&quot;values&quot;:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,&quot;1.11ms&quot;,&quot;1.18ms&quot;,&quot;1.15ms&quot;,&quot;1.09ms&quot;,&quot;1.13ms&quot;,&quot;1.11ms&quot;,&quot;1.15ms&quot;,&quot;1.06ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.13ms&quot;,&quot;1.13ms&quot;,&quot;1.11ms&quot;,&quot;1.11ms&quot;,&quot;1.09ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.09ms&quot;,&quot;1.11ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.06ms&quot;,&quot;1.09ms&quot;,&quot;1.13ms&quot;,&quot;1.11ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.06ms&quot;]},{&quot;name&quot;:&quot;p95&quot;,&quot;slot&quot;:2,&quot;values&quot;:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,&quot;4.23ms&quot;,&quot;1.27ms&quot;,&quot;1.50ms&quot;,&quot;1.25ms&quot;,&quot;1.69ms&quot;,&quot;1.62ms&quot;,&quot;1.50ms&quot;,&quot;1.62ms&quot;,&quot;1.53ms&quot;,&quot;1.18ms&quot;,&quot;1.65ms&quot;,&quot;1.27ms&quot;,&quot;1.30ms&quot;,&quot;1.53ms&quot;,&quot;1.50ms&quot;,&quot;1.50ms&quot;,&quot;1.53ms&quot;,&quot;1.56ms&quot;,&quot;1.56ms&quot;,&quot;1.56ms&quot;,&quot;1.59ms&quot;,&quot;1.90ms&quot;,&quot;1.69ms&quot;,&quot;1.50ms&quot;,&quot;1.62ms&quot;,&quot;1.62ms&quot;,&quot;1.44ms&quot;,&quot;1.59ms&quot;,&quot;1.65ms&quot;,&quot;1.47ms&quot;]},{&quot;name&quot;:&quot;p99&quot;,&quot;slot&quot;:3,&quot;values&quot;:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,&quot;4.23ms&quot;,&quot;1.27ms&quot;,&quot;1.50ms&quot;,&quot;1.25ms&quot;,&quot;1.83ms&quot;,&quot;1.65ms&quot;,&quot;1.59ms&quot;,&quot;1.62ms&quot;,&quot;1.69ms&quot;,&quot;1.22ms&quot;,&quot;1.69ms&quot;,&quot;1.27ms&quot;,&quot;1.50ms&quot;,&quot;1.72ms&quot;,&quot;2.14ms&quot;,&quot;1.59ms&quot;,&quot;1.65ms&quot;,&quot;2.10ms&quot;,&quot;1.98ms&quot;,&quot;2.02ms&quot;,&quot;1.98ms&quot;,&quot;2.19ms&quot;,&quot;2.14ms&quot;,&quot;1.83ms&quot;,&quot;1.98ms&quot;,&quot;2.14ms&quot;,&quot;1.72ms&quot;,&quot;1.62ms&quot;,&quot;1.98ms&quot;,&quot;1.62ms&quot;]}]}">
-<figcaption><b>broadcast.roundtrip</b><span><i class="key k1"></i>p50</span><span><i class="key k2"></i>p95</span><span><i class="key k3"></i>p99</span></figcaption>
-<svg viewBox="0 0 360 180" role="img" aria-label="broadcast.roundtrip">
-<line class="axis" x1="44" x2="348" y1="156.0" y2="156.0"/><text x="38" y="156.0" dy="0.32em" text-anchor="end">0</text>
-<line class="grid" x1="44" x2="348" y1="108.0" y2="108.0"/><text x="38" y="108.0" dy="0.32em" text-anchor="end">2ms</text>
-<line class="grid" x1="44" x2="348" y1="60.0" y2="60.0"/><text x="38" y="60.0" dy="0.32em" text-anchor="end">4ms</text>
-<line class="grid" x1="44" x2="348" y1="12.0" y2="12.0"/><text x="38" y="12.0" dy="0.32em" text-anchor="end">6ms</text>
-<text x="44.0" y="174" text-anchor="middle">0s</text>
-<text x="120.0" y="174" text-anchor="middle">15s</text>
-<text x="196.0" y="174" text-anchor="middle">30s</text>
-<text x="272.0" y="174" text-anchor="middle">45s</text>
-<text x="348.0" y="174" text-anchor="middle">1m</text>
-<path class="line s1" d="M202.6,129.4 L207.8,127.8 L212.9,128.3 L218.0,129.9 L223.1,128.9 L228.2,129.4 L233.3,128.3 L238.5,130.5 L243.6,129.9 L248.7,130.5 L253.8,128.9 L258.9,128.9 L264.1,129.4 L269.2,129.4 L274.3,129.9 L279.4,129.9 L284.5,130.5 L289.6,129.9 L294.8,129.4 L299.9,129.9 L305.0,130.5 L310.1,129.9 L315.2,130.5 L320.3,130.5 L325.5,129.9 L330.6,128.9 L335.7,129.4 L340.8,129.9 L345.9,130.5 L348.0,130.5"/>
-<path class="line s2" d="M202.6,54.5 L207.8,125.4 L212.9,120.1 L218.0,126.0 L223.1,115.5 L228.2,117.1 L233.3,120.1 L238.5,117.1 L243.6,119.4 L248.7,127.8 L253.8,116.3 L258.9,125.4 L264.1,124.8 L269.2,119.4 L274.3,120.1 L279.4,120.1 L284.5,119.4 L289.6,118.6 L294.8,118.6 L299.9,118.6 L305.0,117.9 L310.1,110.4 L315.2,115.5 L320.3,120.1 L325.5,117.1 L330.6,117.1 L335.7,121.5 L340.8,117.9 L345.9,116.3 L348.0,120.8"/>
-<path class="line s3" d="M202.6,54.5 L207.8,125.4 L212.9,120.1 L218.0,126.0 L223.1,112.2 L228.2,116.3 L233.3,117.9 L238.5,117.1 L243.6,115.5 L248.7,126.6 L253.8,115.5 L258.9,125.4 L264.1,120.1 L269.2,114.7 L274.3,104.6 L279.4,117.9 L284.5,116.3 L289.6,105.6 L294.8,108.5 L299.9,107.6 L305.0,108.5 L310.1,103.5 L315.2,104.6 L320.3,112.2 L325.5,108.5 L330.6,104.6 L335.7,114.7 L340.8,117.1 L345.9,108.5 L348.0,117.1"/>
-<line class="cross" y1="12" y2="156"/>
-</svg>
-<div class="tip" hidden></div>
-</figure>
-<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[49.1,54.2,59.4,64.5,69.6,74.7,79.8,84.9,90.1,95.2,100.3,105.4,110.5,115.7,120.8,125.9,131.0,136.1,141.2,146.4,151.5,156.6,161.7,166.8,171.9,177.1,182.2,187.3,192.4,197.5,202.6,207.8,212.9,218.0,223.1,228.2,233.3,238.5,243.6,248.7,253.8,258.9,264.1,269.2,274.3,279.4,284.5,289.6,294.8,299.9,305.0,310.1,315.2,320.3,325.5,330.6,335.7,340.8,345.9,348.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.1s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.3s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.4s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.5s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.0s&quot;],&quot;width&quot;:360,&quot;series&quot;:[{&quot;name&quot;:&quot;p50&quot;,&quot;slot&quot;:1,&quot;values&quot;:[&quot;1.72ms&quot;,&quot;1.65ms&quot;,&quot;1.65ms&quot;,&quot;1.69ms&quot;,&quot;1.75ms&quot;,&quot;1.72ms&quot;,&quot;1.75ms&quot;,&quot;1.75ms&quot;,&quot;1.72ms&quot;,&quot;1.98ms&quot;,&quot;1.86ms&quot;,&quot;1.75ms&quot;,&quot;1.98ms&quot;,&quot;1.83ms&quot;,&quot;1.90ms&quot;,&quot;1.86ms&quot;,&quot;1.90ms&quot;,&quot;1.65ms&quot;,&quot;1.75ms&quot;,&quot;1.69ms&quot;,&quot;1.69ms&quot;,&quot;1.69ms&quot;,&quot;1.83ms&quot;,&quot;1.75ms&quot;,&quot;1.83ms&quot;,&quot;1.75ms&quot;,&quot;1.69ms&quot;,&quot;1.90ms&quot;,&quot;1.83ms&quot;,&quot;1.83ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},{&quot;name&quot;:&quot;p95&quot;,&quot;slot&quot;:2,&quot;values&quot;:[&quot;15.22ms&quot;,&quot;2.37ms&quot;,&quot;3.33ms&quot;,&quot;2.95ms&quot;,&quot;4.87ms&quot;,&quot;3.20ms&quot;,&quot;2.67ms&quot;,&quot;3.33ms&quot;,&quot;3.46ms&quot;,&quot;3.40ms&quot;,&quot;3.33ms&quot;,&quot;3.13ms&quot;,&quot;3.07ms&quot;,&quot;3.01ms&quot;,&quot;3.20ms&quot;,&quot;2.89ms&quot;,&quot;3.40ms&quot;,&quot;2.52ms&quot;,&quot;2.95ms&quot;,&quot;3.07ms&quot;,&quot;3.07ms&quot;,&quot;3.13ms&quot;,&quot;3.13ms&quot;,&quot;2.52ms&quot;,&quot;3.07ms&quot;,&quot;2.42ms&quot;,&quot;2.42ms&quot;,&quot;3.01ms&quot;,&quot;3.07ms&quot;,&quot;3.07ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},{&quot;name&quot;:&quot;p99&quot;,&quot;slot&quot;:3,&quot;values&quot;:[&quot;16.16ms&quot;,&quot;2.95ms&quot;,&quot;5.71ms&quot;,&quot;3.40ms&quot;,&quot;6.84ms&quot;,&quot;3.61ms&quot;,&quot;3.07ms&quot;,&quot;3.75ms&quot;,&quot;4.77ms&quot;,&quot;5.83ms&quot;,&quot;3.53ms&quot;,&quot;3.40ms&quot;,&quot;3.75ms&quot;,&quot;3.53ms&quot;,&quot;3.40ms&quot;,&quot;3.26ms&quot;,&quot;3.53ms&quot;,&quot;3.33ms&quot;,&quot;3.53ms&quot;,&quot;6.57ms&quot;,&quot;3.07ms&quot;,&quot;3.46ms&quot;,&quot;3.40ms&quot;,&quot;3.53ms&quot;,&quot;3.53ms&quot;,&quot;3.20ms&quot;,&quot;2.78ms&quot;,&quot;3.33ms&quot;,&quot;3.13ms&quot;,&quot;3.26ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]}]}">
+</div>
+<h3>Latency</h3>
+<div class="charts pairs">
+<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[52.2,60.3,68.5,76.6,84.8,92.9,101.0,109.2,117.3,125.5,133.6,141.8,149.9,158.1,166.2,174.4,182.5,190.7,198.8,207.0,215.1,223.3,231.4,239.5,247.7,255.8,264.0,272.1,280.3,288.4,296.6,304.7,312.9,321.0,329.2,337.3,345.5,353.6,361.8,369.9,378.1,386.2,394.3,402.5,410.6,418.8,426.9,435.1,443.2,451.4,459.5,467.7,475.8,484.0,492.1,500.3,508.4,516.6,524.7,528.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.1s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.3s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.4s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.5s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.0s&quot;],&quot;width&quot;:540,&quot;series&quot;:[{&quot;name&quot;:&quot;p50&quot;,&quot;slot&quot;:1,&quot;values&quot;:[&quot;1.72ms&quot;,&quot;1.65ms&quot;,&quot;1.65ms&quot;,&quot;1.69ms&quot;,&quot;1.75ms&quot;,&quot;1.72ms&quot;,&quot;1.75ms&quot;,&quot;1.75ms&quot;,&quot;1.72ms&quot;,&quot;1.98ms&quot;,&quot;1.86ms&quot;,&quot;1.75ms&quot;,&quot;1.98ms&quot;,&quot;1.83ms&quot;,&quot;1.90ms&quot;,&quot;1.86ms&quot;,&quot;1.90ms&quot;,&quot;1.65ms&quot;,&quot;1.75ms&quot;,&quot;1.69ms&quot;,&quot;1.69ms&quot;,&quot;1.69ms&quot;,&quot;1.83ms&quot;,&quot;1.75ms&quot;,&quot;1.83ms&quot;,&quot;1.75ms&quot;,&quot;1.69ms&quot;,&quot;1.90ms&quot;,&quot;1.83ms&quot;,&quot;1.83ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},{&quot;name&quot;:&quot;p95&quot;,&quot;slot&quot;:2,&quot;values&quot;:[&quot;15.22ms&quot;,&quot;2.37ms&quot;,&quot;3.33ms&quot;,&quot;2.95ms&quot;,&quot;4.87ms&quot;,&quot;3.20ms&quot;,&quot;2.67ms&quot;,&quot;3.33ms&quot;,&quot;3.46ms&quot;,&quot;3.40ms&quot;,&quot;3.33ms&quot;,&quot;3.13ms&quot;,&quot;3.07ms&quot;,&quot;3.01ms&quot;,&quot;3.20ms&quot;,&quot;2.89ms&quot;,&quot;3.40ms&quot;,&quot;2.52ms&quot;,&quot;2.95ms&quot;,&quot;3.07ms&quot;,&quot;3.07ms&quot;,&quot;3.13ms&quot;,&quot;3.13ms&quot;,&quot;2.52ms&quot;,&quot;3.07ms&quot;,&quot;2.42ms&quot;,&quot;2.42ms&quot;,&quot;3.01ms&quot;,&quot;3.07ms&quot;,&quot;3.07ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},{&quot;name&quot;:&quot;p99&quot;,&quot;slot&quot;:3,&quot;values&quot;:[&quot;16.16ms&quot;,&quot;2.95ms&quot;,&quot;5.71ms&quot;,&quot;3.40ms&quot;,&quot;6.84ms&quot;,&quot;3.61ms&quot;,&quot;3.07ms&quot;,&quot;3.75ms&quot;,&quot;4.77ms&quot;,&quot;5.83ms&quot;,&quot;3.53ms&quot;,&quot;3.40ms&quot;,&quot;3.75ms&quot;,&quot;3.53ms&quot;,&quot;3.40ms&quot;,&quot;3.26ms&quot;,&quot;3.53ms&quot;,&quot;3.33ms&quot;,&quot;3.53ms&quot;,&quot;6.57ms&quot;,&quot;3.07ms&quot;,&quot;3.46ms&quot;,&quot;3.40ms&quot;,&quot;3.53ms&quot;,&quot;3.53ms&quot;,&quot;3.20ms&quot;,&quot;2.78ms&quot;,&quot;3.33ms&quot;,&quot;3.13ms&quot;,&quot;3.26ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]}]}">
 <figcaption><b>channel.join</b><span><i class="key k1"></i>p50</span><span><i class="key k2"></i>p95</span><span><i class="key k3"></i>p99</span></figcaption>
-<svg viewBox="0 0 360 180" role="img" aria-label="channel.join">
-<line class="axis" x1="44" x2="348" y1="156.0" y2="156.0"/><text x="38" y="156.0" dy="0.32em" text-anchor="end">0</text>
-<line class="grid" x1="44" x2="348" y1="120.0" y2="120.0"/><text x="38" y="120.0" dy="0.32em" text-anchor="end">5ms</text>
-<line class="grid" x1="44" x2="348" y1="84.0" y2="84.0"/><text x="38" y="84.0" dy="0.32em" text-anchor="end">10ms</text>
-<line class="grid" x1="44" x2="348" y1="48.0" y2="48.0"/><text x="38" y="48.0" dy="0.32em" text-anchor="end">15ms</text>
-<line class="grid" x1="44" x2="348" y1="12.0" y2="12.0"/><text x="38" y="12.0" dy="0.32em" text-anchor="end">20ms</text>
-<text x="44.0" y="174" text-anchor="middle">0s</text>
-<text x="120.0" y="174" text-anchor="middle">15s</text>
-<text x="196.0" y="174" text-anchor="middle">30s</text>
-<text x="272.0" y="174" text-anchor="middle">45s</text>
-<text x="348.0" y="174" text-anchor="middle">1m</text>
-<path class="line s1" d="M49.1,143.6 L54.2,144.1 L59.4,144.1 L64.5,143.9 L69.6,143.4 L74.7,143.6 L79.8,143.4 L84.9,143.4 L90.1,143.6 L95.2,141.8 L100.3,142.6 L105.4,143.4 L110.5,141.8 L115.7,142.8 L120.8,142.3 L125.9,142.6 L131.0,142.3 L136.1,144.1 L141.2,143.4 L146.4,143.9 L151.5,143.9 L156.6,143.9 L161.7,142.8 L166.8,143.4 L171.9,142.8 L177.1,143.4 L182.2,143.9 L187.3,142.3 L192.4,142.8 L197.5,142.8"/>
-<path class="line s2" d="M49.1,46.4 L54.2,138.9 L59.4,132.0 L64.5,134.7 L69.6,121.0 L74.7,133.0 L79.8,136.8 L84.9,132.0 L90.1,131.1 L95.2,131.6 L100.3,132.0 L105.4,133.4 L110.5,133.9 L115.7,134.3 L120.8,133.0 L125.9,135.2 L131.0,131.6 L136.1,137.9 L141.2,134.7 L146.4,133.9 L151.5,133.9 L156.6,133.4 L161.7,133.4 L166.8,137.9 L171.9,133.9 L177.1,138.6 L182.2,138.6 L187.3,134.3 L192.4,133.9 L197.5,133.9"/>
-<path class="line s3" d="M49.1,39.7 L54.2,134.7 L59.4,114.9 L64.5,131.6 L69.6,106.8 L74.7,130.0 L79.8,133.9 L84.9,129.0 L90.1,121.7 L95.2,114.0 L100.3,130.6 L105.4,131.6 L110.5,129.0 L115.7,130.6 L120.8,131.6 L125.9,132.5 L131.0,130.6 L136.1,132.0 L141.2,130.6 L146.4,108.7 L151.5,133.9 L156.6,131.1 L161.7,131.6 L166.8,130.6 L171.9,130.6 L177.1,133.0 L182.2,136.0 L187.3,132.0 L192.4,133.4 L197.5,132.5"/>
-<line class="cross" y1="12" y2="156"/>
+<svg viewBox="0 0 540 210" role="img" aria-label="channel.join">
+<line class="axis" x1="44" x2="528" y1="186.0" y2="186.0"/><text x="38" y="186.0" dy="0.32em" text-anchor="end">0</text>
+<line class="grid" x1="44" x2="528" y1="143.0" y2="143.0"/><text x="38" y="143.0" dy="0.32em" text-anchor="end">5ms</text>
+<line class="grid" x1="44" x2="528" y1="100.0" y2="100.0"/><text x="38" y="100.0" dy="0.32em" text-anchor="end">10ms</text>
+<line class="grid" x1="44" x2="528" y1="57.0" y2="57.0"/><text x="38" y="57.0" dy="0.32em" text-anchor="end">15ms</text>
+<line class="grid" x1="44" x2="528" y1="14.0" y2="14.0"/><text x="38" y="14.0" dy="0.32em" text-anchor="end">20ms</text>
+<text x="44.0" y="204" text-anchor="middle">0s</text>
+<text x="165.0" y="204" text-anchor="middle">15s</text>
+<text x="286.0" y="204" text-anchor="middle">30s</text>
+<text x="407.0" y="204" text-anchor="middle">45s</text>
+<text x="528.0" y="204" text-anchor="middle">1m</text>
+<path class="line s1" d="M52.2,171.2 L60.3,171.8 L68.5,171.8 L76.6,171.5 L84.8,170.9 L92.9,171.2 L101.0,170.9 L109.2,170.9 L117.3,171.2 L125.5,169.0 L133.6,170.0 L141.8,170.9 L149.9,169.0 L158.1,170.3 L166.2,169.7 L174.4,170.0 L182.5,169.7 L190.7,171.8 L198.8,170.9 L207.0,171.5 L215.1,171.5 L223.3,171.5 L231.4,170.3 L239.5,170.9 L247.7,170.3 L255.8,170.9 L264.0,171.5 L272.1,169.7 L280.3,170.3 L288.4,170.3"/>
+<path class="line s2" d="M52.2,55.1 L60.3,165.6 L68.5,157.4 L76.6,160.6 L84.8,144.1 L92.9,158.5 L101.0,163.0 L109.2,157.4 L117.3,156.2 L125.5,156.8 L133.6,157.4 L141.8,159.0 L149.9,159.6 L158.1,160.1 L166.2,158.5 L174.4,161.1 L182.5,156.8 L190.7,164.4 L198.8,160.6 L207.0,159.6 L215.1,159.6 L223.3,159.0 L231.4,159.0 L239.5,164.4 L247.7,159.6 L255.8,165.2 L264.0,165.2 L272.1,160.1 L280.3,159.6 L288.4,159.6"/>
+<path class="line s3" d="M52.2,47.0 L60.3,160.6 L68.5,136.9 L76.6,156.8 L84.8,127.2 L92.9,155.0 L101.0,159.6 L109.2,153.7 L117.3,145.0 L125.5,135.9 L133.6,155.6 L141.8,156.8 L149.9,153.7 L158.1,155.6 L166.2,156.8 L174.4,157.9 L182.5,155.6 L190.7,157.4 L198.8,155.6 L207.0,129.5 L215.1,159.6 L223.3,156.2 L231.4,156.8 L239.5,155.6 L247.7,155.6 L255.8,158.5 L264.0,162.1 L272.1,157.4 L280.3,159.0 L288.4,157.9"/>
+<line class="cross" y1="14" y2="186"/>
 </svg>
 <div class="tip" hidden></div>
 </figure>
-<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[49.1,54.2,59.4,64.5,69.6,74.7,79.8,84.9,90.1,95.2,100.3,105.4,110.5,115.7,120.8,125.9,131.0,136.1,141.2,146.4,151.5,156.6,161.7,166.8,171.9,177.1,182.2,187.3,192.4,197.5,202.6,207.8,212.9,218.0,223.1,228.2,233.3,238.5,243.6,248.7,253.8,258.9,264.1,269.2,274.3,279.4,284.5,289.6,294.8,299.9,305.0,310.1,315.2,320.3,325.5,330.6,335.7,340.8,345.9,348.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.1s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.3s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.4s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.5s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.0s&quot;],&quot;width&quot;:360,&quot;series&quot;:[{&quot;name&quot;:&quot;p50&quot;,&quot;slot&quot;:1,&quot;values&quot;:[&quot;2.06ms&quot;,&quot;1.90ms&quot;,&quot;1.98ms&quot;,&quot;1.90ms&quot;,&quot;2.02ms&quot;,&quot;1.98ms&quot;,&quot;1.98ms&quot;,&quot;1.90ms&quot;,&quot;1.94ms&quot;,&quot;2.02ms&quot;,&quot;2.02ms&quot;,&quot;1.94ms&quot;,&quot;2.06ms&quot;,&quot;1.98ms&quot;,&quot;2.02ms&quot;,&quot;2.06ms&quot;,&quot;1.94ms&quot;,&quot;1.94ms&quot;,&quot;1.98ms&quot;,&quot;1.98ms&quot;,&quot;1.94ms&quot;,&quot;2.02ms&quot;,&quot;2.02ms&quot;,&quot;1.98ms&quot;,&quot;1.98ms&quot;,&quot;2.02ms&quot;,&quot;2.14ms&quot;,&quot;1.94ms&quot;,&quot;1.98ms&quot;,&quot;2.14ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},{&quot;name&quot;:&quot;p95&quot;,&quot;slot&quot;:2,&quot;values&quot;:[&quot;20.14ms&quot;,&quot;2.78ms&quot;,&quot;5.60ms&quot;,&quot;2.67ms&quot;,&quot;2.95ms&quot;,&quot;2.57ms&quot;,&quot;2.67ms&quot;,&quot;2.67ms&quot;,&quot;2.67ms&quot;,&quot;2.62ms&quot;,&quot;2.78ms&quot;,&quot;2.57ms&quot;,&quot;3.83ms&quot;,&quot;2.62ms&quot;,&quot;3.33ms&quot;,&quot;2.67ms&quot;,&quot;2.72ms&quot;,&quot;2.72ms&quot;,&quot;2.57ms&quot;,&quot;2.57ms&quot;,&quot;2.67ms&quot;,&quot;2.52ms&quot;,&quot;2.62ms&quot;,&quot;2.52ms&quot;,&quot;2.62ms&quot;,&quot;2.57ms&quot;,&quot;3.01ms&quot;,&quot;2.42ms&quot;,&quot;2.95ms&quot;,&quot;2.84ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},{&quot;name&quot;:&quot;p99&quot;,&quot;slot&quot;:3,&quot;values&quot;:[&quot;21.38ms&quot;,&quot;5.71ms&quot;,&quot;6.19ms&quot;,&quot;5.60ms&quot;,&quot;6.98ms&quot;,&quot;2.78ms&quot;,&quot;5.49ms&quot;,&quot;5.38ms&quot;,&quot;2.78ms&quot;,&quot;2.95ms&quot;,&quot;3.07ms&quot;,&quot;2.67ms&quot;,&quot;5.38ms&quot;,&quot;2.72ms&quot;,&quot;5.60ms&quot;,&quot;2.89ms&quot;,&quot;2.95ms&quot;,&quot;3.33ms&quot;,&quot;2.72ms&quot;,&quot;6.98ms&quot;,&quot;3.07ms&quot;,&quot;2.62ms&quot;,&quot;3.07ms&quot;,&quot;2.67ms&quot;,&quot;2.84ms&quot;,&quot;2.67ms&quot;,&quot;3.75ms&quot;,&quot;2.57ms&quot;,&quot;3.75ms&quot;,&quot;6.57ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]}]}">
+<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[52.2,60.3,68.5,76.6,84.8,92.9,101.0,109.2,117.3,125.5,133.6,141.8,149.9,158.1,166.2,174.4,182.5,190.7,198.8,207.0,215.1,223.3,231.4,239.5,247.7,255.8,264.0,272.1,280.3,288.4,296.6,304.7,312.9,321.0,329.2,337.3,345.5,353.6,361.8,369.9,378.1,386.2,394.3,402.5,410.6,418.8,426.9,435.1,443.2,451.4,459.5,467.7,475.8,484.0,492.1,500.3,508.4,516.6,524.7,528.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.1s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.3s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.4s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.5s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.0s&quot;],&quot;width&quot;:540,&quot;series&quot;:[{&quot;name&quot;:&quot;p50&quot;,&quot;slot&quot;:1,&quot;values&quot;:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,&quot;1.02ms&quot;,&quot;1.13ms&quot;,&quot;1.06ms&quot;,&quot;1.04ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.11ms&quot;,&quot;1.02ms&quot;,&quot;1.04ms&quot;,&quot;1.00ms&quot;,&quot;1.06ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.06ms&quot;,&quot;1.02ms&quot;,&quot;1.04ms&quot;,&quot;1.04ms&quot;,&quot;1.04ms&quot;,&quot;1.04ms&quot;,&quot;1.04ms&quot;,&quot;1.02ms&quot;,&quot;1.02ms&quot;,&quot;1.02ms&quot;,&quot;1.00ms&quot;,&quot;1.02ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.02ms&quot;,&quot;1.02ms&quot;,&quot;1.02ms&quot;]},{&quot;name&quot;:&quot;p95&quot;,&quot;slot&quot;:2,&quot;values&quot;:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,&quot;4.15ms&quot;,&quot;1.22ms&quot;,&quot;1.47ms&quot;,&quot;1.20ms&quot;,&quot;1.65ms&quot;,&quot;1.56ms&quot;,&quot;1.44ms&quot;,&quot;1.56ms&quot;,&quot;1.44ms&quot;,&quot;1.13ms&quot;,&quot;1.62ms&quot;,&quot;1.22ms&quot;,&quot;1.25ms&quot;,&quot;1.44ms&quot;,&quot;1.47ms&quot;,&quot;1.35ms&quot;,&quot;1.47ms&quot;,&quot;1.53ms&quot;,&quot;1.47ms&quot;,&quot;1.53ms&quot;,&quot;1.56ms&quot;,&quot;1.83ms&quot;,&quot;1.62ms&quot;,&quot;1.44ms&quot;,&quot;1.56ms&quot;,&quot;1.56ms&quot;,&quot;1.38ms&quot;,&quot;1.56ms&quot;,&quot;1.59ms&quot;,&quot;1.44ms&quot;]},{&quot;name&quot;:&quot;p99&quot;,&quot;slot&quot;:3,&quot;values&quot;:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,&quot;4.15ms&quot;,&quot;1.22ms&quot;,&quot;1.47ms&quot;,&quot;1.20ms&quot;,&quot;1.75ms&quot;,&quot;1.59ms&quot;,&quot;1.53ms&quot;,&quot;1.56ms&quot;,&quot;1.65ms&quot;,&quot;1.18ms&quot;,&quot;1.62ms&quot;,&quot;1.22ms&quot;,&quot;1.47ms&quot;,&quot;1.69ms&quot;,&quot;2.10ms&quot;,&quot;1.56ms&quot;,&quot;1.62ms&quot;,&quot;2.06ms&quot;,&quot;1.94ms&quot;,&quot;1.94ms&quot;,&quot;1.94ms&quot;,&quot;2.10ms&quot;,&quot;2.10ms&quot;,&quot;1.75ms&quot;,&quot;1.90ms&quot;,&quot;2.02ms&quot;,&quot;1.69ms&quot;,&quot;1.59ms&quot;,&quot;1.94ms&quot;,&quot;1.56ms&quot;]}]}">
+<figcaption><b>broadcast.ack</b><span><i class="key k1"></i>p50</span><span><i class="key k2"></i>p95</span><span><i class="key k3"></i>p99</span></figcaption>
+<svg viewBox="0 0 540 210" role="img" aria-label="broadcast.ack">
+<line class="axis" x1="44" x2="528" y1="186.0" y2="186.0"/><text x="38" y="186.0" dy="0.32em" text-anchor="end">0</text>
+<line class="grid" x1="44" x2="528" y1="128.7" y2="128.7"/><text x="38" y="128.7" dy="0.32em" text-anchor="end">2ms</text>
+<line class="grid" x1="44" x2="528" y1="71.3" y2="71.3"/><text x="38" y="71.3" dy="0.32em" text-anchor="end">4ms</text>
+<line class="grid" x1="44" x2="528" y1="14.0" y2="14.0"/><text x="38" y="14.0" dy="0.32em" text-anchor="end">6ms</text>
+<text x="44.0" y="204" text-anchor="middle">0s</text>
+<text x="165.0" y="204" text-anchor="middle">15s</text>
+<text x="286.0" y="204" text-anchor="middle">30s</text>
+<text x="407.0" y="204" text-anchor="middle">45s</text>
+<text x="528.0" y="204" text-anchor="middle">1m</text>
+<path class="line s1" d="M296.6,156.7 L304.7,153.6 L312.9,155.5 L321.0,156.1 L329.2,154.9 L337.3,155.5 L345.5,154.2 L353.6,156.7 L361.8,156.1 L369.9,157.3 L378.1,155.5 L386.2,154.9 L394.3,155.5 L402.5,155.5 L410.6,156.7 L418.8,156.1 L426.9,156.1 L435.1,156.1 L443.2,156.1 L451.4,156.1 L459.5,156.7 L467.7,156.7 L475.8,156.7 L484.0,157.3 L492.1,156.7 L500.3,154.9 L508.4,155.5 L516.6,156.7 L524.7,156.7 L528.0,156.7"/>
+<path class="line s2" d="M296.6,67.1 L304.7,150.9 L312.9,144.0 L321.0,151.6 L329.2,138.6 L337.3,141.4 L345.5,144.8 L353.6,141.4 L361.8,144.8 L369.9,153.6 L378.1,139.6 L386.2,150.9 L394.3,150.2 L402.5,144.8 L410.6,144.0 L418.8,147.2 L426.9,144.0 L435.1,142.3 L443.2,144.0 L451.4,142.3 L459.5,141.4 L467.7,133.6 L475.8,139.6 L484.0,144.8 L492.1,141.4 L500.3,141.4 L508.4,146.4 L516.6,141.4 L524.7,140.5 L528.0,144.8"/>
+<path class="line s3" d="M296.6,67.1 L304.7,150.9 L312.9,144.0 L321.0,151.6 L329.2,135.7 L337.3,140.5 L345.5,142.3 L353.6,141.4 L361.8,138.6 L369.9,152.3 L378.1,139.6 L386.2,150.9 L394.3,144.0 L402.5,137.7 L410.6,125.8 L418.8,141.4 L426.9,139.6 L435.1,127.0 L443.2,130.4 L451.4,130.4 L459.5,130.4 L467.7,125.8 L475.8,125.8 L484.0,135.7 L492.1,131.5 L500.3,128.1 L508.4,137.7 L516.6,140.5 L524.7,130.4 L528.0,141.4"/>
+<line class="cross" y1="14" y2="186"/>
+</svg>
+<div class="tip" hidden></div>
+</figure>
+<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[52.2,60.3,68.5,76.6,84.8,92.9,101.0,109.2,117.3,125.5,133.6,141.8,149.9,158.1,166.2,174.4,182.5,190.7,198.8,207.0,215.1,223.3,231.4,239.5,247.7,255.8,264.0,272.1,280.3,288.4,296.6,304.7,312.9,321.0,329.2,337.3,345.5,353.6,361.8,369.9,378.1,386.2,394.3,402.5,410.6,418.8,426.9,435.1,443.2,451.4,459.5,467.7,475.8,484.0,492.1,500.3,508.4,516.6,524.7,528.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.1s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.3s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.4s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.5s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.0s&quot;],&quot;width&quot;:540,&quot;series&quot;:[{&quot;name&quot;:&quot;p50&quot;,&quot;slot&quot;:1,&quot;values&quot;:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,&quot;1.11ms&quot;,&quot;1.18ms&quot;,&quot;1.15ms&quot;,&quot;1.09ms&quot;,&quot;1.13ms&quot;,&quot;1.11ms&quot;,&quot;1.15ms&quot;,&quot;1.06ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.13ms&quot;,&quot;1.13ms&quot;,&quot;1.11ms&quot;,&quot;1.11ms&quot;,&quot;1.09ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.09ms&quot;,&quot;1.11ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.06ms&quot;,&quot;1.09ms&quot;,&quot;1.13ms&quot;,&quot;1.11ms&quot;,&quot;1.09ms&quot;,&quot;1.06ms&quot;,&quot;1.06ms&quot;]},{&quot;name&quot;:&quot;p95&quot;,&quot;slot&quot;:2,&quot;values&quot;:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,&quot;4.23ms&quot;,&quot;1.27ms&quot;,&quot;1.50ms&quot;,&quot;1.25ms&quot;,&quot;1.69ms&quot;,&quot;1.62ms&quot;,&quot;1.50ms&quot;,&quot;1.62ms&quot;,&quot;1.53ms&quot;,&quot;1.18ms&quot;,&quot;1.65ms&quot;,&quot;1.27ms&quot;,&quot;1.30ms&quot;,&quot;1.53ms&quot;,&quot;1.50ms&quot;,&quot;1.50ms&quot;,&quot;1.53ms&quot;,&quot;1.56ms&quot;,&quot;1.56ms&quot;,&quot;1.56ms&quot;,&quot;1.59ms&quot;,&quot;1.90ms&quot;,&quot;1.69ms&quot;,&quot;1.50ms&quot;,&quot;1.62ms&quot;,&quot;1.62ms&quot;,&quot;1.44ms&quot;,&quot;1.59ms&quot;,&quot;1.65ms&quot;,&quot;1.47ms&quot;]},{&quot;name&quot;:&quot;p99&quot;,&quot;slot&quot;:3,&quot;values&quot;:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,&quot;4.23ms&quot;,&quot;1.27ms&quot;,&quot;1.50ms&quot;,&quot;1.25ms&quot;,&quot;1.83ms&quot;,&quot;1.65ms&quot;,&quot;1.59ms&quot;,&quot;1.62ms&quot;,&quot;1.69ms&quot;,&quot;1.22ms&quot;,&quot;1.69ms&quot;,&quot;1.27ms&quot;,&quot;1.50ms&quot;,&quot;1.72ms&quot;,&quot;2.14ms&quot;,&quot;1.59ms&quot;,&quot;1.65ms&quot;,&quot;2.10ms&quot;,&quot;1.98ms&quot;,&quot;2.02ms&quot;,&quot;1.98ms&quot;,&quot;2.19ms&quot;,&quot;2.14ms&quot;,&quot;1.83ms&quot;,&quot;1.98ms&quot;,&quot;2.14ms&quot;,&quot;1.72ms&quot;,&quot;1.62ms&quot;,&quot;1.98ms&quot;,&quot;1.62ms&quot;]}]}">
+<figcaption><b>broadcast.roundtrip</b><span><i class="key k1"></i>p50</span><span><i class="key k2"></i>p95</span><span><i class="key k3"></i>p99</span></figcaption>
+<svg viewBox="0 0 540 210" role="img" aria-label="broadcast.roundtrip">
+<line class="axis" x1="44" x2="528" y1="186.0" y2="186.0"/><text x="38" y="186.0" dy="0.32em" text-anchor="end">0</text>
+<line class="grid" x1="44" x2="528" y1="128.7" y2="128.7"/><text x="38" y="128.7" dy="0.32em" text-anchor="end">2ms</text>
+<line class="grid" x1="44" x2="528" y1="71.3" y2="71.3"/><text x="38" y="71.3" dy="0.32em" text-anchor="end">4ms</text>
+<line class="grid" x1="44" x2="528" y1="14.0" y2="14.0"/><text x="38" y="14.0" dy="0.32em" text-anchor="end">6ms</text>
+<text x="44.0" y="204" text-anchor="middle">0s</text>
+<text x="165.0" y="204" text-anchor="middle">15s</text>
+<text x="286.0" y="204" text-anchor="middle">30s</text>
+<text x="407.0" y="204" text-anchor="middle">45s</text>
+<text x="528.0" y="204" text-anchor="middle">1m</text>
+<path class="line s1" d="M296.6,154.2 L304.7,152.3 L312.9,152.9 L321.0,154.9 L329.2,153.6 L337.3,154.2 L345.5,152.9 L353.6,155.5 L361.8,154.9 L369.9,155.5 L378.1,153.6 L386.2,153.6 L394.3,154.2 L402.5,154.2 L410.6,154.9 L418.8,154.9 L426.9,155.5 L435.1,154.9 L443.2,154.2 L451.4,154.9 L459.5,155.5 L467.7,154.9 L475.8,155.5 L484.0,155.5 L492.1,154.9 L500.3,153.6 L508.4,154.2 L516.6,154.9 L524.7,155.5 L528.0,155.5"/>
+<path class="line s2" d="M296.6,64.7 L304.7,149.5 L312.9,143.1 L321.0,150.2 L329.2,137.7 L337.3,139.6 L345.5,143.1 L353.6,139.6 L361.8,142.3 L369.9,152.3 L378.1,138.6 L386.2,149.5 L394.3,148.7 L402.5,142.3 L410.6,143.1 L418.8,143.1 L426.9,142.3 L435.1,141.4 L443.2,141.4 L451.4,141.4 L459.5,140.5 L467.7,131.5 L475.8,137.7 L484.0,143.1 L492.1,139.6 L500.3,139.6 L508.4,144.8 L516.6,140.5 L524.7,138.6 L528.0,144.0"/>
+<path class="line s3" d="M296.6,64.7 L304.7,149.5 L312.9,143.1 L321.0,150.2 L329.2,133.6 L337.3,138.6 L345.5,140.5 L353.6,139.6 L361.8,137.7 L369.9,150.9 L378.1,137.7 L386.2,149.5 L394.3,143.1 L402.5,136.7 L410.6,124.6 L418.8,140.5 L426.9,138.6 L435.1,125.8 L443.2,129.3 L451.4,128.1 L459.5,129.3 L467.7,123.3 L475.8,124.6 L484.0,133.6 L492.1,129.3 L500.3,124.6 L508.4,136.7 L516.6,139.6 L524.7,129.3 L528.0,139.6"/>
+<line class="cross" y1="14" y2="186"/>
+</svg>
+<div class="tip" hidden></div>
+</figure>
+<figure class="chart" tabindex="0" data-points="{&quot;x&quot;:[52.2,60.3,68.5,76.6,84.8,92.9,101.0,109.2,117.3,125.5,133.6,141.8,149.9,158.1,166.2,174.4,182.5,190.7,198.8,207.0,215.1,223.3,231.4,239.5,247.7,255.8,264.0,272.1,280.3,288.4,296.6,304.7,312.9,321.0,329.2,337.3,345.5,353.6,361.8,369.9,378.1,386.2,394.3,402.5,410.6,418.8,426.9,435.1,443.2,451.4,459.5,467.7,475.8,484.0,492.1,500.3,508.4,516.6,524.7,528.0],&quot;at&quot;:[&quot;1.0s&quot;,&quot;2.0s&quot;,&quot;3.0s&quot;,&quot;4.0s&quot;,&quot;5.1s&quot;,&quot;6.1s&quot;,&quot;7.1s&quot;,&quot;8.1s&quot;,&quot;9.1s&quot;,&quot;10.1s&quot;,&quot;11.1s&quot;,&quot;12.1s&quot;,&quot;13.1s&quot;,&quot;14.1s&quot;,&quot;15.2s&quot;,&quot;16.2s&quot;,&quot;17.2s&quot;,&quot;18.2s&quot;,&quot;19.2s&quot;,&quot;20.2s&quot;,&quot;21.2s&quot;,&quot;22.2s&quot;,&quot;23.2s&quot;,&quot;24.2s&quot;,&quot;25.3s&quot;,&quot;26.3s&quot;,&quot;27.3s&quot;,&quot;28.3s&quot;,&quot;29.3s&quot;,&quot;30.3s&quot;,&quot;31.3s&quot;,&quot;32.3s&quot;,&quot;33.3s&quot;,&quot;34.3s&quot;,&quot;35.4s&quot;,&quot;36.4s&quot;,&quot;37.4s&quot;,&quot;38.4s&quot;,&quot;39.4s&quot;,&quot;40.4s&quot;,&quot;41.4s&quot;,&quot;42.4s&quot;,&quot;43.4s&quot;,&quot;44.4s&quot;,&quot;45.5s&quot;,&quot;46.5s&quot;,&quot;47.5s&quot;,&quot;48.5s&quot;,&quot;49.5s&quot;,&quot;50.5s&quot;,&quot;51.5s&quot;,&quot;52.5s&quot;,&quot;53.5s&quot;,&quot;54.5s&quot;,&quot;55.6s&quot;,&quot;56.6s&quot;,&quot;57.6s&quot;,&quot;58.6s&quot;,&quot;59.6s&quot;,&quot;60.0s&quot;],&quot;width&quot;:540,&quot;series&quot;:[{&quot;name&quot;:&quot;p50&quot;,&quot;slot&quot;:1,&quot;values&quot;:[&quot;2.06ms&quot;,&quot;1.90ms&quot;,&quot;1.98ms&quot;,&quot;1.90ms&quot;,&quot;2.02ms&quot;,&quot;1.98ms&quot;,&quot;1.98ms&quot;,&quot;1.90ms&quot;,&quot;1.94ms&quot;,&quot;2.02ms&quot;,&quot;2.02ms&quot;,&quot;1.94ms&quot;,&quot;2.06ms&quot;,&quot;1.98ms&quot;,&quot;2.02ms&quot;,&quot;2.06ms&quot;,&quot;1.94ms&quot;,&quot;1.94ms&quot;,&quot;1.98ms&quot;,&quot;1.98ms&quot;,&quot;1.94ms&quot;,&quot;2.02ms&quot;,&quot;2.02ms&quot;,&quot;1.98ms&quot;,&quot;1.98ms&quot;,&quot;2.02ms&quot;,&quot;2.14ms&quot;,&quot;1.94ms&quot;,&quot;1.98ms&quot;,&quot;2.14ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},{&quot;name&quot;:&quot;p95&quot;,&quot;slot&quot;:2,&quot;values&quot;:[&quot;20.14ms&quot;,&quot;2.78ms&quot;,&quot;5.60ms&quot;,&quot;2.67ms&quot;,&quot;2.95ms&quot;,&quot;2.57ms&quot;,&quot;2.67ms&quot;,&quot;2.67ms&quot;,&quot;2.67ms&quot;,&quot;2.62ms&quot;,&quot;2.78ms&quot;,&quot;2.57ms&quot;,&quot;3.83ms&quot;,&quot;2.62ms&quot;,&quot;3.33ms&quot;,&quot;2.67ms&quot;,&quot;2.72ms&quot;,&quot;2.72ms&quot;,&quot;2.57ms&quot;,&quot;2.57ms&quot;,&quot;2.67ms&quot;,&quot;2.52ms&quot;,&quot;2.62ms&quot;,&quot;2.52ms&quot;,&quot;2.62ms&quot;,&quot;2.57ms&quot;,&quot;3.01ms&quot;,&quot;2.42ms&quot;,&quot;2.95ms&quot;,&quot;2.84ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},{&quot;name&quot;:&quot;p99&quot;,&quot;slot&quot;:3,&quot;values&quot;:[&quot;21.38ms&quot;,&quot;5.71ms&quot;,&quot;6.19ms&quot;,&quot;5.60ms&quot;,&quot;6.98ms&quot;,&quot;2.78ms&quot;,&quot;5.49ms&quot;,&quot;5.38ms&quot;,&quot;2.78ms&quot;,&quot;2.95ms&quot;,&quot;3.07ms&quot;,&quot;2.67ms&quot;,&quot;5.38ms&quot;,&quot;2.72ms&quot;,&quot;5.60ms&quot;,&quot;2.89ms&quot;,&quot;2.95ms&quot;,&quot;3.33ms&quot;,&quot;2.72ms&quot;,&quot;6.98ms&quot;,&quot;3.07ms&quot;,&quot;2.62ms&quot;,&quot;3.07ms&quot;,&quot;2.67ms&quot;,&quot;2.84ms&quot;,&quot;2.67ms&quot;,&quot;3.75ms&quot;,&quot;2.57ms&quot;,&quot;3.75ms&quot;,&quot;6.57ms&quot;,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]}]}">
 <figcaption><b>ws.connect</b><span><i class="key k1"></i>p50</span><span><i class="key k2"></i>p95</span><span><i class="key k3"></i>p99</span></figcaption>
-<svg viewBox="0 0 360 180" role="img" aria-label="ws.connect">
-<line class="axis" x1="44" x2="348" y1="156.0" y2="156.0"/><text x="38" y="156.0" dy="0.32em" text-anchor="end">0</text>
-<line class="grid" x1="44" x2="348" y1="108.0" y2="108.0"/><text x="38" y="108.0" dy="0.32em" text-anchor="end">10ms</text>
-<line class="grid" x1="44" x2="348" y1="60.0" y2="60.0"/><text x="38" y="60.0" dy="0.32em" text-anchor="end">20ms</text>
-<line class="grid" x1="44" x2="348" y1="12.0" y2="12.0"/><text x="38" y="12.0" dy="0.32em" text-anchor="end">30ms</text>
-<text x="44.0" y="174" text-anchor="middle">0s</text>
-<text x="120.0" y="174" text-anchor="middle">15s</text>
-<text x="196.0" y="174" text-anchor="middle">30s</text>
-<text x="272.0" y="174" text-anchor="middle">45s</text>
-<text x="348.0" y="174" text-anchor="middle">1m</text>
-<path class="line s1" d="M49.1,146.1 L54.2,146.9 L59.4,146.5 L64.5,146.9 L69.6,146.3 L74.7,146.5 L79.8,146.5 L84.9,146.9 L90.1,146.7 L95.2,146.3 L100.3,146.3 L105.4,146.7 L110.5,146.1 L115.7,146.5 L120.8,146.3 L125.9,146.1 L131.0,146.7 L136.1,146.7 L141.2,146.5 L146.4,146.5 L151.5,146.7 L156.6,146.3 L161.7,146.3 L166.8,146.5 L171.9,146.5 L177.1,146.3 L182.2,145.7 L187.3,146.7 L192.4,146.5 L197.5,145.7"/>
-<path class="line s2" d="M49.1,59.3 L54.2,142.7 L59.4,129.1 L64.5,143.2 L69.6,141.8 L74.7,143.7 L79.8,143.2 L84.9,143.2 L90.1,143.2 L95.2,143.4 L100.3,142.7 L105.4,143.7 L110.5,137.6 L115.7,143.4 L120.8,140.0 L125.9,143.2 L131.0,142.9 L136.1,142.9 L141.2,143.7 L146.4,143.7 L151.5,143.2 L156.6,143.9 L161.7,143.4 L166.8,143.9 L171.9,143.4 L177.1,143.7 L182.2,141.5 L187.3,144.4 L192.4,141.8 L197.5,142.4"/>
-<path class="line s3" d="M49.1,53.4 L54.2,128.6 L59.4,126.3 L64.5,129.1 L69.6,122.5 L74.7,142.7 L79.8,129.7 L84.9,130.2 L90.1,142.7 L95.2,141.8 L100.3,141.3 L105.4,143.2 L110.5,130.2 L115.7,142.9 L120.8,129.1 L125.9,142.1 L131.0,141.8 L136.1,140.0 L141.2,142.9 L146.4,122.5 L151.5,141.3 L156.6,143.4 L161.7,141.3 L166.8,143.2 L171.9,142.4 L177.1,143.2 L182.2,138.0 L187.3,143.7 L192.4,138.0 L197.5,124.5"/>
-<line class="cross" y1="12" y2="156"/>
+<svg viewBox="0 0 540 210" role="img" aria-label="ws.connect">
+<line class="axis" x1="44" x2="528" y1="186.0" y2="186.0"/><text x="38" y="186.0" dy="0.32em" text-anchor="end">0</text>
+<line class="grid" x1="44" x2="528" y1="128.7" y2="128.7"/><text x="38" y="128.7" dy="0.32em" text-anchor="end">10ms</text>
+<line class="grid" x1="44" x2="528" y1="71.3" y2="71.3"/><text x="38" y="71.3" dy="0.32em" text-anchor="end">20ms</text>
+<line class="grid" x1="44" x2="528" y1="14.0" y2="14.0"/><text x="38" y="14.0" dy="0.32em" text-anchor="end">30ms</text>
+<text x="44.0" y="204" text-anchor="middle">0s</text>
+<text x="165.0" y="204" text-anchor="middle">15s</text>
+<text x="286.0" y="204" text-anchor="middle">30s</text>
+<text x="407.0" y="204" text-anchor="middle">45s</text>
+<text x="528.0" y="204" text-anchor="middle">1m</text>
+<path class="line s1" d="M52.2,174.2 L60.3,175.1 L68.5,174.7 L76.6,175.1 L84.8,174.4 L92.9,174.7 L101.0,174.7 L109.2,175.1 L117.3,174.9 L125.5,174.4 L133.6,174.4 L141.8,174.9 L149.9,174.2 L158.1,174.7 L166.2,174.4 L174.4,174.2 L182.5,174.9 L190.7,174.9 L198.8,174.7 L207.0,174.7 L215.1,174.9 L223.3,174.4 L231.4,174.4 L239.5,174.7 L247.7,174.7 L255.8,174.4 L264.0,173.7 L272.1,174.9 L280.3,174.7 L288.4,173.7"/>
+<path class="line s2" d="M52.2,70.6 L60.3,170.1 L68.5,153.9 L76.6,170.7 L84.8,169.1 L92.9,171.3 L101.0,170.7 L109.2,170.7 L117.3,170.7 L125.5,171.0 L133.6,170.1 L141.8,171.3 L149.9,164.1 L158.1,171.0 L166.2,166.9 L174.4,170.7 L182.5,170.4 L190.7,170.4 L198.8,171.3 L207.0,171.3 L215.1,170.7 L223.3,171.6 L231.4,171.0 L239.5,171.6 L247.7,171.0 L255.8,171.3 L264.0,168.7 L272.1,172.1 L280.3,169.1 L288.4,169.7"/>
+<path class="line s3" d="M52.2,63.4 L60.3,153.3 L68.5,150.5 L76.6,153.9 L84.8,146.0 L92.9,170.1 L101.0,154.5 L109.2,155.2 L117.3,170.1 L125.5,169.1 L133.6,168.4 L141.8,170.7 L149.9,155.2 L158.1,170.4 L166.2,153.9 L174.4,169.4 L182.5,169.1 L190.7,166.9 L198.8,170.4 L207.0,146.0 L215.1,168.4 L223.3,171.0 L231.4,168.4 L239.5,170.7 L247.7,169.7 L255.8,170.7 L264.0,164.5 L272.1,171.3 L280.3,164.5 L288.4,148.3"/>
+<line class="cross" y1="14" y2="186"/>
 </svg>
 <div class="tip" hidden></div>
 </figure>
 </div>
 <h3>Metrics</h3>
-<div class="table"><table>
+<div class="table-wrap"><table>
 <thead><tr><th>metric</th><th>count</th><th>rate/s</th><th>mean</th><th>p50</th><th>p90</th><th>p95</th><th>p99</th><th>max</th></tr></thead>
 <tbody>
 <tr><td>broadcast.ack</td><td>1,479</td><td>24.65</td><td>1.09ms</td><td>1.04ms</td><td>1.38ms</td><td>1.53ms</td><td>1.90ms</td><td>4.15ms</td></tr>
@@ -258,7 +291,7 @@ pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px
 <tr><td>ws.connect</td><td>3,000</td><td>50.00</td><td>2.16ms</td><td>1.98ms</td><td>2.57ms</td><td>2.72ms</td><td>5.60ms</td><td>21.38ms</td></tr>
 </tbody></table></div>
 <h3>Thresholds</h3>
-<div class="table"><table>
+<div class="table-wrap"><table>
 <thead><tr><th>metric</th><th>stat</th><th>limit</th><th>value</th><th>status</th></tr></thead>
 <tbody>
 <tr><td>channel.join</td><td>p95</td><td>1.00s</td><td>3.13ms</td><td><span class="status passed">pass</span></td></tr>
@@ -266,7 +299,7 @@ pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px
 <tr><td>iteration.errors</td><td>count</td><td>0</td><td>0</td><td><span class="status passed">pass</span></td></tr>
 </tbody></table></div>
 <details><summary>Timeline</summary>
-<div class="table"><table>
+<div class="table-wrap"><table>
 <thead><tr><th>time</th><th>VUs</th><th>iterations/s</th><th>errors/s</th><th>broadcast.ack p95</th><th>broadcast.roundtrip p95</th><th>channel.join p95</th><th>ws.connect p95</th></tr></thead>
 <tbody>
 <tr><td>1.0s</td><td>101</td><td>0.00</td><td>0.00</td><td>–</td><td>–</td><td>15.22ms</td><td>20.14ms</td></tr>

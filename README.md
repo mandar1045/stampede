@@ -259,7 +259,7 @@ $ mix stampede.run loadtest/channels.exs --find-limit --start 100000 --step 1000
 p95. The server held them at 76% CPU and didn't log a single warning. Here's
 the HTML report from the same run:
 
-![The HTML report of the 600,000-user run](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/benchmark-600k.png)
+![The HTML report of the 600,000-user run: held 600,000 VUs, each find-limit step shaded green, with the latency of joins, pushes and connects](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/report-600k.png)
 
 That's about as far as this server goes, because at 600,000 its memory was
 98% full. Each connection took about 47 KB, so more memory means more users.
@@ -320,7 +320,7 @@ joins a room of about 100 people, which reads the room's latest 50 messages,
 then every 30 to 60 seconds sends a message, which is written before the reply
 comes back, or scrolls up for older ones.
 
-![The dashboard following the chat app, sped up, as it climbs to 40,000 users with 0 errors](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/postgres-chat-40k.gif)
+![The dashboard climbing to 40,000 users with 0 errors on the chat app, replayed from the run's saved results](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/dashboard-postgres-40k.gif)
 
 | Users | Join p95 | Send p95 | Scroll up p95 | Errors |
 |---:|---:|---:|---:|---:|
@@ -473,7 +473,7 @@ would be the limit:
 Here's what the probe saw on the way to 600,000 users, with 1.2 million
 processes on 4 cores:
 
-![The Server section of the HTML report](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/benchmark-server.png)
+![The Server section of the HTML report: schedulers, memory, 1.2 million processes and the run queue on the way to 600,000 users](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/report-server-600k.png)
 
 A small agent runs on the app's node during the test. It stops by itself if
 the test goes away, and its code is removed afterwards. It costs a little:

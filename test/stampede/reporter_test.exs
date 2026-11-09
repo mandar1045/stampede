@@ -156,7 +156,9 @@ defmodule Stampede.ReporterTest do
     assert html =~ ~r/\A<!doctype html>/
     assert html =~ "<h2>MyApp.Load.Lobby</h2>"
     assert html =~ ~s(<span class="status failed">Failed</span>)
-    assert length(String.split(html, ~s(<figure class="chart"))) == 4
+    # The users, and channel.join. Nothing was counted, so no chart of it.
+    assert length(String.split(html, ~s(<figure class="chart))) == 3
+    assert html =~ ~s(<figure class="chart wide")
     assert html =~ ~s(<circle class="dot s1")
     assert html =~ "&lt;b&gt; &amp; &quot;quoted&quot;"
     assert html =~ "** (RuntimeError) &lt;script&gt;"
@@ -349,5 +351,73 @@ defmodule Stampede.ReporterTest do
     assert html =~ "<h2>MyApp.Load.Checkout</h2>"
     refute html =~ ~s(<figure)
     refute html =~ ~s(<span class="status)
+  end
+
+  test "from_json/1 reads back what to_json/1 wrote, limit and server included" do
+    step = %{
+      target: 100,
+      from: 0,
+      to: 2_000,
+      passed?: true,
+      busy: 0.1,
+      thresholds: [%{metric: "channel.join", stat: :p95, limit: 500, value: 4.5, passed?: true}]
+    }
+
+    result = %Result{
+      scenario: MyApp.Load.Lobby,
+      duration: 2_000,
+      metrics: %{"channel.join" => @join, "status is 200" => @check},
+      timeline: [
+        %{at: 1_000, vus: 2, metrics: %{"channel.join" => @join}, server: %{busy: 0.5}}
+      ],
+      thresholds: [%{metric: "channel.join", stat: :p95, limit: 500, value: 4.5, passed?: true}],
+      errors: [%{message: "boom", count: 1}],
+      limit: %{value: 100, by: :vus, up_to?: true, min: nil, failed: nil, steps: [step]},
+      server: %{
+        busy: 0.5,
+        memory: 1,
+        processes: 2,
+        run_queue: 0,
+        nodes: ["app@host"],
+        lost: [],
+        queues: []
+      }
+    }
+
+    assert [read] = result |> Reporter.to_json() |> Reporter.from_json()
+    assert read == result
+    assert Reporter.to_html(read) == Reporter.to_html(result)
+
+    # The files mix stampede.run --out writes hold a list.
+    list = "[" <> Reporter.to_json(result) <> "," <> Reporter.to_json(result) <> "]"
+    assert [^result, ^result] = Reporter.from_json(list)
+  end
+
+  @tag :tmp_dir
+  test "mix stampede.report writes the HTML report of saved results", %{tmp_dir: dir} do
+    result = %Result{
+      scenario: MyApp.Load.Lobby,
+      duration: 1_000,
+      metrics: %{"channel.join" => @join}
+    }
+
+    json = Path.join(dir, "results.json")
+    File.write!(json, "[" <> Reporter.to_json(result) <> "]")
+
+    output = ExUnit.CaptureIO.capture_io(fn -> Mix.Tasks.Stampede.Report.run([json]) end)
+    assert File.read!(Path.join(dir, "report.html")) == Reporter.to_html(result)
+    assert output =~ "Wrote "
+
+    ExUnit.CaptureIO.capture_io(fn ->
+      Mix.Tasks.Stampede.Report.run([json, "--html", Path.join(dir, "old.html")])
+    end)
+
+    assert File.exists?(Path.join(dir, "old.html"))
+
+    File.write!(json, "not json")
+
+    assert_raise Mix.Error, ~r/Could not read/, fn ->
+      Mix.Tasks.Stampede.Report.run([json])
+    end
   end
 end
