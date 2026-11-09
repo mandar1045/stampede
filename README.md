@@ -209,7 +209,7 @@ live_dashboard "/dashboard",
 Any run with `--probe` then shows up live in a Stampede tab, next to the
 dashboard's processes and ports, and stays there after the load test has gone:
 
-![A probed run in LiveDashboard's Stampede tab, sped up, ramping to 200 users with 0 errors next to the run before it](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/livedashboard-tab.gif)
+![LiveDashboard's Stampede tab following the 600,000-user run, replayed from its saved results, through to 600,000 users with 0 errors](https://raw.githubusercontent.com/mandar1045/stampede/main/assets/readme/livedashboard-tab-600k.gif)
 
 **Livebook.** [![Run in Livebook](https://livebook.dev/badge/v1/blue.svg)](https://livebook.dev/run?url=https%3A%2F%2Fgithub.com%2Fmandar1045%2Fstampede%2Fblob%2Fmain%2Fnotebooks%2Fload_test.livemd)
 Add Stampede and Kino, and pick **Load test** from the **+ Smart** menu. You

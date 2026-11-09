@@ -539,6 +539,9 @@ defmodule Stampede.Reporter.HTML do
   # A --find-limit run leads with its answer.
   defp verdict(nil), do: []
 
+  # Holding all it was asked to try says nothing the Limit tile doesn't.
+  defp verdict(%{up_to?: true}), do: []
+
   defp verdict(limit) do
     {first, rest} =
       case String.split(limit_headline(limit), ". ", parts: 2) do
