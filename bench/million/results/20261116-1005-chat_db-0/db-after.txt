@@ -1,0 +1,4 @@
+# after the run: messages, database size, messages table size
+107979985|20 GB|20 GB
+# pg_stat_database: time, connections, commits, rows inserted, fetched, updated, blocks read, blocks from cache
+2026-11-16 10:58:32.688578+00|33|10854940|7928334|276890711|421995|151522|963792352

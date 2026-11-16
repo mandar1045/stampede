@@ -1,0 +1,14 @@
+# the app's pool: 32, fan-out: broadcast
+# Postgres settings: -c shared_buffers=16GB -c effective_cache_size=48GB -c work_mem=16MB -c maintenance_work_mem=2GB -c random_page_cost=1.1 -c effective_io_concurrency=200 -c max_wal_size=16GB -c min_wal_size=2GB -c checkpoint_completion_target=0.9 -c wal_buffers=64MB -c wal_compression=lz4
+effective_cache_size|48GB
+max_connections|100
+max_wal_size|16GB
+random_page_cost|1.1
+shared_buffers|16GB
+synchronous_commit|on
+wal_level|replica
+work_mem|16MB
+# before the run: messages, database size, messages table size
+100310453|18 GB|18 GB
+# pg_stat_database: time, connections, commits, rows inserted, fetched, updated, blocks read, blocks from cache
+2026-11-16 10:05:22.569879+00|1|14|0|314431|0|44614|43879089

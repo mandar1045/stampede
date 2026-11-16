@@ -1,0 +1,42 @@
+
+PostgreSQL Database directory appears to contain a database; Skipping initialization
+
+2026-11-16 10:05:07.366 UTC [1] LOG:  starting PostgreSQL 17.12 (Debian 17.12-1.pgdg13+1) on aarch64-unknown-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+2026-11-16 10:05:07.366 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2026-11-16 10:05:07.366 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2026-11-16 10:05:07.372 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-11-16 10:05:07.380 UTC [35] LOG:  database system was interrupted; last known up at 2026-11-16 10:02:38 UTC
+2026-11-16 10:05:07.392 UTC [35] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-11-16 10:05:07.396 UTC [35] LOG:  redo starts at 6/486C5818
+2026-11-16 10:05:08.292 UTC [42] FATAL:  the database system is not yet accepting connections
+2026-11-16 10:05:08.292 UTC [42] DETAIL:  Consistent recovery state has not been yet reached.
+2026-11-16 10:05:09.283 UTC [35] LOG:  unexpected pageaddr 6/2A9DC000 in WAL segment 000000010000000600000078, LSN 6/789DC000, offset 10338304
+2026-11-16 10:05:09.283 UTC [35] LOG:  redo done at 6/789DBFC8 system usage: CPU: user: 1.54 s, system: 0.34 s, elapsed: 1.88 s
+2026-11-16 10:05:09.293 UTC [33] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-11-16 10:05:09.368 UTC [49] FATAL:  the database system is not yet accepting connections
+2026-11-16 10:05:09.368 UTC [49] DETAIL:  Consistent recovery state has not been yet reached.
+2026-11-16 10:05:10.443 UTC [56] FATAL:  the database system is not yet accepting connections
+2026-11-16 10:05:10.443 UTC [56] DETAIL:  Consistent recovery state has not been yet reached.
+2026-11-16 10:05:11.522 UTC [63] FATAL:  the database system is not yet accepting connections
+2026-11-16 10:05:11.522 UTC [63] DETAIL:  Consistent recovery state has not been yet reached.
+2026-11-16 10:05:12.419 UTC [33] LOG:  checkpoint complete: wrote 57221 buffers (2.7%); 0 WAL file(s) added, 0 removed, 48 recycled; write=3.000 s, sync=0.023 s, total=3.129 s; sync files=28, longest=0.009 s, average=0.001 s; distance=789594 kB, estimate=789594 kB; lsn=6/789DC018, redo lsn=6/789DC018
+2026-11-16 10:05:12.433 UTC [1] LOG:  database system is ready to accept connections
+2026-11-16 10:10:09.426 UTC [33] LOG:  checkpoint starting: time
+2026-11-16 10:14:39.115 UTC [33] LOG:  checkpoint complete: wrote 32316 buffers (1.5%); 0 WAL file(s) added, 0 removed, 12 recycled; write=269.611 s, sync=0.019 s, total=269.690 s; sync files=21, longest=0.007 s, average=0.001 s; distance=193656 kB, estimate=730000 kB; lsn=6/9E424EF0, redo lsn=6/846FA3E8
+2026-11-16 10:15:09.145 UTC [33] LOG:  checkpoint starting: time
+2026-11-16 10:19:39.175 UTC [33] LOG:  checkpoint complete: wrote 55544 buffers (2.6%); 0 WAL file(s) added, 0 removed, 27 recycled; write=269.880 s, sync=0.031 s, total=270.030 s; sync files=23, longest=0.007 s, average=0.002 s; distance=450939 kB, estimate=702094 kB; lsn=6/C5184680, redo lsn=6/9FF59240
+2026-11-16 10:20:09.205 UTC [33] LOG:  checkpoint starting: time
+2026-11-16 10:24:39.198 UTC [33] LOG:  checkpoint complete: wrote 74233 buffers (3.5%); 0 WAL file(s) added, 0 removed, 40 recycled; write=269.782 s, sync=0.034 s, total=269.994 s; sync files=26, longest=0.007 s, average=0.002 s; distance=649539 kB, estimate=696838 kB; lsn=6/F5EAC018, redo lsn=6/C79AA1C0
+2026-11-16 10:25:09.228 UTC [33] LOG:  checkpoint starting: time
+2026-11-16 10:29:39.300 UTC [33] LOG:  checkpoint complete: wrote 86627 buffers (4.1%); 0 WAL file(s) added, 0 removed, 49 recycled; write=269.827 s, sync=0.027 s, total=270.073 s; sync files=23, longest=0.007 s, average=0.002 s; distance=797842 kB, estimate=797842 kB; lsn=7/2F5A40A8, redo lsn=6/F84CEB98
+2026-11-16 10:30:09.330 UTC [33] LOG:  checkpoint starting: time
+2026-11-16 10:34:39.224 UTC [33] LOG:  checkpoint complete: wrote 99513 buffers (4.7%); 0 WAL file(s) added, 0 removed, 58 recycled; write=269.696 s, sync=0.047 s, total=269.895 s; sync files=24, longest=0.014 s, average=0.002 s; distance=949839 kB, estimate=949839 kB; lsn=7/70C0A290, redo lsn=7/324629F0
+2026-11-16 10:35:09.254 UTC [33] LOG:  checkpoint starting: time
+2026-11-16 10:39:39.217 UTC [33] LOG:  checkpoint complete: wrote 109559 buffers (5.2%); 0 WAL file(s) added, 0 removed, 66 recycled; write=269.738 s, sync=0.047 s, total=269.964 s; sync files=23, longest=0.013 s, average=0.003 s; distance=1083932 kB, estimate=1083932 kB; lsn=7/B9D48778, redo lsn=7/746E9D40
+2026-11-16 10:40:09.247 UTC [33] LOG:  checkpoint starting: time
+2026-11-16 10:44:39.370 UTC [33] LOG:  checkpoint complete: wrote 118818 buffers (5.7%); 0 WAL file(s) added, 0 removed, 73 recycled; write=269.795 s, sync=0.028 s, total=270.123 s; sync files=24, longest=0.008 s, average=0.002 s; distance=1203221 kB, estimate=1203221 kB; lsn=8/A5ED760, redo lsn=7/BDDEF360
+2026-11-16 10:45:09.400 UTC [33] LOG:  checkpoint starting: time
+2026-11-16 10:49:39.324 UTC [33] LOG:  checkpoint complete: wrote 130189 buffers (6.2%); 0 WAL file(s) added, 0 removed, 81 recycled; write=269.638 s, sync=0.035 s, total=269.925 s; sync files=26, longest=0.016 s, average=0.002 s; distance=1328089 kB, estimate=1328089 kB; lsn=8/621CE1C8, redo lsn=8/EEE5A38
+2026-11-16 10:50:09.354 UTC [33] LOG:  checkpoint starting: time
+2026-11-16 10:54:39.377 UTC [33] LOG:  checkpoint complete: wrote 141907 buffers (6.8%); 0 WAL file(s) added, 0 removed, 89 recycled; write=269.665 s, sync=0.007 s, total=270.023 s; sync files=24, longest=0.004 s, average=0.001 s; distance=1450250 kB, estimate=1450250 kB; lsn=8/A72445C8, redo lsn=8/677284B8
+2026-11-16 10:55:09.406 UTC [33] LOG:  checkpoint starting: time

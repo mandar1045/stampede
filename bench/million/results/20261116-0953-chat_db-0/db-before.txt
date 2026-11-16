@@ -1,0 +1,14 @@
+# the app's pool: 10, fan-out: broadcast
+# Postgres settings: none, the defaults of the image
+effective_cache_size|4GB
+max_connections|100
+max_wal_size|1GB
+random_page_cost|4
+shared_buffers|128MB
+synchronous_commit|on
+wal_level|replica
+work_mem|4MB
+# before the run: messages, database size, messages table size
+100000000|18 GB|18 GB
+# pg_stat_database: time, connections, commits, rows inserted, fetched, updated, blocks read, blocks from cache
+2026-11-16 09:53:53.277716+00|1|297|101010361|19315|446|5186687|440757787
