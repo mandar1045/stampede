@@ -151,6 +151,28 @@ seconds the app's pool was dropping requests from its queue, so I stopped it
 and ran again. The `column "chat" does not exist` errors in its `postgres.log`
 come from a quoting bug in my stats loop, fixed since.
 
+#### Running it again, tuned
+
+On [the Elixir Forum](https://forum.elixirforum.com/t/40-000-chat-users-on-phoenix-postgres-hit-three-limits-at-once-how-would-you-tune-it/77333),
+the first answers were that a pool of 10 and Postgres's defaults, sized for a
+small machine, say more about the defaults than about the hardware. So
+`run-chat.sh` takes the pool size and Postgres's settings, and the database
+doesn't have to be seeded again to change them:
+
+```console
+$ SEED=0 POOL_SIZE=32 PG_CONF="-c shared_buffers=16GB -c effective_cache_size=48GB \
+    -c work_mem=16MB -c random_page_cost=1.1 -c max_wal_size=16GB" \
+    PROOF=1 STEP_RAMP=120 ./run-chat.sh --find-limit --start 20000 --step 20000 --up-to 400000 --hold 60s
+```
+
+The other question was whether fan-out could cost less. `FANOUT` picks how a
+message reaches its room: `broadcast`, as above, `ids`, which keeps messages
+in ETS and broadcasts only their ids, or `batch`, which sends a room's messages
+together every `FANOUT_WINDOW` milliseconds. Each run also times
+`chat.delivered`, until a message comes back to its sender in the room's
+broadcast, since batching saves work by making messages wait. `db-before.txt`
+records which pool, settings and fan-out a run used.
+
 ### 2,000,000 Channels users on a 16-core server (November 4, 2026)
 
 One r7g.4xlarge (16 Graviton cores, 128 GB) running the stock app, and eight

@@ -1,7 +1,11 @@
 defmodule ChatWeb.RoomChannel do
   use Phoenix.Channel
 
-  alias Chat.Messages
+  alias Chat.{Fanout, Messages}
+
+  # Only broadcast with FANOUT=ids. Intercepting it is what lets each channel
+  # read the message back, and what takes it off Phoenix's encode-once path.
+  intercept ["new_msg_id"]
 
   # Joining loads the latest messages and marks them read, like opening a chat.
   @impl true
@@ -15,16 +19,22 @@ defmodule ChatWeb.RoomChannel do
     {:ok, %{messages: messages}, assign(socket, :room_id, room_id)}
   end
 
-  # Sending writes the message, then broadcasts it to the room.
+  # Sending writes the message, then sends it to the room, as Chat.Fanout says.
   @impl true
   def handle_in("new_msg", %{"body" => body}, socket) do
     message = Messages.create!(socket.assigns.room_id, socket.assigns.user_id, body)
-    broadcast!(socket, "new_msg", message)
+    Fanout.deliver(socket.assigns.room_id, message)
     {:reply, {:ok, %{id: message.id}}, socket}
   end
 
   # Scrolling up loads the page of messages before the oldest one shown.
   def handle_in("history", %{"before" => before}, socket) do
     {:reply, {:ok, %{messages: Messages.before(socket.assigns.room_id, before)}}, socket}
+  end
+
+  @impl true
+  def handle_out("new_msg_id", %{id: id}, socket) do
+    if message = Fanout.lookup(id), do: push(socket, "new_msg", message)
+    {:noreply, socket}
   end
 end
