@@ -35,8 +35,13 @@ erl_flags="+P 10000000 $no_spin -kernel inet_dist_listen_min 9100 inet_dist_list
 
 # Stops what an earlier run left on a machine. This is a command of its own,
 # with brackets in the patterns, so pkill can't match the shell running it.
+# An app that held hundreds of thousands of connections can take most of an
+# hour to stop, so after a minute it's killed.
 stop_old() {
-  on "$1" "pkill -f '[m]onitor.sh'; pkill -f '[m]ix run --no-halt'; pkill -f '[s]tampede.run'; pkill -f '[p]hx.server'; sleep 2; true"
+  local beams='[m]ix run --no-halt|[s]tampede.run|[p]hx.server'
+  on "$1" "pkill -f '[m]onitor.sh'; pkill -f '$beams'
+    for _ in \$(seq 60); do pgrep -f '$beams' > /dev/null || break; sleep 1; done
+    pkill -9 -f '$beams'; true"
 }
 
 start_monitor() {
