@@ -73,9 +73,10 @@ defmodule Stampede.Probe do
         :busy, a, b ->
           max(a, b)
 
-        # Each node sees the same database.
-        :database, a, _b ->
-          a
+        # Each node sees the same database, but only one may have sent its
+        # settings that second.
+        :database, a, b ->
+          Map.merge(Map.take(b, [:settings]), a)
 
         :pool, a, b ->
           %{
@@ -119,7 +120,16 @@ defmodule Stampede.Probe do
         nil
 
       databases ->
-        Map.new([:commits, :writes, :reads, :connections, :active], &{&1, peak(databases, &1)})
+        peaks =
+          Map.new([:commits, :writes, :reads, :connections, :active], &{&1, peak(databases, &1)})
+
+        wal =
+          case for %{wal: wal} when is_number(wal) <- databases, do: wal do
+            [] -> nil
+            wals -> Enum.max(wals)
+          end
+
+        Map.merge(peaks, %{wal: wal, settings: Enum.find_value(databases, & &1[:settings])})
     end
   end
 
@@ -243,6 +253,13 @@ defmodule Stampede.Probe.Agent do
         loop(state)
 
       {:database, database} ->
+        # A newer reading replaces one not sent yet, but not the settings it had.
+        database =
+          case state.database do
+            %{settings: settings} -> Map.put_new(database, :settings, settings)
+            _none -> database
+          end
+
         loop(%{state | database: database})
 
       :stop ->
@@ -469,6 +486,19 @@ defmodule Stampede.Probe.Agent do
   group by 1
   """
 
+  # Postgres 14 and newer.
+  @database_wal "select wal_bytes::bigint from pg_stat_wal"
+
+  # Read once. `setting = boot_val` rather than `source = 'default'`, since
+  # initdb writes some defaults, such as shared_buffers, into the config file.
+  @database_settings """
+  select name, current_setting(name), setting = boot_val
+  from pg_settings where name = any($1)
+  """
+
+  @settings ~w(shared_buffers effective_cache_size work_mem random_page_cost max_wal_size
+               max_connections synchronous_commit)
+
   defp start_database(repos) do
     with repo when repo != nil <- Enum.find(repos, &postgres?/1) do
       opts = repo |> repo_config() |> Keyword.take(@database_keys) |> Keyword.put(:pool_size, 1)
@@ -490,7 +520,14 @@ defmodule Stampede.Probe.Agent do
       {:ok, conn} ->
         # The first reading is only a baseline, so it's taken right away.
         send(self(), :sample)
-        database_loop(%{agent: agent, monitor: monitor, conn: conn, last: nil})
+
+        database_loop(%{
+          agent: agent,
+          monitor: monitor,
+          conn: conn,
+          last: nil,
+          settings: database_settings(conn)
+        })
 
       _error ->
         :ok
@@ -515,27 +552,49 @@ defmodule Stampede.Probe.Agent do
     with {:ok, %{rows: [[commits, writes, reads, blocks_read, blocks_hit, backends]]}} <-
            database_query(state.conn, @database_stats),
          {:ok, %{rows: waits}} <- database_query(state.conn, @database_waits) do
+      wal =
+        case database_query(state.conn, @database_wal) do
+          {:ok, %{rows: [[wal]]}} -> wal
+          _older_postgres -> nil
+        end
+
       counters =
-        {System.monotonic_time(:millisecond), commits, writes, reads, blocks_read, blocks_hit}
+        {System.monotonic_time(:millisecond), commits, writes, reads, blocks_read, blocks_hit,
+         wal}
 
-      if state.last,
-        do: send(state.agent, {:database, database_rates(state.last, counters, backends, waits)})
-
-      %{state | last: counters}
+      if state.last do
+        rates = database_rates(state.last, counters, backends, waits)
+        # The settings don't change during a run, so only the first second has them.
+        rates = if state.settings, do: Map.put(rates, :settings, state.settings), else: rates
+        send(state.agent, {:database, rates})
+        %{state | last: counters, settings: nil}
+      else
+        %{state | last: counters}
+      end
     else
       _error -> state
     end
   end
 
-  defp database_query(conn, sql) do
-    apply(Postgrex, :query, [conn, sql, [], [timeout: 900]])
+  defp database_query(conn, sql, params \\ []) do
+    apply(Postgrex, :query, [conn, sql, params, [timeout: 900]])
   catch
     :exit, _reason -> {:error, :timeout}
   end
 
+  defp database_settings(conn) do
+    case database_query(conn, @database_settings, [@settings]) do
+      {:ok, %{rows: rows}} ->
+        Map.new(rows, fn [name, value, default] -> {name, %{value: value, default: default}} end)
+
+      _error ->
+        nil
+    end
+  end
+
   defp database_rates(before, now, backends, waits) do
-    {t0, commits0, writes0, reads0, read0, hit0} = before
-    {t1, commits1, writes1, reads1, read1, hit1} = now
+    {t0, commits0, writes0, reads0, read0, hit0, wal0} = before
+    {t1, commits1, writes1, reads1, read1, hit1, wal1} = now
     seconds = max(t1 - t0, 1) / 1000
     blocks = read1 - read0 + (hit1 - hit0)
 
@@ -544,6 +603,7 @@ defmodule Stampede.Probe.Agent do
       writes: (writes1 - writes0) / seconds,
       reads: (reads1 - reads0) / seconds,
       cache_hit: if(blocks > 0, do: (hit1 - hit0) / blocks),
+      wal: if(wal0 && wal1, do: (wal1 - wal0) / seconds),
       # Not counting the probe's own connection.
       connections: max(backends - 1, 0),
       active: waits |> Enum.map(fn [_wait, count] -> count end) |> Enum.sum(),

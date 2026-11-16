@@ -88,20 +88,27 @@ thresholds: [{"server.ecto.queue", p95: 50}]
 When your app has an Ecto repo, the probe also sends how long queries waited
 for a connection from the pool, every second. When that repo uses Postgres, it
 reads Postgres's own statistics every second too: commits and rows written per
-second, rows read, the cache hit rate, connections, and what active queries
-are waiting on.
+second, rows read, the cache hit rate, how much WAL it wrote, connections, and
+what active queries are waiting on. It also reads the settings that decide how
+much of the machine Postgres uses, such as `shared_buffers`, once when the run
+starts.
 
 You don't give it a database URL. The agent uses your repo's own settings to
 open one connection of its own, outside your app's pool, so it doesn't take a
 connection your app needs. It's closed when the run ends.
 
-The summary gets two more lines, and the dashboard and the HTML report chart
-the pool wait, commits and writes per second, and active queries:
+The summary gets a few more lines, and the dashboard and the HTML report chart
+the pool wait, commits and writes per second, active queries and WAL written
+per second:
 
 ```
-    database at its busiest: 2,454 commits/s, 1,156 rows written/s, 34,000 rows read/s, 11 connections
+    database at its busiest: 2,454 commits/s, 1,156 rows written/s, 34,000 rows read/s, 11 connections, 12.50 MB of WAL/s
+    postgres settings: shared_buffers 128MB (default), effective_cache_size 4GB (default), work_mem 4MB (default), random_page_cost 4 (default), max_wal_size 1GB (default), max_connections 100 (default), synchronous_commit on (default)
     database pool of 10: queries waited up to 300.00ms for a connection
 ```
+
+The settings are kept with the results, so two runs before and after tuning
+Postgres say what changed between them.
 
 When a `--find-limit` step fails, its verdict says what the database was
 doing, from what it measured:
@@ -117,6 +124,20 @@ It names the wait Postgres spent most of its time on, such as `WALWrite`,
 writing its log to disk before each commit, or `DataFileRead`, reading table
 data from disk, or locks held by other queries. It only says so when queries
 were really waiting on it, and pool waits under 50ms aren't mentioned.
+
+When the pool or Postgres was the limit, the verdict also says what to change,
+from the settings it read:
+
+```
+    Postgres allows 100 connections, so the pool can grow past 10. Postgres still has its
+    default shared_buffers (128MB), effective_cache_size (4GB), work_mem (4MB),
+    random_page_cost (4) and max_wal_size (1GB), which suit a small machine, so tuning them
+    may raise this limit.
+```
+
+Postgres ships with settings sized for a small machine with spinning disks.
+On a bigger one, a limit found with them is often Postgres's settings rather
+than its hardware, so tune them before you read it as the database's limit.
 
 The probe connects as your app's database user, so it sees what your app's
 queries are waiting on. Sessions of other database users only show their waits
@@ -157,6 +178,7 @@ which process falls behind first.
 | `server.ecto.queue` growing while `server.ecto.query` stays flat | The pool is too small, or queries hold connections too long |
 | Pool waits climbing while Postgres waits on `WALWrite` | Every commit waits on the disk. A bigger pool lets more commits share a flush, and a faster disk helps too |
 | Postgres mostly running queries, with few waits | The database is out of CPU, or a query needs an index |
+| Postgres settings marked `(default)` on a big machine | Postgres is only using a small part of it. Size `shared_buffers`, `effective_cache_size` and `max_wal_size` for the machine, and set `random_page_cost` for an SSD |
 | The app's own timings are fast, but the load test's are slow | The time is going somewhere else, such as the network, a proxy, or the load test itself |
 
 When a `--find-limit` step fails, its verdict says if the server's schedulers

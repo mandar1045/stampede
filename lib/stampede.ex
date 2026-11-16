@@ -165,9 +165,9 @@ defmodule Stampede do
 
       With an Ecto repo, it also sends how long queries waited for a pool
       connection each second, and with a Postgres repo, Postgres's own
-      commits, writes, reads and waits, over a connection of its own. A
-      `:find_limit` verdict then says when the pool or the database was the
-      limit.
+      commits, writes, reads, WAL and waits, and its main settings, over a
+      connection of its own. A `:find_limit` verdict then says when the pool
+      or the database was the limit, and what to change.
 
     * `:progress` - prints the number of VUs, iterations and errors every
       second. Defaults to `false`.

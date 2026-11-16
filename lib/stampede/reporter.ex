@@ -56,9 +56,9 @@ defmodule Stampede.Reporter do
     |> Enum.map(&result_from_json/1)
   end
 
-  # Metrics and Postgres's waits are keyed by their own names, which stay
-  # strings. Everything else is keyed by a field.
-  @named_keys ["metrics", "waits", "database_waits"]
+  # Metrics, Postgres's waits and its settings are keyed by their own names,
+  # which stay strings. Everything else is keyed by a field.
+  @named_keys ["metrics", "waits", "database_waits", "settings", "database_settings"]
   @atom_values ["type", "stat", "by"]
 
   defp result_from_json(%{} = map) do
@@ -178,9 +178,24 @@ defmodule Stampede.Reporter do
   defp database(nil), do: []
 
   defp database(database) do
-    "    database at its busiest: #{integer(round(database.commits))} commits/s, " <>
-      "#{integer(round(database.writes))} rows written/s, #{integer(round(database.reads))} " <>
-      "rows read/s, #{integer(database.connections)} connections\n"
+    wal =
+      case Map.get(database, :wal) do
+        nil -> ""
+        wal -> ", #{decimal(wal / 1_000_000)} MB of WAL/s"
+      end
+
+    settings =
+      case database_settings(Map.get(database, :settings)) do
+        nil -> []
+        settings -> "    postgres settings: #{settings}\n"
+      end
+
+    [
+      "    database at its busiest: #{integer(round(database.commits))} commits/s, " <>
+        "#{integer(round(database.writes))} rows written/s, #{integer(round(database.reads))} " <>
+        "rows read/s, #{integer(database.connections)} connections#{wal}\n",
+      settings
+    ]
   end
 
   defp pool(nil), do: []
@@ -316,8 +331,58 @@ defmodule Stampede.Reporter do
           "The app's schedulers were only #{percent(step.server_busy)} busy, so the " <>
             "database was the limit, not the app"
 
-    Enum.reject([server, pool, database, database_limit], &is_nil/1)
+    advice = if pool || database, do: database_advice(step, pool != nil), else: []
+
+    Enum.reject([server, pool, database, database_limit], &is_nil/1) ++ advice
   end
+
+  # Postgres ships with these sized for a small machine, which holds a big one back.
+  @small_machine_settings ~w(shared_buffers effective_cache_size work_mem random_page_cost max_wal_size)
+
+  # What to change, from the settings the probe read when the run started.
+  defp database_advice(%{database_settings: %{} = settings} = step, pool_waited?) do
+    pool =
+      with true <- pool_waited?,
+           %{value: value} <- settings["max_connections"],
+           {max, ""} <- Integer.parse(value),
+           size when is_integer(size) and size < max <- step[:pool_size] do
+        "Postgres allows #{max} connections, so the pool can grow past #{size}"
+      else
+        _ -> nil
+      end
+
+    defaults =
+      for name <- @small_machine_settings, match?(%{default: true}, settings[name]) do
+        "#{name} (#{settings[name].value})"
+      end
+
+    defaults =
+      if defaults != [],
+        do:
+          "Postgres still has its default #{and_join(defaults)}, which suit a small machine, " <>
+            "so tuning them may raise this limit"
+
+    Enum.reject([pool, defaults], &is_nil/1)
+  end
+
+  defp database_advice(_step, _pool_waited?), do: []
+
+  defp and_join([one]), do: one
+  defp and_join(list), do: Enum.join(Enum.drop(list, -1), ", ") <> " and " <> List.last(list)
+
+  # Shared with the HTML report.
+  @doc false
+  def database_settings(settings) when map_size(settings) > 0 do
+    shown =
+      for name <- @small_machine_settings ++ ~w(max_connections synchronous_commit),
+          %{value: value, default: default} <- [settings[name]] do
+        "#{name} #{value}" <> if(default, do: " (default)", else: "")
+      end
+
+    if shown != [], do: Enum.join(shown, ", ")
+  end
+
+  def database_settings(_settings), do: nil
 
   defp database_wait(%{database_waits: waits, database_seconds: seconds})
        when map_size(waits) > 0 and seconds > 0 do
