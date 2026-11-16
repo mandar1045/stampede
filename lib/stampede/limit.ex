@@ -25,6 +25,7 @@ defmodule Stampede.Limit do
     pool_size: nil,
     database_waits: %{},
     database_seconds: 0,
+    database_settings: nil,
     steps: []
   ]
 
@@ -116,7 +117,8 @@ defmodule Stampede.Limit do
             do: Map.merge(limit.database_waits, database.waits, fn _wait, a, b -> a + b end),
             else: limit.database_waits
           ),
-        database_seconds: limit.database_seconds + if(database, do: 1, else: 0)
+        database_seconds: limit.database_seconds + if(database, do: 1, else: 0),
+        database_settings: (database && database[:settings]) || limit.database_settings
     }
 
     if to >= step_to - @slack, do: check(limit), else: {:continue, limit}
@@ -140,7 +142,8 @@ defmodule Stampede.Limit do
       pool_wait: limit.pool_wait,
       pool_size: limit.pool_size,
       database_waits: limit.database_waits,
-      database_seconds: limit.database_seconds
+      database_seconds: limit.database_seconds,
+      database_settings: limit.database_settings
     }
 
     limit = %{

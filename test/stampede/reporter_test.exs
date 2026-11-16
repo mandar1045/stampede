@@ -248,6 +248,122 @@ defmodule Stampede.ReporterTest do
     refute summary =~ "Postgres"
   end
 
+  @stock_settings %{
+    "shared_buffers" => %{value: "128MB", default: true},
+    "effective_cache_size" => %{value: "4GB", default: true},
+    "work_mem" => %{value: "4MB", default: true},
+    "random_page_cost" => %{value: "4", default: true},
+    "max_wal_size" => %{value: "1GB", default: true},
+    "max_connections" => %{value: "100", default: true},
+    "synchronous_commit" => %{value: "on", default: true}
+  }
+
+  test "says what to change when the database was the limit on Postgres's defaults" do
+    thresholds = [%{metric: "chat.send", stat: :p95, value: 640.0, limit: 500, passed?: false}]
+
+    step = %{
+      target: 60_000,
+      busy: 0.1,
+      server_busy: 0.3,
+      server_lost?: false,
+      passed?: false,
+      thresholds: thresholds,
+      pool_wait: 300.0,
+      pool_size: 10,
+      database_waits: %{"LWLock:WALWrite" => 40, "running" => 12},
+      database_seconds: 30,
+      database_settings: @stock_settings
+    }
+
+    limit = %{by: :vus, value: 40_000, failed: step, up_to?: false, min: nil, steps: [step]}
+    summary = Reporter.format(%Result{scenario: Chat, duration: 1_000, limit: limit})
+
+    assert summary =~
+             "so the database was the limit, not the app. Postgres allows 100 connections, so " <>
+               "the pool can grow past 10. Postgres still has its default shared_buffers " <>
+               "(128MB), effective_cache_size (4GB), work_mem (4MB), random_page_cost (4) and " <>
+               "max_wal_size (1GB), which suit a small machine, so tuning them may raise this limit"
+
+    assert Reporter.to_html(%Result{scenario: Chat, duration: 1_000, limit: limit}) =~
+             "the pool can grow past 10"
+
+    # Tuned, with a pool that kept up: nothing left to suggest about either.
+    tuned =
+      @stock_settings
+      |> Map.put("shared_buffers", %{value: "16GB", default: false})
+      |> Map.put("effective_cache_size", %{value: "48GB", default: false})
+      |> Map.put("work_mem", %{value: "16MB", default: false})
+      |> Map.put("random_page_cost", %{value: "1.1", default: false})
+      |> Map.put("max_wal_size", %{value: "16GB", default: false})
+
+    tuned_step = %{step | pool_wait: 4.0, database_settings: tuned}
+
+    summary =
+      Reporter.format(%Result{
+        scenario: Chat,
+        duration: 1_000,
+        limit: %{limit | failed: tuned_step}
+      })
+
+    assert summary =~ "Postgres was mostly waiting on WALWrite"
+    refute summary =~ "pool can grow"
+    refute summary =~ "default"
+
+    # When the app's CPU was the limit, Postgres's settings aren't the story.
+    busy_app = %{step | server_busy: 0.97, pool_wait: 0.0, database_waits: %{"running" => 3}}
+
+    summary =
+      Reporter.format(%Result{
+        scenario: Chat,
+        duration: 1_000,
+        limit: %{limit | failed: busy_app}
+      })
+
+    assert summary =~ "The server's schedulers were 97% busy"
+    refute summary =~ "small machine"
+  end
+
+  test "shows Postgres's settings and how much WAL it wrote" do
+    database = %{
+      commits: 2454.3,
+      writes: 1156.0,
+      reads: 34_000.0,
+      connections: 11,
+      active: 9,
+      wal: 12_500_000.0,
+      settings: Map.put(@stock_settings, "random_page_cost", %{value: "1.1", default: false})
+    }
+
+    server = %{
+      nodes: ["app@a"],
+      busy: 0.5,
+      memory: 1_000_000_000,
+      processes: 10,
+      run_queue: 0,
+      queues: [],
+      database: database
+    }
+
+    point = fn at, wal ->
+      %{at: at, vus: 1, metrics: %{}, server: %{busy: 0.5, database: %{database | wal: wal}}}
+    end
+
+    timeline = [point.(1_000, 2_000_000.0), point.(2_000, 12_500_000.0)]
+    result = %Result{scenario: Chat, duration: 2_000, server: server, timeline: timeline}
+
+    summary = Reporter.format(result)
+    assert summary =~ "11 connections, 12.50 MB of WAL/s\n"
+
+    assert summary =~
+             "    postgres settings: shared_buffers 128MB (default), effective_cache_size 4GB " <>
+               "(default), work_mem 4MB (default), random_page_cost 1.1, max_wal_size 1GB " <>
+               "(default), max_connections 100 (default), synchronous_commit on (default)\n"
+
+    html = Reporter.to_html(result)
+    assert html =~ "Postgres settings: shared_buffers 128MB (default)"
+    assert html =~ "Postgres WAL written, MB per second"
+  end
+
   test "shows the database at its busiest" do
     server = %{
       nodes: ["app@a"],
@@ -360,15 +476,23 @@ defmodule Stampede.ReporterTest do
       to: 2_000,
       passed?: true,
       busy: 0.1,
-      thresholds: [%{metric: "channel.join", stat: :p95, limit: 500, value: 4.5, passed?: true}]
+      thresholds: [%{metric: "channel.join", stat: :p95, limit: 500, value: 4.5, passed?: true}],
+      database_settings: @stock_settings
     }
+
+    database = %{commits: 1.0, waits: %{"IO:WalSync" => 1}, wal: 10.0, settings: @stock_settings}
 
     result = %Result{
       scenario: MyApp.Load.Lobby,
       duration: 2_000,
       metrics: %{"channel.join" => @join, "status is 200" => @check},
       timeline: [
-        %{at: 1_000, vus: 2, metrics: %{"channel.join" => @join}, server: %{busy: 0.5}}
+        %{
+          at: 1_000,
+          vus: 2,
+          metrics: %{"channel.join" => @join},
+          server: %{busy: 0.5, database: database}
+        }
       ],
       thresholds: [%{metric: "channel.join", stat: :p95, limit: 500, value: 4.5, passed?: true}],
       errors: [%{message: "boom", count: 1}],

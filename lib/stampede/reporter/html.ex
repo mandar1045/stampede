@@ -11,6 +11,7 @@ defmodule Stampede.Reporter.HTML do
       amount: 2,
       busy_warning: 1,
       bytes: 1,
+      database_settings: 1,
       decimal: 1,
       limit_headline: 1,
       milliseconds: 1,
@@ -675,6 +676,10 @@ defmodule Stampede.Reporter.HTML do
       escape(Enum.join(server.nodes, ", ")),
       "</p>\n",
       tile_grid(tiles),
+      case database_settings(get_in(server, [:database, :settings])) do
+        nil -> []
+        settings -> [~s(<p class="meta">Postgres settings: ), escape(settings), "</p>\n"]
+      end,
       if(queues != [],
         do: [
           ~s(<p class="meta queues"><strong>Longest message queues</strong><br>\n),
@@ -929,7 +934,15 @@ defmodule Stampede.Reporter.HTML do
         []
       end
 
-    pool ++ database
+    wal =
+      if Enum.any?(timeline, &get_in(&1, [:server, :database, :wal])) do
+        megabytes = Enum.map(value.([:database, :wal]), &(&1 && &1 / 1_000_000))
+        [chart("Postgres WAL written, MB per second", result, [{"WAL", 1, megabytes}], :mb_rate)]
+      else
+        []
+      end
+
+    pool ++ database ++ wal
   end
 
   # What a chart shows, drawn once its group knows where it goes.
@@ -1122,6 +1135,7 @@ defmodule Stampede.Reporter.HTML do
   defp value(value, :rate), do: decimal(value) <> "/s"
   defp value(value, :percent), do: "#{round(value)}%"
   defp value(value, :gb), do: decimal(value) <> " GB"
+  defp value(value, :mb_rate), do: decimal(value) <> " MB/s"
 
   defp metrics([]), do: []
   defp metrics(metrics), do: ["<h3>Metrics</h3>\n", metrics_table(metrics)]

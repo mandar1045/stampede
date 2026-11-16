@@ -25,16 +25,11 @@ defmodule Stampede.LimitTest do
       %{pool: %{size: 10, queries: 3, wait_ms: wait_ms}, database: %{waits: waits}}
     end
 
-    {:continue, limit} =
-      Stampede.Limit.add_second(
-        limit,
-        1_000,
-        %{},
-        0.1,
-        0.2,
-        false,
-        second.(5.0, %{"IO:WalSync" => 2})
-      )
+    # Only the first second's reading has Postgres's settings.
+    settings = %{"shared_buffers" => %{value: "128MB", default: true}}
+    first = put_in(second.(5.0, %{"IO:WalSync" => 2}), [:database, :settings], settings)
+
+    {:continue, limit} = Stampede.Limit.add_second(limit, 1_000, %{}, 0.1, 0.2, false, first)
 
     assert {:stop, limit} =
              Stampede.Limit.add_second(
@@ -52,6 +47,7 @@ defmodule Stampede.LimitTest do
     assert step.pool_size == 10
     assert step.database_waits == %{"IO:WalSync" => 5, "running" => 1}
     assert step.database_seconds == 2
+    assert step.database_settings == settings
   end
 
   test "finds the most VUs the thresholds allow, and stops at the first step that fails" do

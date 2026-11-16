@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+  * `--probe` reads Postgres's main settings when the run starts, such as
+    `shared_buffers`, `random_page_cost` and `max_connections`, and says
+    which are still Postgres's defaults. They're in the summary, the HTML
+    report and the JSON, so runs before and after tuning say what changed
+  * When the pool or Postgres was the limit, a `--find-limit` verdict says
+    what to change: that the pool can grow, up to the connections Postgres
+    allows, and which settings are still sized for a small machine
+  * `--probe` sends how much WAL Postgres writes each second, charted in the
+    dashboard and the HTML report
   * Replace cached HTTP connections observed closed before sending a new request,
     including POST and PATCH. Requests that were already attempted retain their
     existing retry rules.

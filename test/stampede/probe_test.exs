@@ -134,6 +134,13 @@ defmodule Stampede.ProbeTest do
     assert %{commits: commits, writes: writes, connections: connections} = result.server.database
     assert commits > 0 and writes > 0 and connections >= 1
     assert result.server.pool.size == 3
+
+    # Read once at the start. The test database may be tuned, so only the shape is known.
+    assert %{"shared_buffers" => %{value: value, default: default}, "max_connections" => _} =
+             result.server.database.settings
+
+    assert is_binary(value) and is_boolean(default)
+    assert result.server.database.wal > 0
   end
 
   test "adds up what several app nodes saw, but counts their database once" do
@@ -166,6 +173,13 @@ defmodule Stampede.ProbeTest do
              Stampede.Probe.merge_samples([one, two])
 
     assert pool == %{size: 20, queries: 12, wait_ms: 9.0}
+
+    # Whichever node sent Postgres's settings that second, they're kept.
+    settings = %{"work_mem" => %{value: "4MB", default: true}}
+    two = put_in(two, [:database, :settings], settings)
+
+    assert %{database: %{commits: 100.0, settings: ^settings}} =
+             Stampede.Probe.merge_samples([one, two])
   end
 
   defmodule Clogged do

@@ -22,6 +22,11 @@ end
 
 config :chat, ChatWeb.Endpoint, http: [port: String.to_integer(System.get_env("PORT", "4000"))]
 
+# How a message reaches its room, see Chat.Fanout.
+config :chat,
+  fanout: System.get_env("FANOUT", "broadcast"),
+  fanout_window: String.to_integer(System.get_env("FANOUT_WINDOW", "500"))
+
 if config_env() == :prod do
   config :logger, level: String.to_existing_atom(System.get_env("LOG_LEVEL", "info"))
 
