@@ -9,9 +9,10 @@ defmodule Stampede.HTTP do
   names, and the `:body`.
 
   Each VU keeps a connection open to every server it talks to and sends its
-  next request on it, as a browser does. When the server closed it in the
-  meantime, a new one is opened, and a request that is safe to repeat (GET,
-  HEAD, PUT, DELETE or OPTIONS) is sent again on it.
+  next request on it, as a browser does. A connection observed closed before
+  sending is replaced for every method. After a request has been attempted,
+  only requests that are safe to repeat (GET, HEAD, PUT, DELETE or OPTIONS)
+  are sent again on a new connection.
 
   ## Metrics
 
@@ -211,13 +212,22 @@ defmodule Stampede.HTTP do
         connect_and_exchange(key, request, deadline, opts)
 
       conn ->
-        case conn |> refresh() |> exchange(request, deadline) do
-          {:stale, conn} when request.method in @idempotent ->
-            Mint.HTTP.close(conn)
-            connect_and_exchange(key, request, deadline, opts)
+        conn = refresh(conn)
 
-          result ->
-            finish(key, result)
+        if Mint.HTTP.open?(conn, :read_write) do
+          case exchange(conn, request, deadline) do
+            {:stale, conn} when request.method in @idempotent ->
+              Mint.HTTP.close(conn)
+              connect_and_exchange(key, request, deadline, opts)
+
+            result ->
+              finish(key, result)
+          end
+        else
+          # No request was attempted on this cached connection. Opening the
+          # original request's connection does not replay a POST or PATCH.
+          Mint.HTTP.close(conn)
+          connect_and_exchange(key, request, deadline, opts)
         end
     end
   end
