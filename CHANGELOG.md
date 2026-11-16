@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+  * Replace cached HTTP connections observed closed before sending a new request,
+    including POST and PATCH. Requests that were already attempted retain their
+    existing retry rules.
+
 ## v1.4.0 (2026-11-08)
 
 After the 2,000,000 run, the question I kept getting was: what about a real
